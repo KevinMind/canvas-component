@@ -1,11 +1,19 @@
 {
   "name": "blog",
+  "private": true,
   "version": "1.0.0",
   "main": "index.js",
   "repository": "https://github.com/KevinMind/blog",
   "author": "Kevin Meinhardt <kmeinhardt7@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "generate:package": "plop --plopfile plop/scripts/package.js",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint"
+  },
   "devDependencies": {
+    "plop": "^3.0.5",
     "turbo": "^1.1.6"
   },
   "workspaces": [
