@@ -3,7 +3,7 @@
     "lib": ["dom", "ES2015"],
     "jsx": "react"
   },
-  "extends": "tsconfig/{{tsconfigPreset}}.json",
+  "extends": "tsconfig/base.json",
   "include": [".", ".eslintrc.js"],
   "exclude": ["dist", "build", "node_modules"]
 }

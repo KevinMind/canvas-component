@@ -2,7 +2,8 @@
 
 ## Todo
 
-- [ ] Setup monorepo
+- [X] Setup monorepo
+- [ ] add CI integration with vercel and basic package
 - [ ] add component library package and website
 - [ ] setup next.js and build step
 - [ ] setup jest and storybook
