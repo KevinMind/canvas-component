@@ -9,8 +9,9 @@
   "scripts": {
     "generate:package": "plop --plopfile plop/scripts/package.js",
     "build": "turbo run build",
-    "test": "turbo run test",
-    "lint": "turbo run lint"
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "turbo run test"
   },
   "devDependencies": {
     "plop": "^3.0.5",
