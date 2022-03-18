@@ -13,8 +13,9 @@
 - [ ] create blog layout and home page layout
 - [ ] import components from previous project
 
+## Repo package structure
 
-## Adding a new package
+### Adding a new package
 
 We use plop to generate new packages. therea re 2 options
 
@@ -23,3 +24,31 @@ We use plop to generate new packages. therea re 2 options
 
 run `yarn generate:package` to initiate the CLI. with turborepo, the package should automatically be integrated into the various build/ci pipelines.
 
+### Adding a new app
+
+We use plop to generate new apps. there is one option
+
+- name: the name for the package both in package.json and directory in packages/{{name}}
+
+run `yarn generate:app` to initiate the CLI. with turborepo, the package should automatically be integrated into the various build/ci pipelines.
+
+## Testing
+
+### Global tests
+
+- [ ] Test that packages/apps are valid
+
+- no dupliate package/app names
+- no package/app with root name
+
+- all apps have
+-- jest.config.js
+-- tsconfig.json
+-- .eslintrc.js
+-- package.json scripts
+
+- all packages have:
+-- tsconfig.json
+-- .eslintrc.js
+-- package.json scripts
+-- package.json jest preset
