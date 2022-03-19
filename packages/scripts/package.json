@@ -24,6 +24,7 @@
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-react": "^7.20.3",
     "eslint-plugin-react-hooks": "^4.0.8",
+    "eslint-plugin-storybook": "^0.5.7",
     "prettier": "^2.6.0",
     "ts-jest": "^26.5.0"
   },
