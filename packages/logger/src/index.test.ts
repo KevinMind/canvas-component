@@ -1,11 +1,11 @@
-import logger from './index';
+import logger from "./index";
 
-describe('logger', () => {
-  it('logs', () => {
-    const spy = jest.spyOn(console, 'log');
+describe("logger", () => {
+  it("logs", () => {
+    const spy = jest.spyOn(console, "log");
 
-    logger('test');
+    logger("test");
 
-    expect(spy).toHaveBeenCalledWith('test');
-  })
+    expect(spy).toHaveBeenCalledWith("test");
+  });
 });

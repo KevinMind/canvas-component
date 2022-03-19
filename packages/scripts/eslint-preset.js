@@ -1,5 +1,5 @@
 module.exports = {
-  extends: ["react-app"],
+  extends: ["react-app", "plugin:prettier/recommended"],
   settings: {
     react: {
       version: "detect",

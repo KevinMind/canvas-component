@@ -1,16 +1,16 @@
-import React from 'react';
-import {render, fireEvent, screen} from '@testing-library/react';
+import React from "react";
+import { render, fireEvent, screen } from "@testing-library/react";
 
-import {Button} from './Button';
+import { Button } from "./Button";
 
-describe('<Button />', () => {
-  it('passes', async () => {
+describe("<Button />", () => {
+  it("passes", async () => {
     const spy = jest.fn();
     render(<Button onClick={spy}>Click</Button>);
 
-    expect(screen.getByText('Click')).toBeTruthy();
+    expect(screen.getByText("Click")).toBeTruthy();
 
-    fireEvent.click(screen.getByText('Click'))
+    fireEvent.click(screen.getByText("Click"));
 
     expect(spy).toHaveBeenCalled();
   });

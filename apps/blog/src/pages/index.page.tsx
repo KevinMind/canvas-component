@@ -1,5 +1,5 @@
 import log from "logger";
-import {Button} from "ui";
+import { Button } from "ui";
 
 export default function Store() {
   log("Hey! This is Home.");
