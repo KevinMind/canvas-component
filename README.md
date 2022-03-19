@@ -3,9 +3,9 @@
 ## Todo
 
 - [X] Setup monorepo
-- [ ] add CI integration with vercel and basic package
+- [X] add CI integration with vercel and basic package
 - [ ] add component library package and website
-- [ ] setup next.js and build step
+- [X] setup next.js and build step
 - [ ] setup jest and storybook
 - [ ] setup chromatic
 - [ ] setup CMS
