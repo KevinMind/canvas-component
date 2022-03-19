@@ -1,7 +1,7 @@
-import {ComponentProps} from 'react';
-import { ComponentMeta, StoryObj } from '@storybook/react';
+import { ComponentProps } from "react";
+import { ComponentMeta, StoryObj } from "@storybook/react";
 // import { within, userEvent } from '@storybook/testing-library';
-import { Button } from './Button';
+import { Button } from "./Button";
 
 export default {
   component: Button,
@@ -9,8 +9,7 @@ export default {
 
 export const Default: StoryObj<ComponentProps<typeof Button>> = {
   args: {
-    onClick: () => console.log('clicked'),
-    children: 'Click Me!',
-  }
+    onClick: () => console.log("clicked"),
+    children: "Click Me!",
+  },
 };
-
