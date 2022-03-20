@@ -11,5 +11,6 @@ module.exports = {
   "framework": "@storybook/react",
   features: {
     previewCsfV3: true,
+    interactionsDebugger: true,
   }
 }
