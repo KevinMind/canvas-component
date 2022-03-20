@@ -18,8 +18,7 @@
     "format": "yarn lint --fix",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
     "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook",
-    "chromatic": "npx chromatic --project-token=4c09e93f1988"
+    "build-storybook": "build-storybook"
   },
   "devDependencies": {
     "@babel/core": "^7.17.8",
