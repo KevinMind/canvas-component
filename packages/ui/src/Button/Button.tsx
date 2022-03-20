@@ -4,5 +4,9 @@ export function Button({
   children,
   ...props
 }: PropsWithChildren<ButtonHTMLAttributes<{}>>) {
-  return <button {...props}>{children}</button>;
+  return (
+    <button {...props} style={{ padding: "20px 10px" }}>
+      {children}
+    </button>
+  );
 }

@@ -18,7 +18,8 @@
     "format": "yarn lint --fix",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
     "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "build-storybook": "build-storybook",
+    "chromatic": "npx chromatic --project-token=4c09e93f1988"
   },
   "devDependencies": {
     "@babel/core": "^7.17.8",
@@ -33,6 +34,7 @@
     "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^26.0.22",
     "babel-loader": "^8.2.3",
+    "chromatic": "^6.5.3",
     "eslint": "^7.32.0",
     "jest": "^26.6.3",
     "scripts": "*",
