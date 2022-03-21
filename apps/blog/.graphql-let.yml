@@ -1,0 +1,5 @@
+schema: "https://api-eu-central-1.graphcms.com/v2/ckjo70qrrqzg901xybnzecdvn/master"
+documents: "**/*.graphql"
+plugins:
+   - typescript-operations
+   - typescript-react-apollo

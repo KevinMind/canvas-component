@@ -1,26 +1,31 @@
 import log from "logger";
 import { Button } from "ui";
-import { useApolloClient, gql } from "@apollo/client";
+
+import { useIndexQueryQuery } from "./index.graphql";
+
+console.log({ useIndexQueryQuery });
 
 export default function Store() {
-  const client = useApolloClient();
-  log(client);
+  const { data, loading, error } = useIndexQueryQuery();
 
-  client
-    .query({
-      query: gql`
-        query {
-          posts {
-            id
-          }
-        }
-      `,
-    })
-    .then((result) => log(result));
+  if (loading) {
+    return <div>loading...</div>;
+  }
+
+  if (error) {
+    log(error);
+    return <div>error!</div>;
+  }
+
   return (
     <div>
       <h1>Hello blog</h1>
       <Button onClick={(e) => log(e)}>Click</Button>
+      <ul>
+        {data?.posts.map((post) => {
+          return <li>{post.id}</li>;
+        })}
+      </ul>
     </div>
   );
 }
