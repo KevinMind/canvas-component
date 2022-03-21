@@ -7,7 +7,7 @@
 - [X] add component library package and website
 - [X] setup next.js and build step
 - [X] setup jest and storybook
-- [ ] setup chromatic
+- [X] setup chromatic
 - [ ] setup CMS
 - [ ] setup backend API
 - [ ] create blog layout and home page layout
