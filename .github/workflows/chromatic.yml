@@ -3,21 +3,52 @@ name: Chromatic
 on: push
 
 jobs:
-  chromatic-deployment:
+  chromatic-deployment-ui:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v1
+      
+      - uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
 
       - name: Install dependencies
         run: yarn
 
-      - name: Publish to Chromatic
-        uses: chromaui/action@v1
+      - name: Build
+        run: yarn build
 
+      - name: Chromatic (UI)
+        uses: chromaui/action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
-          autoAcceptChanges: main
-          workingDir: packages/ui
-          exitOnceUploaded: true
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN_UI }}
+          autoAcceptChanges: "main"
+          workingDir: "packages/ui"
+
+  chromatic-deployment-blog:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      
+      - uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Build
+        run: yarn build
+
+      - name: Chromatic (Blog)
+        uses: chromaui/action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN_BLOG }}
+          autoAcceptChanges: "main"
+          workingDir: "apps/blog"

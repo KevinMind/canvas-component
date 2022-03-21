@@ -13,9 +13,21 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "format": "turbo run format",
-    "test": "turbo run test"
+    "test": "turbo run test",
+    "storybook": "turbo run storybook",
+    "build-storybook": "turbo run build-storybook",
+    "chromatic": "turbo run chromatic",
+    "storybook:global": "start-storybook -p 4004",
+    "build-storybook:global": "build-storybook"
   },
   "devDependencies": {
+    "@babel/core": "^7.17.8",
+    "@storybook/addon-actions": "^6.4.19",
+    "@storybook/addon-essentials": "^6.4.19",
+    "@storybook/addon-links": "^6.4.19",
+    "@storybook/html": "^6.4.19",
+    "babel-loader": "^8.2.3",
+    "chromatic": "^6.5.3",
     "eslint-plugin-prettier": "^4.0.0",
     "plop": "^3.0.5",
     "turbo": "^1.1.6"
@@ -24,5 +36,6 @@
     "packages/*",
     "apps/*"
   ],
-  "packageManager": "yarn@1.22.15"
+  "packageManager": "yarn@1.22.15",
+  "dependencies": {}
 }

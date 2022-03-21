@@ -15,6 +15,7 @@ module.exports = {
   features: {
     previewCsfV3: true,
     interactionsDebugger: true,
+    buildStoriesJson: true,
   },
   webpackFinal: async (config) => {
     config.module.rules.push({

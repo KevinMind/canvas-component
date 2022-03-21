@@ -12,6 +12,20 @@
         "^build"
       ]
     },
+    "storybook": {
+      "outputs": [],
+      "dependsOn": [
+        "^build"
+      ]
+    },
+    "build-storybook": {
+      "outputs": [
+        "storybook-static/**"
+      ],
+      "dependsOn": [
+        "^build"
+      ]
+    },
     "test": {
       "outputs": [
         "coverage/**"

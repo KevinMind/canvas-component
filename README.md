@@ -59,3 +59,26 @@ run `yarn generate:app` to initiate the CLI. with turborepo, the package should 
 
 https://623670d49b1e54004a0be84c-tsfuqaennc.chromatic.com/
 
+## Chromatic
+
+- chromatic allows only one project per repository so we have to either, use 1 storybook for all stories, or trigger chromatic manually
+- we can use turbo repo to trigger manually
+- we can use environment variables to set branch and appId
+- there is an issue with playwrite and stale node_modules so I've disabled the npm cache until it is fixed
+
+links:
+
+- permalinks: https://www.chromatic.com/docs/permalinks
+- playwrite bug: https://github.com/microsoft/playwright/issues/4033
+- npm cache github actions: https://github.community/t/how-to-clear-cache-in-github-actions/129038/5
+- storybook test-runner: https://github.com/storybookjs/test-runner/blob/main/README.md#storiesjson-mode
+
+Solution:
+
+- split test and storybook-test to allow normal jest runs to happen in the CI job.
+- storybook-test is a separate command that can be run manually for local testing.
+- the storybook interaction tets are run automatically during chromatic builds
+- we can trigger multiple chromatic builds with a single job using turbo repo and project specific environment variables
+
+
+

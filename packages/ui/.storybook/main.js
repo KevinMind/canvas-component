@@ -12,5 +12,6 @@ module.exports = {
   features: {
     previewCsfV3: true,
     interactionsDebugger: true,
+    buildStoriesJson: true,
   }
 }
