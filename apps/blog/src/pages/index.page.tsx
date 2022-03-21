@@ -3,9 +3,7 @@ import { Button } from "ui";
 
 import { useIndexQueryQuery } from "./index.graphql";
 
-console.log({ useIndexQueryQuery });
-
-export default function Store() {
+export default function Index() {
   const { data, loading, error } = useIndexQueryQuery();
 
   if (loading) {
