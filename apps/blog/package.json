@@ -3,14 +3,16 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "next build",
+    "codegen": "graphql-let",
+    "build": "yarn codegen && next build",
     "start": "next start ",
-    "dev": "next dev",
+    "dev": "yarn codegen && next dev",
     "lint": "TIMING=1 next lint",
     "format": "yarn lint --fix",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf .next",
-    "test": "jest",
-    "storybook": "start-storybook -p 6006",
+    "test-storybook": "test-storybook --url http://localhost:7006",
+    "test": "concurrently -k -s first -n \"SB,TEST\" -c \"magenta,blue\" \"yarn build-storybook --quiet && npx http-server storybook-static --port 7006 --silent\" \"wait-on tcp:7006 && yarn test-storybook\"",
+    "storybook": "start-storybook -p 7006",
     "build-storybook": "build-storybook"
   },
   "dependencies": {
@@ -34,6 +36,7 @@
     "@storybook/addon-interactions": "^6.4.19",
     "@storybook/addon-links": "^6.4.19",
     "@storybook/react": "^6.4.19",
+    "@storybook/test-runner": "^0.0.4",
     "@storybook/testing-library": "^0.0.9",
     "@testing-library/jest-dom": "5.16.1",
     "@testing-library/react": "12.1.2",
@@ -46,9 +49,9 @@
     "eslint": "^7.32.0",
     "eslint-plugin-storybook": "^0.5.7",
     "graphql-let": "^0.18.6",
-    "jest": "^26.6.3",
+    "msw": "^0.39.2",
+    "msw-storybook-addon": "^1.6.1",
     "scripts": "*",
-    "storybook-addon-next": "^1.6.2",
     "tsconfig": "*",
     "typescript": "^4.5.3"
   }

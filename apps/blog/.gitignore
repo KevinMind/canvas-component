@@ -1,0 +1,6 @@
+storybook-static
+.next
+.turbo
+node_modules
+
+**/*.graphql.d.ts

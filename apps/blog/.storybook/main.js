@@ -11,6 +11,7 @@ module.exports = {
     "@storybook/addon-interactions"
   ],
   "framework": "@storybook/react",
+  staticDirs: ['../public'],
   features: {
     previewCsfV3: true,
     interactionsDebugger: true,

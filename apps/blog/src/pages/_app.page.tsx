@@ -1,11 +1,11 @@
 import { AppProps } from "next/app";
 import { ApolloProvider } from "@apollo/client";
 
-import { client } from "../utilities/graphql/client";
+import createClient from "../utilities/graphql/client";
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <ApolloProvider client={client}>
+    <ApolloProvider client={createClient()}>
       <Component {...pageProps} />
     </ApolloProvider>
   );
