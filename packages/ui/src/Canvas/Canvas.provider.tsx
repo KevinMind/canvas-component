@@ -4,10 +4,11 @@ import React, {
   useRef,
   useState,
   forwardRef,
-  useEffect,
 } from "react";
 
-import { CanvasContext, Drawing } from "./Canvas.context";
+import { CanvasContext } from "./Canvas.context";
+import { Draw } from "./Canvas.types";
+import { useRequestAnimationFrame } from "./hooks/useRequestAnimationFrame";
 
 const Canvas = forwardRef<
   HTMLCanvasElement,
@@ -33,51 +34,39 @@ export function CanvasProvider({
 }: PropsWithChildren<CanvasHTMLAttributes<{}>> & Props) {
   const [, setReady] = useState<boolean>(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const drawings = useRef<Map<Drawing, true>>(new Map());
+  const drawings = useRef<Map<Draw, true>>(new Map());
 
   const setCanvasRef = (ref: HTMLCanvasElement) => {
     canvasRef.current = ref;
     setReady(true);
   };
 
-  useEffect(() => {
+  useRequestAnimationFrame((frame) => {
     if (!canvasRef.current) return;
 
     const context = canvasRef.current.getContext("2d");
 
     if (!context) return;
 
-    let frame = 0;
-    let animationFrameId: number;
+    context.clearRect(0, 0, context.canvas.width, context.canvas.height);
 
-    const render = () => {
-      frame++;
-      context.clearRect(0, 0, context.canvas.width, context.canvas.height);
-      for (let draw of drawings.current.keys()) {
-        context.fillStyle = fillStyle;
-        context.strokeStyle = strokeStyle;
-        context.resetTransform();
-        context.setLineDash([]);
-        context.beginPath();
-        draw(context, frame);
-      }
-      animationFrameId = window.requestAnimationFrame(render);
-    };
+    for (let draw of drawings.current.keys()) {
+      context.fillStyle = fillStyle;
+      context.strokeStyle = strokeStyle;
+      context.resetTransform();
+      context.setLineDash([]);
+      context.beginPath();
+      draw(context, frame);
+    }
+  });
 
-    render();
-
-    return () => {
-      window.cancelAnimationFrame(animationFrameId);
-    };
-  }, [drawings, fillStyle, strokeStyle]);
-
-  function add(draw: Drawing) {
+  function add(draw: Draw) {
     if (!drawings.current.has(draw)) {
       drawings.current.set(draw, true);
     }
   }
 
-  function remove(draw: Drawing) {
+  function remove(draw: Draw) {
     drawings.current.delete(draw);
   }
 

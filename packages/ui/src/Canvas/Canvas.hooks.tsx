@@ -1,6 +1,7 @@
 import { useContext, useEffect } from "react";
 
-import { CanvasContext, Drawing } from "./Canvas.context";
+import { CanvasContext } from "./Canvas.context";
+import { Draw } from "./Canvas.types";
 
 export function useCanvas() {
   const context = useContext(CanvasContext);
@@ -14,7 +15,7 @@ export function useCanvas() {
   return context.canvas?.getContext("2d") ?? null;
 }
 
-export function useCanvasFrame(draw: Drawing) {
+export function useCanvasFrame(draw: Draw) {
   const context = useContext(CanvasContext);
 
   useEffect(() => {
