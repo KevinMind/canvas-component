@@ -105,7 +105,7 @@ export const Default: CanvasProviderStory = {
         <Input />
         <Triangle />
         <Circle x={150} y={150} radius={150} />
-        <Circle x={200} y={50} radius={100} />
+        <Circle x={200} y={100} radius={100} />
         <Circle x={100} y={50} radius={100} />
         <Smiley />
       </>

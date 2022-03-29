@@ -32,7 +32,7 @@ function RenderManyLines({ width, height }: { width: number; height: number }) {
 
   useRequestAnimationFrame(() => {
     setX((curr) => {
-      return curr + 3;
+      return curr + 30;
     });
   });
 
