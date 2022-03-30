@@ -6,16 +6,19 @@ import { expect } from "@storybook/jest";
 import {
   useRequestAnimationFrame,
   RequestAnimationFrameCallback,
+  RequestAnimationFrameConfig,
 } from "./useRequestAnimationFrame.hooks";
 
 function TransitionValue<T>({
   duration,
   callback,
+  config,
 }: {
   duration: number;
   callback: RequestAnimationFrameCallback<T>;
+  config: RequestAnimationFrameConfig;
 }) {
-  const [value, actions] = useRequestAnimationFrame<T>(callback);
+  const [value, actions] = useRequestAnimationFrame<T>(callback, config);
 
   return (
     <div>
@@ -47,10 +50,7 @@ function expectCount(
   });
 }
 
-const useCounter: RequestAnimationFrameCallback<number> = (frame, duration) => {
-  if (frame > duration) {
-    return duration;
-  }
+const useCounter: RequestAnimationFrameCallback<number> = (frame) => {
   return Math.round(frame / 1000);
 };
 
@@ -116,5 +116,22 @@ export const ManyTimers: TransitionValueStory = {
   },
   render: (args) => {
     return <RenderManyTimers {...args} />;
+  },
+};
+
+export const Auto: TransitionValueStory = {
+  args: {
+    callback: useCounter,
+    duration: 3000,
+    config: {
+      auto: true,
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    await expectCount(canvas, 5, 5_000);
+
+    await userEvent.click(canvas.getByText("stop"));
   },
 };

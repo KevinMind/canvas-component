@@ -1,6 +1,5 @@
 import React, { ComponentProps, useState, useEffect } from "react";
 import { ComponentMeta, StoryObj } from "@storybook/react";
-import { waitFor } from "@storybook/testing-library";
 
 import { withCanvasProvider, withTodoList } from "../../.storybook/decorators";
 import { useRequestAnimationFrame } from "../../hooks/useRequestAnimationFrame";
@@ -27,29 +26,26 @@ export const Default: LineStory = {
 };
 
 function RenderManyLines({ width, height }: { width: number; height: number }) {
-  const [playing, setPlaying] = useState<boolean>(false);
-
-  const [x, xActions] = useRequestAnimationFrame((frame) => {
-    return frame;
-  });
+  const [x, { stop }] = useRequestAnimationFrame(
+    (frame) => {
+      return frame;
+    },
+    { auto: true }
+  );
 
   const middle = { x: width / 2, y: height / 2 };
 
   useEffect(() => {
-    if (!playing) {
-      xActions.start();
-      setPlaying(true);
+    if (x > 20_000) {
+      stop();
     }
-    if (x > Math.random() * 10_000) {
-      xActions.start();
-    }
-  }, [playing, x, xActions]);
+  }, [stop, x]);
 
   return (
     <>
       {Array.apply(null, Array(Math.round(x / 100))).map((_, idx) => (
         <Line
-          start={{ x: x / (idx + 1), y: 0 }}
+          start={{ x: x / (idx + 1) + (Math.random() * x) / 300, y: 0 }}
           end={middle}
           rotation={0}
           key={idx}

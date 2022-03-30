@@ -1,14 +1,15 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 
-export type RequestAnimationFrameCallback<T> = (
-  frame: number,
-  duration: number
-) => T;
+export type RequestAnimationFrameCallback<T> = (frame: number) => T;
 
 export type RequestAnimationFrameReturnType<T> = [
   T,
   { start: (duration?: number) => void; stop: () => void; reset: () => void }
 ];
+
+export interface RequestAnimationFrameConfig {
+  auto: boolean;
+}
 
 /**
  * todo:
@@ -25,13 +26,12 @@ export type RequestAnimationFrameReturnType<T> = [
  * interval: only recompute value on specified interval
  *
  * infinite: replay with current settings infinitely
- *
- * auto: automatically start on mount of the calling component
  */
 export function useRequestAnimationFrame<T = void>(
-  callback: RequestAnimationFrameCallback<T>
+  callback: RequestAnimationFrameCallback<T>,
+  { auto = false }: RequestAnimationFrameConfig = { auto: false }
 ): RequestAnimationFrameReturnType<T> {
-  const [value, setValue] = useState<T>(callback(0, 0));
+  const [value, setValue] = useState<T>(callback(0));
 
   let id = useRef<number>();
   const startTime = useRef<number>(0);
@@ -42,7 +42,7 @@ export function useRequestAnimationFrame<T = void>(
     }
   }
 
-  function start(duration = 0) {
+  function start(duration?: number) {
     function render(currentTime: number, isFirst = false) {
       if (isFirst) {
         startTime.current = currentTime;
@@ -54,7 +54,7 @@ export function useRequestAnimationFrame<T = void>(
         return stop();
       }
 
-      setValue(callback(frame, duration));
+      setValue(callback(frame));
 
       id.current = window.requestAnimationFrame(render);
     }
@@ -63,8 +63,20 @@ export function useRequestAnimationFrame<T = void>(
   }
 
   function reset() {
-    setValue(callback(0, 0));
+    setValue(callback(0));
   }
+
+  useEffect(() => {
+    if (auto) {
+      start();
+    }
+    return () => {
+      if (auto) {
+        stop();
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [auto]);
 
   return [value, { start, stop, reset }];
 }
