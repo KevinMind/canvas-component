@@ -4,6 +4,7 @@ import React, {
   useRef,
   useState,
   forwardRef,
+  useEffect,
 } from "react";
 
 import { CanvasContext } from "./Canvas.context";
@@ -41,7 +42,7 @@ export function CanvasProvider({
     setReady(true);
   };
 
-  useRequestAnimationFrame((frame) => {
+  const [, actions] = useRequestAnimationFrame((frame) => {
     if (!canvasRef.current) return;
 
     const context = canvasRef.current.getContext("2d");
@@ -60,18 +61,34 @@ export function CanvasProvider({
     }
   });
 
-  function add(draw: Draw) {
+  useEffect(() => {
+    actions.start();
+
+    return () => {
+      actions.stop();
+    };
+  }, [actions]);
+
+  function addDrawing(draw: Draw) {
     if (!drawings.current.has(draw)) {
       drawings.current.set(draw, true);
     }
   }
 
-  function remove(draw: Draw) {
+  function removeDrawing(draw: Draw) {
     drawings.current.delete(draw);
   }
 
   return (
-    <CanvasContext.Provider value={{ canvas: canvasRef.current, add, remove }}>
+    <CanvasContext.Provider
+      value={{
+        canvas: canvasRef.current,
+        addDrawing,
+        removeDrawing,
+        start: actions.start,
+        stop: actions.stop,
+      }}
+    >
       <Canvas ref={setCanvasRef} {...canvasProps}>
         {children}
       </Canvas>

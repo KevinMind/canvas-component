@@ -27,28 +27,29 @@ export const Default: LineStory = {
 };
 
 function RenderManyLines({ width, height }: { width: number; height: number }) {
-  const [x, setX] = useState<number>(0);
-  const [count, setCount] = useState<number>(1);
+  const [playing, setPlaying] = useState<boolean>(false);
 
-  useRequestAnimationFrame(() => {
-    setX((curr) => {
-      return curr + 3;
-    });
+  const [x, xActions] = useRequestAnimationFrame((frame) => {
+    return frame;
   });
-
-  useEffect(() => {
-    setTimeout(() => {
-      setCount((curr) => curr + 1);
-    }, count);
-  }, [count]);
 
   const middle = { x: width / 2, y: height / 2 };
 
+  useEffect(() => {
+    if (!playing) {
+      xActions.start();
+      setPlaying(true);
+    }
+    if (x > Math.random() * 10_000) {
+      xActions.start();
+    }
+  }, [playing, x, xActions]);
+
   return (
     <>
-      {Array.apply(null, Array(count)).map((_, idx) => (
+      {Array.apply(null, Array(Math.round(x / 100))).map((_, idx) => (
         <Line
-          start={{ x: x / idx + 1, y: 0 }}
+          start={{ x: x / (idx + 1), y: 0 }}
           end={middle}
           rotation={0}
           key={idx}

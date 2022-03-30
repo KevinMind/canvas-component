@@ -1,13 +1,17 @@
 import { createContext } from "react";
 import { Draw } from "./Canvas.types";
-interface CanvasContextValue {
+export interface CanvasContextValue {
   canvas: HTMLCanvasElement | null;
-  add: (draw: Draw) => void;
-  remove: (draw: Draw) => void;
+  addDrawing: (draw: Draw) => void;
+  removeDrawing: (draw: Draw) => void;
+  start(): void;
+  stop(): void;
 }
 
 export const CanvasContext = createContext<CanvasContextValue>({
   canvas: null,
-  add: () => {},
-  remove: () => {},
+  addDrawing: () => {},
+  removeDrawing: () => {},
+  start: () => {},
+  stop: () => {},
 });
