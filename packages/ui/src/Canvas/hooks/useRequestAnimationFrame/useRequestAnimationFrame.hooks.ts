@@ -2,15 +2,24 @@ import { useRef, useState, useEffect } from "react";
 
 export type RequestAnimationFrameCallback<T> = (frame: number) => T;
 
+interface RequestAnimationPlayOptions {
+  duration?: number;
+  infinite?: boolean;
+}
+
 export type RequestAnimationFrameReturnType<T> = [
   T,
-  { start: (duration?: number) => void; stop: () => void; reset: () => void }
+  {
+    start: (config?: RequestAnimationPlayOptions) => void;
+    stop: () => void;
+    reset: () => void;
+  }
 ];
 
-export interface RequestAnimationFrameConfig {
+export interface RequestAnimationFrameConfig
+  extends RequestAnimationPlayOptions {
   auto?: boolean;
   interval?: number;
-  duration?: number;
 }
 
 /**
@@ -24,10 +33,6 @@ export interface RequestAnimationFrameConfig {
  * from/to: play from a frame and two a frame
  *
  * start({from: 3_000, to: 230_000}); first plays from 3-230 seconds/frames
- *
- * interval: only recompute value on specified interval
- *
- * infinite: replay with current settings infinitely
  */
 export function useRequestAnimationFrame<T = void>(
   callback: RequestAnimationFrameCallback<T>,
@@ -35,6 +40,7 @@ export function useRequestAnimationFrame<T = void>(
     auto = false,
     interval = 0,
     duration: baseDuration,
+    infinite: baseInfinite,
   }: RequestAnimationFrameConfig = {
     auto: false,
     interval: 0,
@@ -52,9 +58,10 @@ export function useRequestAnimationFrame<T = void>(
     }
   }
 
-  function start(singleDuration?: number) {
+  function start(playOptions: RequestAnimationPlayOptions = {}) {
     function render(currentTime: number, isFirst = false) {
-      const duration = singleDuration || baseDuration;
+      const duration = playOptions.duration || baseDuration;
+      const infinite = playOptions.infinite || baseInfinite;
 
       if (isFirst) {
         startTime.current = currentTime;
@@ -64,6 +71,9 @@ export function useRequestAnimationFrame<T = void>(
       let frame = Math.round(Math.max(currentTime - startTime.current, 0));
 
       if (duration && frame > duration) {
+        if (infinite) {
+          return start(playOptions);
+        }
         setValue(callback(frame));
         return stop();
       }

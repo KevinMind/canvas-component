@@ -23,7 +23,7 @@ function TransitionValue<T>({
   return (
     <div>
       <div>
-        <button onClick={() => actions.start(duration)}>start</button>
+        <button onClick={() => actions.start({ duration })}>start</button>
         <button onClick={actions.stop}>stop</button>
         <button onClick={actions.reset}>reset</button>
       </div>
@@ -152,5 +152,23 @@ export const Interval: TransitionValueStory = {
         1
       );
     });
+  },
+};
+
+export const Infinite: TransitionValueStory = {
+  args: {
+    callback: useCounter,
+    config: {
+      duration: 5_000,
+      infinite: true,
+      auto: true,
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    await expectCount(canvas, 5, 5_000);
+
+    await expectCount(canvas, 2, 7_000);
   },
 };
