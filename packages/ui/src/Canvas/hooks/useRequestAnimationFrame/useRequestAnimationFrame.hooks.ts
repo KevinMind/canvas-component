@@ -8,7 +8,9 @@ export type RequestAnimationFrameReturnType<T> = [
 ];
 
 export interface RequestAnimationFrameConfig {
-  auto: boolean;
+  auto?: boolean;
+  interval?: number;
+  duration?: number;
 }
 
 /**
@@ -29,12 +31,20 @@ export interface RequestAnimationFrameConfig {
  */
 export function useRequestAnimationFrame<T = void>(
   callback: RequestAnimationFrameCallback<T>,
-  { auto = false }: RequestAnimationFrameConfig = { auto: false }
+  {
+    auto = false,
+    interval = 0,
+    duration: baseDuration,
+  }: RequestAnimationFrameConfig = {
+    auto: false,
+    interval: 0,
+  }
 ): RequestAnimationFrameReturnType<T> {
   const [value, setValue] = useState<T>(callback(0));
 
   let id = useRef<number>();
   const startTime = useRef<number>(0);
+  const lastTime = useRef<number>(0);
 
   function stop() {
     if (id.current) {
@@ -42,23 +52,32 @@ export function useRequestAnimationFrame<T = void>(
     }
   }
 
-  function start(duration?: number) {
+  function start(singleDuration?: number) {
     function render(currentTime: number, isFirst = false) {
+      const duration = singleDuration || baseDuration;
+
       if (isFirst) {
         startTime.current = currentTime;
+        lastTime.current = 0;
       }
 
-      let frame = Math.max(currentTime - startTime.current, 0);
+      let frame = Math.round(Math.max(currentTime - startTime.current, 0));
 
       if (duration && frame > duration) {
+        setValue(callback(frame));
         return stop();
       }
 
-      setValue(callback(frame));
+      if (frame - lastTime.current >= interval) {
+        setValue(callback(frame));
+        lastTime.current = frame;
+      }
 
       id.current = window.requestAnimationFrame(render);
     }
 
+    // pre-render first frame
+    setValue(callback(0));
     render(performance.now(), true);
   }
 

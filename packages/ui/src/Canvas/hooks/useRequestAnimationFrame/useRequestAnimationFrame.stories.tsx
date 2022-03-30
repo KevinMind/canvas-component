@@ -28,7 +28,7 @@ function TransitionValue<T>({
         <button onClick={actions.reset}>reset</button>
       </div>
       <div>
-        <p>{value}</p>
+        <h3>{value}</h3>
       </div>
     </div>
   );
@@ -67,7 +67,7 @@ export const Default: TransitionValueStory = {
 
 export const ClicksStart: TransitionValueStory = {
   args: {
-    duration: 10_000,
+    duration: 3_000,
     callback: useCounter,
   },
   play: async ({ canvasElement }) => {
@@ -75,7 +75,7 @@ export const ClicksStart: TransitionValueStory = {
 
     await userEvent.click(canvas.getByText("start"));
 
-    await expectCount(canvas, 10, 10_000);
+    await expectCount(canvas, 3, 3_000);
   },
 };
 
@@ -91,11 +91,10 @@ export const RestartsTimer: TransitionValueStory = {
 
     await expectCount(canvas, 5, 5_000);
 
-    await userEvent.click(canvas.getByText("stop"));
-
     await userEvent.click(canvas.getByText("start"));
-    await userEvent.click(canvas.getByText("stop"));
+
     await expectCount(canvas, 0);
+    await userEvent.click(canvas.getByText("stop"));
   },
 };
 
@@ -122,8 +121,8 @@ export const ManyTimers: TransitionValueStory = {
 export const Auto: TransitionValueStory = {
   args: {
     callback: useCounter,
-    duration: 3000,
     config: {
+      duration: 5_000,
       auto: true,
     },
   },
@@ -133,5 +132,25 @@ export const Auto: TransitionValueStory = {
     await expectCount(canvas, 5, 5_000);
 
     await userEvent.click(canvas.getByText("stop"));
+  },
+};
+
+export const Interval: TransitionValueStory = {
+  args: {
+    callback: useCounter,
+    config: {
+      auto: true,
+      duration: 2_000,
+      interval: 2_000,
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    await waitFor(() => {
+      expect(canvas.getByRole("heading", { level: 3 }).innerHTML).not.toEqual(
+        1
+      );
+    });
   },
 };
