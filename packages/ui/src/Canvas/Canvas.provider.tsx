@@ -42,40 +42,35 @@ export function CanvasProvider({
     setReady(true);
   };
 
-  const [, actions] = useRequestAnimationFrame((frame) => {
-    if (!canvasRef.current) return;
+  useRequestAnimationFrame(
+    (frame) => {
+      if (!canvasRef.current) return;
 
-    const context = canvasRef.current.getContext("2d");
+      const context = canvasRef.current.getContext("2d");
 
-    if (!context) return;
+      if (!context) return;
 
-    context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+      context.clearRect(0, 0, context.canvas.width, context.canvas.height);
 
-    for (let draw of drawings.current.keys()) {
-      context.fillStyle = fillStyle;
-      context.strokeStyle = strokeStyle;
-      context.resetTransform();
-      context.setLineDash([]);
-      context.beginPath();
-      draw(context, frame);
-    }
-  });
+      for (let draw of drawings.current.keys()) {
+        context.fillStyle = fillStyle;
+        context.strokeStyle = strokeStyle;
+        context.resetTransform();
+        context.setLineDash([]);
+        context.beginPath();
+        draw(context, frame);
+      }
+    },
+    { auto: true }
+  );
 
-  useEffect(() => {
-    actions.start();
-
-    return () => {
-      actions.stop();
-    };
-  }, [actions]);
-
-  function addDrawing(draw: Draw) {
+  function add(draw: Draw) {
     if (!drawings.current.has(draw)) {
       drawings.current.set(draw, true);
     }
   }
 
-  function removeDrawing(draw: Draw) {
+  function remove(draw: Draw) {
     drawings.current.delete(draw);
   }
 
@@ -83,10 +78,8 @@ export function CanvasProvider({
     <CanvasContext.Provider
       value={{
         canvas: canvasRef.current,
-        addDrawing,
-        removeDrawing,
-        start: actions.start,
-        stop: actions.stop,
+        add,
+        remove,
       }}
     >
       <Canvas ref={setCanvasRef} {...canvasProps}>

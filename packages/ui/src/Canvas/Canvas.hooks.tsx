@@ -27,10 +27,10 @@ export function useCanvasFrame(draw: Draw) {
   useEffect(() => {
     if (!context) return;
 
-    context.addDrawing(draw);
+    context.add(draw);
 
     return () => {
-      context.removeDrawing(draw);
+      context.remove(draw);
     };
   }, [draw, context]);
 }
