@@ -1,6 +1,7 @@
 import React, { ComponentProps, useEffect, useState, useCallback } from "react";
 import { ComponentMeta, StoryObj } from "@storybook/react";
 
+import { useRequestAnimationFrame } from "./hooks/useRequestAnimationFrame";
 import { withCanvasProvider, withTodoList } from "./.storybook/decorators";
 import { CanvasProvider, useCanvasFrame } from ".";
 
@@ -8,6 +9,16 @@ function Input() {
   const [input, setInput] = useState<string>("");
 
   return <input value={input} onChange={(e) => setInput(e.target.value)} />;
+}
+
+function RawCircle({ radius, x, y }: { x: number; y: number; radius: number }) {
+  useCanvasFrame((context) => {
+    context.beginPath();
+    context.arc(x, y, radius, 0, 2 * Math.PI);
+    context.stroke();
+  });
+
+  return null;
 }
 
 function Circle({
@@ -111,4 +122,134 @@ export const Default: CanvasProviderStory = {
       </>
     );
   },
+};
+
+function RenderAnimated() {
+  const [x] = useRequestAnimationFrame(
+    (curr) => {
+      return Number((curr / 3_000).toFixed(2)) * 300;
+    },
+    { auto: true, mode: "pingpong", duration: 3_000 }
+  );
+  const [radius] = useRequestAnimationFrame(
+    (curr) => {
+      return curr / 1_000;
+    },
+    {
+      auto: true,
+      mode: "forward",
+      infinite: true,
+      duration: 1_000,
+    }
+  );
+  return (
+    <>
+      <RawCircle x={x + 100} y={100} radius={100} />
+      <RawCircle x={x + 100} y={100} radius={radius * 50} />
+      <RawCircle x={2 * x} y={100} radius={50} />
+    </>
+  );
+}
+
+export const Animated: CanvasProviderStory = {
+  parameters: {
+    canvasProvider: {
+      width: 500,
+      height: 200,
+    },
+  },
+  render: () => {
+    return <RenderAnimated />;
+  },
+};
+
+const useMousePosition = () => {
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const setFromEvent = (e: MouseEvent) =>
+      setPosition({ x: e.clientX, y: e.clientY });
+    window.addEventListener("mousemove", setFromEvent);
+
+    return () => {
+      window.removeEventListener("mousemove", setFromEvent);
+    };
+  }, []);
+
+  return position;
+};
+
+function RenderDraggable() {
+  const { x } = useMousePosition();
+
+  return (
+    <>
+      <RawCircle x={x + 100} y={100} radius={100} />
+    </>
+  );
+}
+
+export const Draggable: CanvasProviderStory = {
+  parameters: {
+    canvasProvider: {
+      width: 500,
+      height: 200,
+    },
+  },
+  render: () => <RenderDraggable />,
+};
+
+function getPointInCircle(radius: number, degrees: number) {
+  const radians = degrees * (Math.PI / 180);
+
+  var x = Math.cos(radians) * radius;
+  var y = Math.sin(radians) * radius;
+
+  return { x, y };
+}
+
+function RenderCircleOfCircles() {
+  const radius = 60;
+  const slowRadius = 100;
+  const x = 100;
+  const y = 100;
+
+  const rotations = 1;
+  const factor = 4.5;
+  const speed = Math.pow(10, factor) / rotations;
+
+  const [percentage] = useRequestAnimationFrame((curr) => curr / speed, {
+    duration: speed,
+    auto: true,
+  });
+
+  const slow = getPointInCircle(slowRadius, percentage * 360);
+  const moon = getPointInCircle(slowRadius * 0.3, percentage * 5 * 360);
+
+  const fast = getPointInCircle(radius, percentage * 10 * 360);
+
+  return (
+    <>
+      <RawCircle x={x} y={y} radius={slowRadius} />
+      <RawCircle x={x} y={y} radius={radius} />
+      <RawCircle x={x + slow.x} y={y + slow.y} radius={slowRadius / 10} />
+      <RawCircle
+        x={x + slow.x + moon.x}
+        y={y + slow.y + moon.y}
+        radius={slowRadius / 20}
+      />
+
+      <RawCircle x={x + fast.x} y={y + fast.y} radius={radius / 10} />
+    </>
+  );
+}
+
+export const CircleOfCircles: CanvasProviderStory = {
+  parameters: {
+    canvasProvider: {
+      width: 500,
+      height: 200,
+    },
+  },
+  render: () => <RenderCircleOfCircles />,
 };
