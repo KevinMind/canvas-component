@@ -2,9 +2,12 @@ import { useRef, useState, useEffect } from "react";
 
 export type RequestAnimationFrameCallback<T> = (frame: number) => T;
 
+type PlayModes = "forward" | "backward" | "pingpong" | "pingpong-backward";
+
 interface RequestAnimationPlayOptions {
   duration?: number;
   infinite?: boolean;
+  mode?: Omit<PlayModes, "pingpong-backward">;
 }
 
 export type RequestAnimationFrameReturnType<T> = [
@@ -25,10 +28,9 @@ export interface RequestAnimationFrameConfig
 /**
  * todo:
  *
- * play mode: forward/backward/pingpong/random
+ * figure out how to correctly implement initial value.. needs to be based on mode at setup and play
  *
- * start({mode: 'forward'}) ->
- * * start({mode: 'pingpong'}) <->
+ * timing is not correct. I don't fully understand the cause but around 0 intervals are not 0 seconds.
  *
  * from/to: play from a frame and two a frame
  *
@@ -41,9 +43,11 @@ export function useRequestAnimationFrame<T = void>(
     interval = 0,
     duration: baseDuration,
     infinite: baseInfinite,
+    mode: baseMode = "forward",
   }: RequestAnimationFrameConfig = {
     auto: false,
     interval: 0,
+    mode: "forward",
   }
 ): RequestAnimationFrameReturnType<T> {
   const [value, setValue] = useState<T>(callback(0));
@@ -59,35 +63,63 @@ export function useRequestAnimationFrame<T = void>(
   }
 
   function start(playOptions: RequestAnimationPlayOptions = {}) {
-    function render(currentTime: number, isFirst = false) {
-      const duration = playOptions.duration || baseDuration;
-      const infinite = playOptions.infinite || baseInfinite;
+    const duration = playOptions.duration || baseDuration;
+    const infinite = playOptions.infinite || baseInfinite;
+    let playMode = playOptions.mode || baseMode;
 
+    if (playMode === "backward" && !duration) {
+      throw new Error(
+        "must provide duration when playing backwards, otherwise we play backwards from infinity..."
+      );
+    }
+
+    function innerRender(frame: number) {
+      let step = playMode.includes("backward") ? duration! - frame : frame;
+      setValue(callback(step));
+    }
+
+    function render(currentTime: number, isFirst = false) {
       if (isFirst) {
         startTime.current = currentTime;
         lastTime.current = 0;
       }
 
-      let frame = Math.round(Math.max(currentTime - startTime.current, 0));
+      let frame = Math.min(
+        Math.max(Math.round(currentTime - startTime.current), 0),
+        duration || Infinity
+      );
 
-      if (duration && frame > duration) {
-        if (infinite) {
-          return start(playOptions);
+      if (duration && frame >= duration) {
+        innerRender(frame);
+
+        switch (playMode) {
+          case "forward":
+          case "backward":
+            return infinite ? start(playOptions) : stop();
+          case "pingpong":
+            return start({
+              ...playOptions,
+              mode: "pingpong-backward" as PlayModes,
+            });
+          case "pingpong-backward":
+            return start({
+              ...playOptions,
+              mode: "pingpong",
+            });
+          default:
+            return stop();
         }
-        setValue(callback(frame));
-        return stop();
       }
 
       if (frame - lastTime.current >= interval) {
-        setValue(callback(frame));
+        innerRender(frame);
         lastTime.current = frame;
       }
 
       id.current = window.requestAnimationFrame(render);
     }
 
-    // pre-render first frame
-    setValue(callback(0));
+    innerRender(0);
     render(performance.now(), true);
   }
 

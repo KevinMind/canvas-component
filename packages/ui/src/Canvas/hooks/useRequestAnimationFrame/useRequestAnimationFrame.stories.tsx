@@ -172,3 +172,36 @@ export const Infinite: TransitionValueStory = {
     await expectCount(canvas, 2, 7_000);
   },
 };
+
+export const Backwards: TransitionValueStory = {
+  args: {
+    callback: useCounter,
+    config: {
+      infinite: true,
+      duration: 5_000,
+      auto: true,
+      mode: "backward",
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    await expectCount(canvas, 2, 3_000);
+  },
+};
+
+export const PingPong: TransitionValueStory = {
+  args: {
+    callback: useCounter,
+    config: {
+      duration: 5_000,
+      auto: true,
+      mode: "pingpong",
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    await expectCount(canvas, 2, 3_000);
+  },
+};
