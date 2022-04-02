@@ -2,8 +2,10 @@ import { ComponentProps } from "react";
 import { ComponentMeta, StoryObj } from "@storybook/react";
 
 import { {{name}} } from "./{{name}}.component";
+import { withCanvasProvider, withTodoList } from "../../.storybook/decorators";
 
 export default {
+  decorators: [withCanvasProvider, withTodoList],
   component: {{name}},
 } as ComponentMeta<typeof {{name}}>;
 
