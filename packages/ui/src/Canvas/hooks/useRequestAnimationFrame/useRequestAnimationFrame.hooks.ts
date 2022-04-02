@@ -1,19 +1,22 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 
-export type RequestAnimationFrameCallback<T> = (frame: number) => T;
+export type RequestAnimationFrameCallback<T> = (
+  currentFrame: number,
+  totalFrames: number
+) => T;
 
 type PlayModes = "forward" | "backward" | "pingpong" | "pingpong-backward";
 
 interface RequestAnimationPlayOptions {
-  duration?: number;
-  infinite?: boolean;
-  mode?: Omit<PlayModes, "pingpong-backward">;
+  duration: number;
+  infinite: boolean;
+  mode: PlayModes;
 }
 
 export type RequestAnimationFrameReturnType<T> = [
   T,
   {
-    start: (config?: RequestAnimationPlayOptions) => void;
+    start: (config?: Partial<RequestAnimationPlayOptions>) => void;
     stop: () => void;
     reset: () => void;
   }
@@ -21,8 +24,10 @@ export type RequestAnimationFrameReturnType<T> = [
 
 export interface RequestAnimationFrameConfig
   extends RequestAnimationPlayOptions {
-  auto?: boolean;
-  interval?: number;
+  auto: boolean;
+  interval: number;
+  min: number;
+  max: number;
 }
 
 /**
@@ -36,25 +41,39 @@ export interface RequestAnimationFrameConfig
  *
  * start({from: 3_000, to: 230_000}); first plays from 3-230 seconds/frames
  */
+
+const defaultConfig: RequestAnimationFrameConfig = {
+  auto: false,
+  interval: 0,
+  duration: Number.MAX_SAFE_INTEGER,
+  infinite: false,
+  mode: "forward",
+  min: 0,
+  max: 100,
+};
+
 export function useRequestAnimationFrame<T = void>(
   callback: RequestAnimationFrameCallback<T>,
-  {
-    auto = false,
-    interval = 0,
-    duration: baseDuration,
-    infinite: baseInfinite,
-    mode: baseMode = "forward",
-  }: RequestAnimationFrameConfig = {
-    auto: false,
-    interval: 0,
-    mode: "forward",
-  }
+  inputConfig: Partial<RequestAnimationFrameConfig> = defaultConfig
 ): RequestAnimationFrameReturnType<T> {
-  const [value, setValue] = useState<T>(callback(0));
+  const baseConfig = useMemo(
+    () => ({
+      ...defaultConfig,
+      ...inputConfig,
+    }),
+    [inputConfig]
+  );
+
+  const [value, setValue] = useState<T>(callback(0, baseConfig.duration));
 
   let id = useRef<number>();
   const startTime = useRef<number>(0);
   const lastTime = useRef<number>(0);
+
+  function _render(playMode: PlayModes, frame: number, duration: number) {
+    let step = playMode?.includes("backward") ? duration! - frame : frame;
+    setValue(callback(step, duration));
+  }
 
   function stop() {
     if (id.current) {
@@ -62,20 +81,18 @@ export function useRequestAnimationFrame<T = void>(
     }
   }
 
-  function start(playOptions: RequestAnimationPlayOptions = {}) {
-    const duration = playOptions.duration || baseDuration;
-    const infinite = playOptions.infinite || baseInfinite;
-    let playMode = playOptions.mode || baseMode;
+  function start(playOptions: Partial<RequestAnimationPlayOptions> = {}) {
+    const {
+      duration,
+      infinite,
+      interval,
+      mode: playMode,
+    } = { ...baseConfig, ...playOptions };
 
     if (playMode === "backward" && !duration) {
       throw new Error(
         "must provide duration when playing backwards, otherwise we play backwards from infinity..."
       );
-    }
-
-    function innerRender(frame: number) {
-      let step = playMode.includes("backward") ? duration! - frame : frame;
-      setValue(callback(step));
     }
 
     function render(currentTime: number, isFirst = false) {
@@ -90,7 +107,7 @@ export function useRequestAnimationFrame<T = void>(
       );
 
       if (duration && frame >= duration) {
-        innerRender(frame);
+        _render(playMode, frame, duration);
 
         switch (playMode) {
           case "forward":
@@ -112,32 +129,32 @@ export function useRequestAnimationFrame<T = void>(
       }
 
       if (frame - lastTime.current >= interval) {
-        innerRender(frame);
+        _render(playMode, frame, duration);
         lastTime.current = frame;
       }
 
       id.current = window.requestAnimationFrame(render);
     }
 
-    innerRender(0);
+    _render(playMode, 0, duration);
     render(performance.now(), true);
   }
 
   function reset() {
-    setValue(callback(0));
+    _render(baseConfig.mode, 0, baseConfig.duration);
   }
 
   useEffect(() => {
-    if (auto) {
+    if (baseConfig.auto) {
       start();
     }
     return () => {
-      if (auto) {
+      if (baseConfig.auto) {
         stop();
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [auto]);
+  }, [baseConfig.auto]);
 
   return [value, { start, stop, reset }];
 }

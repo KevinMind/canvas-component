@@ -16,7 +16,7 @@ function TransitionValue<T>({
 }: {
   duration: number;
   callback: RequestAnimationFrameCallback<T>;
-  config: RequestAnimationFrameConfig;
+  config: Partial<RequestAnimationFrameConfig>;
 }) {
   const [value, actions] = useRequestAnimationFrame<T>(callback, config);
 

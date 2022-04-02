@@ -34,8 +34,8 @@ export const Expanding: CircleStory = {
   decorators: [
     (Story, ctx) => {
       const [radius] = useRequestAnimationFrame(
-        (curr) => {
-          return (curr / 1000) * 125;
+        (curr, duration) => {
+          return (curr / duration) * 125;
         },
         {
           auto: true,
@@ -62,14 +62,14 @@ export const Rotating: CircleStory = {
   decorators: [
     (Story, ctx) => {
       const [rotation] = useRequestAnimationFrame(
-        (curr) => {
-          return (curr / 1000) * 360;
+        (curr, duration) => {
+          return (curr / duration) * 360;
         },
         { auto: true, duration: 1000, infinite: true }
       );
       const [radius] = useRequestAnimationFrame(
-        (curr) => {
-          return (curr / 1000) * 125;
+        (curr, duration) => {
+          return (curr / duration) * 125;
         },
         { auto: true, mode: "pingpong", duration: 1000 }
       );

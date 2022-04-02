@@ -126,14 +126,14 @@ export const Default: CanvasProviderStory = {
 
 function RenderAnimated() {
   const [x] = useRequestAnimationFrame(
-    (curr) => {
-      return Number((curr / 3_000).toFixed(2)) * 300;
+    (curr, duration) => {
+      return Number((curr / duration).toFixed(2)) * 300;
     },
     { auto: true, mode: "pingpong", duration: 3_000 }
   );
   const [radius] = useRequestAnimationFrame(
-    (curr) => {
-      return curr / 1_000;
+    (curr, duration) => {
+      return curr / duration;
     },
     {
       auto: true,
@@ -218,10 +218,13 @@ function RenderCircleOfCircles() {
   const factor = 4.5;
   const speed = Math.pow(10, factor) / rotations;
 
-  const [percentage] = useRequestAnimationFrame((curr) => curr / speed, {
-    duration: speed,
-    auto: true,
-  });
+  const [percentage] = useRequestAnimationFrame(
+    (curr, duration) => curr / duration,
+    {
+      duration: speed,
+      auto: true,
+    }
+  );
 
   const slow = getPointInCircle(slowRadius, percentage * 360);
   const moon = getPointInCircle(slowRadius * 0.3, percentage * 5 * 360);
