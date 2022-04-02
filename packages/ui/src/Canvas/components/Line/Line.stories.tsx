@@ -1,9 +1,9 @@
-import React, { ComponentProps, useState, useEffect } from "react";
+import React, { ComponentProps } from "react";
 import { ComponentMeta, StoryObj } from "@storybook/react";
 
 import { withCanvasProvider, withTodoList } from "../../.storybook/decorators";
-import { useRequestAnimationFrame } from "../../hooks/useRequestAnimationFrame";
 import { Line } from "./Line.component";
+import { useAnimationFrame } from "../../hooks/useAnimationFrame";
 
 export default {
   decorators: [withCanvasProvider, withTodoList],
@@ -26,20 +26,14 @@ export const Default: LineStory = {
 };
 
 function RenderManyLines({ width, height }: { width: number; height: number }) {
-  const [x, { stop }] = useRequestAnimationFrame(
-    (frame) => {
-      return frame;
-    },
-    { auto: true }
-  );
+  const [x] = useAnimationFrame({
+    auto: true,
+    from: 0,
+    to: 50_000,
+    duration: 20_000,
+  });
 
   const middle = { x: width / 2, y: height / 2 };
-
-  useEffect(() => {
-    if (x > 20_000) {
-      stop();
-    }
-  }, [stop, x]);
 
   return (
     <>

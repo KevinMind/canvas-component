@@ -1,7 +1,7 @@
 import React, { ComponentProps, useEffect, useState, useCallback } from "react";
 import { ComponentMeta, StoryObj } from "@storybook/react";
 
-import { useRequestAnimationFrame } from "./hooks/useRequestAnimationFrame";
+import { useAnimationFrame } from "./hooks/useAnimationFrame";
 import { withCanvasProvider, withTodoList } from "./.storybook/decorators";
 import { CanvasProvider, useCanvasFrame } from ".";
 
@@ -125,27 +125,25 @@ export const Default: CanvasProviderStory = {
 };
 
 function RenderAnimated() {
-  const [x] = useRequestAnimationFrame(
-    (curr, duration) => {
-      return Number((curr / duration).toFixed(2)) * 300;
-    },
-    { auto: true, mode: "pingpong", duration: 3_000 }
-  );
-  const [radius] = useRequestAnimationFrame(
-    (curr, duration) => {
-      return curr / duration;
-    },
-    {
-      auto: true,
-      mode: "forward",
-      infinite: true,
-      duration: 1_000,
-    }
-  );
+  const [x] = useAnimationFrame({
+    auto: true,
+    mode: "pingpong",
+    duration: 3_000,
+    from: 0,
+    to: 300,
+  });
+  const [radius] = useAnimationFrame({
+    auto: true,
+    mode: "forward",
+    infinite: true,
+    duration: 2_000,
+    from: 0,
+    to: 50,
+  });
   return (
     <>
       <RawCircle x={x + 100} y={100} radius={100} />
-      <RawCircle x={x + 100} y={100} radius={radius * 50} />
+      <RawCircle x={x + 100} y={100} radius={radius} />
       <RawCircle x={2 * x} y={100} radius={50} />
     </>
   );
@@ -214,22 +212,34 @@ function RenderCircleOfCircles() {
   const x = 100;
   const y = 100;
 
-  const rotations = 1;
-  const factor = 4.5;
-  const speed = Math.pow(10, factor) / rotations;
+  const [slowRadian] = useAnimationFrame({
+    from: 0,
+    to: 360,
+    duration: 3_000,
+    auto: true,
+    infinite: true,
+  });
 
-  const [percentage] = useRequestAnimationFrame(
-    (curr, duration) => curr / duration,
-    {
-      duration: speed,
-      auto: true,
-    }
-  );
+  const [moonRadian] = useAnimationFrame({
+    from: 0,
+    to: 360,
+    duration: 1_000,
+    auto: true,
+    infinite: true,
+  });
 
-  const slow = getPointInCircle(slowRadius, percentage * 360);
-  const moon = getPointInCircle(slowRadius * 0.3, percentage * 5 * 360);
+  const slow = getPointInCircle(slowRadius, slowRadian);
+  const moon = getPointInCircle(slowRadius * 0.3, moonRadian);
 
-  const fast = getPointInCircle(radius, percentage * 10 * 360);
+  const [fastRadian] = useAnimationFrame({
+    from: 0,
+    to: 360,
+    duration: 10_000,
+    auto: true,
+    infinite: true,
+  });
+
+  const fast = getPointInCircle(radius, fastRadian);
 
   return (
     <>

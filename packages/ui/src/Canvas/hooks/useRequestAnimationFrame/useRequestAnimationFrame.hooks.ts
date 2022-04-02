@@ -26,8 +26,8 @@ export interface RequestAnimationFrameConfig
   extends RequestAnimationPlayOptions {
   auto: boolean;
   interval: number;
-  min: number;
-  max: number;
+  from: number;
+  to: number;
 }
 
 /**
@@ -48,8 +48,8 @@ const defaultConfig: RequestAnimationFrameConfig = {
   duration: Number.MAX_SAFE_INTEGER,
   infinite: false,
   mode: "forward",
-  min: 0,
-  max: 100,
+  from: 0,
+  to: 100,
 };
 
 export function useRequestAnimationFrame<T = void>(

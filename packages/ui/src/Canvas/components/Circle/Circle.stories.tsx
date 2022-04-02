@@ -4,6 +4,7 @@ import { ComponentMeta, StoryObj } from "@storybook/react";
 import { Circle } from "./Circle.component";
 import { withCanvasProvider, withTodoList } from "../../.storybook/decorators";
 import { useRequestAnimationFrame } from "../../hooks/useRequestAnimationFrame";
+import { useAnimationFrame } from "../../hooks/useAnimationFrame";
 
 export default {
   decorators: [withCanvasProvider, withTodoList],
@@ -33,16 +34,13 @@ export const Expanding: CircleStory = {
   ...Default,
   decorators: [
     (Story, ctx) => {
-      const [radius] = useRequestAnimationFrame(
-        (curr, duration) => {
-          return (curr / duration) * 125;
-        },
-        {
-          auto: true,
-          duration: 1000,
-          mode: "pingpong",
-        }
-      );
+      const [radius] = useAnimationFrame({
+        from: 0,
+        to: 125,
+        auto: true,
+        duration: 1000,
+        mode: "pingpong",
+      });
       ctx.args.radius = radius;
       return <Story />;
     },
@@ -61,18 +59,20 @@ export const Rotating: CircleStory = {
   ...Elipse,
   decorators: [
     (Story, ctx) => {
-      const [rotation] = useRequestAnimationFrame(
-        (curr, duration) => {
-          return (curr / duration) * 360;
-        },
-        { auto: true, duration: 1000, infinite: true }
-      );
-      const [radius] = useRequestAnimationFrame(
-        (curr, duration) => {
-          return (curr / duration) * 125;
-        },
-        { auto: true, mode: "pingpong", duration: 1000 }
-      );
+      const [rotation] = useAnimationFrame({
+        auto: true,
+        duration: 1000,
+        infinite: true,
+        from: 0,
+        to: 360,
+      });
+      const [radius] = useAnimationFrame({
+        auto: true,
+        mode: "pingpong",
+        duration: 1000,
+        from: 0,
+        to: 125,
+      });
       ctx.args.rotation = rotation;
       ctx.args.radius = radius;
       return <Story />;
