@@ -13,5 +13,5 @@ export interface Draw {
 }
 
 export interface DrawnCanvasProps {
-  rotation: number | [Position, number];
+  rotation: number;
 }
