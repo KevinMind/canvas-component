@@ -126,6 +126,7 @@ export const Default: CanvasProviderStory = {
 
 function RenderAnimated() {
   const [x] = useAnimationFrame({
+    easing: "ease-in-out",
     auto: true,
     mode: "pingpong",
     duration: 3_000,
@@ -135,8 +136,9 @@ function RenderAnimated() {
   const [radius] = useAnimationFrame({
     auto: true,
     mode: "forward",
+    easing: [1, 0, 1, 1],
     infinite: true,
-    duration: 2_000,
+    duration: 5_000,
     from: 0,
     to: 50,
   });
