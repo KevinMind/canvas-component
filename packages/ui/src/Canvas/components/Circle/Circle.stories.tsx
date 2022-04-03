@@ -3,7 +3,6 @@ import { ComponentMeta, StoryObj } from "@storybook/react";
 
 import { Circle } from "./Circle.component";
 import { withCanvasProvider, withTodoList } from "../../.storybook/decorators";
-import { useRequestAnimationFrame } from "../../hooks/useRequestAnimationFrame";
 import { useAnimationFrame } from "../../hooks/useAnimationFrame";
 
 export default {

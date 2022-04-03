@@ -42,27 +42,24 @@ export function CanvasProvider({
     setReady(true);
   };
 
-  useRequestAnimationFrame(
-    (frame) => {
-      if (!canvasRef.current) return;
+  const { start, stop } = useRequestAnimationFrame((frame) => {
+    if (!canvasRef.current) return;
 
-      const context = canvasRef.current.getContext("2d");
+    const context = canvasRef.current.getContext("2d");
 
-      if (!context) return;
+    if (!context) return;
 
-      context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+    context.clearRect(0, 0, context.canvas.width, context.canvas.height);
 
-      for (let draw of drawings.current.keys()) {
-        context.fillStyle = fillStyle;
-        context.strokeStyle = strokeStyle;
-        context.resetTransform();
-        context.setLineDash([]);
-        context.beginPath();
-        draw(context, frame);
-      }
-    },
-    { auto: true }
-  );
+    for (let draw of drawings.current.keys()) {
+      context.fillStyle = fillStyle;
+      context.strokeStyle = strokeStyle;
+      context.resetTransform();
+      context.setLineDash([]);
+      context.beginPath();
+      draw(context, frame);
+    }
+  });
 
   function add(draw: Draw) {
     if (!drawings.current.has(draw)) {
@@ -73,6 +70,14 @@ export function CanvasProvider({
   function remove(draw: Draw) {
     drawings.current.delete(draw);
   }
+
+  useEffect(() => {
+    start();
+
+    return () => {
+      stop();
+    };
+  }, [start, stop]);
 
   return (
     <CanvasContext.Provider
