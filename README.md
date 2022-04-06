@@ -2,16 +2,22 @@
 
 ## Todo
 
-- [X] Setup monorepo
-- [X] add CI integration with vercel and basic package
-- [X] add component library package and website
-- [X] setup next.js and build step
-- [X] setup jest and storybook
-- [X] setup chromatic
+- [x] Setup monorepo
+- [x] add CI integration with vercel and basic package
+- [x] add component library package and website
+- [x] setup next.js and build step
+- [x] setup jest and storybook
+- [x] setup chromatic
 - [ ] setup CMS
 - [ ] setup backend API
 - [ ] create blog layout and home page layout
 - [ ] import components from previous project
+
+- [ ] split Canvas component to separate package
+- [ ] review current code base for opportunities to improve tests
+- [ ] add Polygon support for canvas
+- [ ] add FreeDrawing support for canvas
+- [ ] add chain animations hook to canvas
 
 ## Repo package structure
 
@@ -20,7 +26,7 @@
 We use plop to generate new packages. therea re 2 options
 
 - name: the name for the package both in package.json and directory in packages/{{name}}
-- tsconfigPreset: which tsconfig preset to use for the package. choose from one of the named files in packages/tsconfig/*
+- tsconfigPreset: which tsconfig preset to use for the package. choose from one of the named files in packages/tsconfig/\*
 
 run `yarn generate:package` to initiate the CLI. with turborepo, the package should automatically be integrated into the various build/ci pipelines.
 
@@ -42,16 +48,16 @@ run `yarn generate:app` to initiate the CLI. with turborepo, the package should 
 - no package/app with root name
 
 - all apps have
--- jest.config.js
--- tsconfig.json
--- .eslintrc.js
--- package.json scripts
+  -- jest.config.js
+  -- tsconfig.json
+  -- .eslintrc.js
+  -- package.json scripts
 
 - all packages have:
--- tsconfig.json
--- .eslintrc.js
--- package.json scripts
--- package.json jest preset
+  -- tsconfig.json
+  -- .eslintrc.js
+  -- package.json scripts
+  -- package.json jest preset
 
 ## Packages
 
@@ -79,6 +85,3 @@ Solution:
 - storybook-test is a separate command that can be run manually for local testing.
 - the storybook interaction tets are run automatically during chromatic builds
 - we can trigger multiple chromatic builds with a single job using turbo repo and project specific environment variables
-
-
-
