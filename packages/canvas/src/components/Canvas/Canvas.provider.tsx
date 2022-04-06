@@ -9,7 +9,7 @@ import React, {
 
 import { CanvasContext } from "./Canvas.context";
 import { Draw } from "./Canvas.types";
-import { useRequestAnimationFrame } from "./hooks/useRequestAnimationFrame";
+import { useRequestAnimationFrame } from "../../hooks/useRequestAnimationFrame";
 
 const Canvas = forwardRef<
   HTMLCanvasElement,

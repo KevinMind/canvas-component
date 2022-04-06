@@ -9,7 +9,7 @@ import {
   Easing as EasingType,
 } from "./useAnimationFrame.hooks";
 import { Circle } from "../../components/Circle";
-import { CanvasProvider } from "../../Canvas.provider";
+import { CanvasProvider } from "../../components/Canvas/Canvas.provider";
 
 function TransitionValue(args: UseAnimationFrameConfig) {
   const [value, actions] = useAnimationFrame(args);

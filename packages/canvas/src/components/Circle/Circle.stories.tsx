@@ -2,7 +2,10 @@ import React, { ComponentProps } from "react";
 import { ComponentMeta, StoryObj } from "@storybook/react";
 
 import { Circle } from "./Circle.component";
-import { withCanvasProvider, withTodoList } from "../../.storybook/decorators";
+import {
+  withCanvasProvider,
+  withTodoList,
+} from "../../../.storybook/decorators";
 import { useAnimationFrame } from "../../hooks/useAnimationFrame";
 
 export default {

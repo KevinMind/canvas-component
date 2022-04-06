@@ -2,7 +2,7 @@ import React, { ComponentProps, useState, useRef, useEffect } from "react";
 import { StoryFn, StoryContext } from "@storybook/react";
 import isChromatic from "chromatic/isChromatic";
 
-import { CanvasProvider } from "../Canvas.provider";
+import { CanvasProvider } from "../src/components/Canvas/Canvas.provider";
 
 export function withCanvasProvider(Story: StoryFn, ctx: StoryContext) {
   const customParams = ctx.parameters?.canvasProvider ?? {};

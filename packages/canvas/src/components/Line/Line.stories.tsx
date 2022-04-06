@@ -1,7 +1,10 @@
 import React, { ComponentProps } from "react";
 import { ComponentMeta, StoryObj } from "@storybook/react";
 
-import { withCanvasProvider, withTodoList } from "../../.storybook/decorators";
+import {
+  withCanvasProvider,
+  withTodoList,
+} from "../../../.storybook/decorators";
 import { Line } from "./Line.component";
 import { useAnimationFrame } from "../../hooks/useAnimationFrame";
 

@@ -1,6 +1,6 @@
 import { CircleArgs } from "./Circle.types";
 
-import { degreesToRadians } from "../../Canvas.utilities";
+import { degreesToRadians } from "../Canvas/Canvas.utilities";
 
 export function drawCircle(ctx: CanvasRenderingContext2D, args: CircleArgs) {
   const radiusX = args.radius;

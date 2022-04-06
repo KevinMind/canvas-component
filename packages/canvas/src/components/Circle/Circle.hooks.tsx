@@ -1,4 +1,4 @@
-import { useCanvasFrame } from "../../Canvas.hooks";
+import { useCanvasFrame } from "../Canvas/Canvas.hooks";
 import { drawCircle } from "./Circle.utilities";
 import { CircleArgs } from "./Circle.types";
 

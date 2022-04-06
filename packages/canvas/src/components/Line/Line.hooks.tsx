@@ -1,4 +1,4 @@
-import { useCanvasFrame } from "../../Canvas.hooks";
+import { useCanvasFrame } from "../Canvas/Canvas.hooks";
 import { drawLine } from "./Line.utilities";
 import { LineArgs } from "./Line.types";
 

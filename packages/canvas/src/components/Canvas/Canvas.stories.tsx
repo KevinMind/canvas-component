@@ -1,8 +1,8 @@
 import React, { ComponentProps, useEffect, useState, useCallback } from "react";
 import { ComponentMeta, StoryObj } from "@storybook/react";
 
-import { useAnimationFrame } from "./hooks/useAnimationFrame";
-import { withCanvasProvider, withTodoList } from "./.storybook/decorators";
+import { useAnimationFrame } from "../../hooks/useAnimationFrame";
+import { withCanvasProvider, withTodoList } from "../../../.storybook/decorators";
 import { CanvasProvider, useCanvasFrame } from ".";
 
 function Input() {

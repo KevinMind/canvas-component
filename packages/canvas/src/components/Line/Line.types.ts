@@ -1,4 +1,4 @@
-import { DrawnCanvasProps, Position } from "../../Canvas.types";
+import { DrawnCanvasProps, Position } from "../Canvas/Canvas.types";
 
 export interface LineArgs extends DrawnCanvasProps {
   start: Position;
