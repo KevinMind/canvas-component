@@ -1,5 +1,6 @@
-import React, { ComponentProps, useState, useRef, useEffect } from "react";
+import React, { ComponentProps, useState, useRef, useEffect, createContext, useContext } from "react";
 import { StoryFn, StoryContext } from "@storybook/react";
+import {useMove} from '@use-gesture/react';
 import isChromatic from "chromatic/isChromatic";
 
 import { CanvasProvider } from "../src/components/Canvas/Canvas.provider";
@@ -24,6 +25,36 @@ export function withCanvasProvider(Story: StoryFn, ctx: StoryContext) {
         <Story />
       </CanvasProvider>
     </div>
+  );
+}
+
+type MousePos = [number, number];
+
+const MousePositionContext = createContext<MousePos>([0, 0]);
+
+export function useMousePos(): MousePos {
+  const ctx = useContext(MousePositionContext);
+  
+  if (!ctx) {
+    throw new Error('useMousePos() must be rendered in a story using the withMousePosition decorator');
+  }
+
+  return ctx;
+}
+
+export function withMousePosition(Story: StoryFn, ctx: StoryContext) {
+  const [mousePos, setMousePos] = useState<[number, number]>([0, 0]);
+
+  const bind = useMove((state) => {
+    setMousePos(state.values);
+  });
+
+  return (
+    <MousePositionContext.Provider value={mousePos}>
+      <div {...bind()}>
+        <Story />
+      </div>
+    </MousePositionContext.Provider>
   );
 }
 
