@@ -13,7 +13,8 @@
 - [ ] create blog layout and home page layout
 - [ ] import components from previous project
 
-- [ ] split Canvas component to separate package
+- [x] split Canvas component to separate package
+- [x] enable custom easing functions
 - [ ] review current code base for opportunities to improve tests
 - [ ] add Polygon support for canvas
 - [ ] add FreeDrawing support for canvas

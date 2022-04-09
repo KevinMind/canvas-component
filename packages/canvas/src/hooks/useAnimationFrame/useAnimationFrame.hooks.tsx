@@ -1,72 +1,49 @@
-import { useRef, useEffect, useMemo, useState } from "react";
-import { cubicBezier } from "./useAnimationFrame.utilities";
+import { useRef, useEffect, useState, MutableRefObject } from "react";
 
-export type Easing = "linear" | "ease" | "ease-in" | "ease-out" | "ease-in-out";
+import { linearEasing } from "./useAnimationFrame.utilities";
+import { PlayModes, UseAnimationFrameArgs, UseAnimationFrameOptionalArgs } from "./useAnimationFrame.types";
 
-export type PlayModes =
-  | "forward"
-  | "backward"
-  | "pingpong"
-  | "pingpong-backward";
-export interface UseAnimationFrameConfig {
-  from: number;
-  to: number;
-  easing:
-    | Easing
-    | [number, number, number, number]
-    | ((time: number) => number);
-  auto: boolean;
-  interval: number;
-  duration: number;
-  infinite: boolean;
-  mode: PlayModes;
+function useRefValue<T>(value: T): MutableRefObject<T> {
+  const ref = useRef<T>(value);
+
+  useEffect(() => {
+    ref.current = value;
+  }, [value]);
+
+  return ref;
 }
 
-export type UseAnimationFrameArgs = Partial<UseAnimationFrameConfig> &
-  Pick<UseAnimationFrameConfig, "from" | "to">;
+const defaultConfig: UseAnimationFrameOptionalArgs = {
+  easing: linearEasing,
+  mode: 'forward',
+  duration: Number.MAX_SAFE_INTEGER,
+  infinite: false,
+  interval: 0,
+  auto: false,
+};
 
-export function useAnimationFrame({
-  from,
-  to,
-  easing = "linear",
-  mode: defaultMode = "forward",
-  duration = Number.MAX_SAFE_INTEGER,
-  infinite = false,
-  interval = 0,
-  auto = false,
-}: UseAnimationFrameArgs): [
+export function useAnimationFrame(inputConfig: UseAnimationFrameArgs): [
   number,
   { start(mode?: PlayModes): void; stop(): void; reset(): void }
 ] {
-  const easingFunction = useMemo(() => {
-    if (typeof easing === "function") {
-      return easing;
-    }
-    if (Array.isArray(easing)) {
-      return cubicBezier(...easing);
-    }
-    switch (easing) {
-      case "ease":
-        return cubicBezier(0.25, 0.1, 0.25, 0.1);
-      case "ease-in":
-        return cubicBezier(0.42, 0, 1, 1);
-      case "ease-out":
-        return cubicBezier(0, 0, 0.58, 1);
-      case "ease-in-out":
-        return cubicBezier(0.42, 0, 0.58, 1);
-      case "linear":
-      default:
-        return cubicBezier(0, 0, 1, 1);
-    }
-  }, [easing]);
+  const config = {...defaultConfig, ...inputConfig};
 
-  const mode = useRef<PlayModes>(defaultMode);
+  // config parameters must be refs currently to prevent stale closures
+  // @TODO: find out how to solve this without refs.
+  const mode = useRef<PlayModes>(config.mode);
+  const duration = useRefValue(config.duration);
+  const easing = useRefValue(config.easing);
+  const auto = useRefValue(config.auto);
+  const interval = useRefValue(config.interval);
+  const infinite = useRefValue(config.infinite);
+  const from = useRefValue(config.from);
+  const to = useRefValue(config.to);
 
   const [value, setValue] = useState(0);
 
   function _render(frame: number) {
-    let step = mode.current?.includes("backward") ? duration - frame : frame;
-    setValue(from + (to - from) * easingFunction(step / duration));
+    let step = mode.current?.includes("backward") ? duration.current - frame : frame;
+    setValue(from.current + (to.current - from.current) * easing.current(step / duration.current));
   }
 
   let id = useRef<number>();
@@ -92,16 +69,20 @@ export function useAnimationFrame({
 
       let frame = Math.min(
         Math.max(Math.round(currentTime - startTime.current), 0),
-        duration
+        duration.current
       );
 
-      if (frame >= duration) {
+      if (frame >= duration.current) {
         _render(frame);
+
+        if (!infinite.current) {
+          return stop();
+        }
 
         switch (mode.current) {
           case "forward":
           case "backward":
-            return infinite ? start(mode.current) : stop();
+            return start(mode.current);
           case "pingpong":
             return start("pingpong-backward");
           case "pingpong-backward":
@@ -111,7 +92,7 @@ export function useAnimationFrame({
         }
       }
 
-      if (frame - lastTime.current >= interval) {
+      if (frame - lastTime.current >= interval.current) {
         _render(frame);
         lastTime.current = frame;
       }
@@ -128,16 +109,17 @@ export function useAnimationFrame({
   }
 
   useEffect(() => {
-    if (auto) {
+    let isAuto = auto.current;
+    if (isAuto) {
       start();
     }
     return () => {
-      if (auto) {
+      if (isAuto) {
         stop();
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [auto]);
+  }, [config.auto]);
 
   return [value, { start, stop, reset }];
 }

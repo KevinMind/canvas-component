@@ -124,45 +124,6 @@ export const Default: CanvasProviderStory = {
   },
 };
 
-function RenderAnimated() {
-  const [x] = useAnimationFrame({
-    easing: "ease-in-out",
-    auto: true,
-    mode: "pingpong",
-    duration: 3_000,
-    from: 0,
-    to: 300,
-  });
-  const [radius] = useAnimationFrame({
-    auto: true,
-    mode: "forward",
-    easing: [1, 0, 1, 1],
-    infinite: true,
-    duration: 5_000,
-    from: 0,
-    to: 50,
-  });
-  return (
-    <>
-      <RawCircle x={x + 100} y={100} radius={100} />
-      <RawCircle x={x + 100} y={100} radius={radius} />
-      <RawCircle x={2 * x} y={100} radius={50} />
-    </>
-  );
-}
-
-export const Animated: CanvasProviderStory = {
-  parameters: {
-    canvasProvider: {
-      width: 500,
-      height: 200,
-    },
-  },
-  render: () => {
-    return <RenderAnimated />;
-  },
-};
-
 const useMousePosition = () => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
 

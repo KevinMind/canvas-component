@@ -3957,6 +3957,18 @@
     "@typescript-eslint/types" "5.15.0"
     eslint-visitor-keys "^3.0.0"
 
+"@use-gesture/core@10.2.11":
+  version "10.2.11"
+  resolved "https://registry.yarnpkg.com/@use-gesture/core/-/core-10.2.11.tgz#914c36f190bcf452500d11a11fc294fe56e5dc2f"
+  integrity sha512-5YeVrT9prf9UeaAO+2fIuiKdZ01uVBvVsjG79berGZPTHVkz01eFX2ODWJG05uQTqmRw6olz1J80yt6qcGPdvA==
+
+"@use-gesture/react@^10.2.11":
+  version "10.2.11"
+  resolved "https://registry.yarnpkg.com/@use-gesture/react/-/react-10.2.11.tgz#f23776050aeaee3b18f80df9cd2b765229bbfa66"
+  integrity sha512-yATjHv6ZNe9Jar1YtJvcb6KxwpcGGW/X8FEUY6xo2mDxHkP7dCsnhZZm7I+giGlrJKBMvpVBARsbUhwQP6v6nA==
+  dependencies:
+    "@use-gesture/core" "10.2.11"
+
 "@webassemblyjs/ast@1.9.0":
   version "1.9.0"
   resolved "https://registry.yarnpkg.com/@webassemblyjs/ast/-/ast-1.9.0.tgz#bd850604b4042459a5a41cd7d338cbed695ed964"
@@ -4951,6 +4963,11 @@ better-opn@^2.1.1:
   integrity sha512-kIPXZS5qwyKiX/HcRvDYfmBQUa8XP17I0mYZZ0y4UhpYOSvtsLHDYqmomS+Mj20aDvD3knEiQ0ecQy2nhio3yA==
   dependencies:
     open "^7.0.3"
+
+bezier-easing@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/bezier-easing/-/bezier-easing-2.1.0.tgz#c04dfe8b926d6ecaca1813d69ff179b7c2025d86"
+  integrity sha1-wE3+i5JtbsrKGBPWn/F5t8ICXYY=
 
 big.js@^5.2.2:
   version "5.2.2"
@@ -15044,6 +15061,11 @@ use-latest@^1.0.0:
   integrity sha512-d2TEuG6nSLKQLAfW3By8mKr8HurOlTkul0sOpxbClIv4SQ4iOd7BYr7VIzdbktUCnv7dua/60xzd8igMU6jmyw==
   dependencies:
     use-isomorphic-layout-effect "^1.0.0"
+
+use-spring@^0.2.4:
+  version "0.2.4"
+  resolved "https://registry.yarnpkg.com/use-spring/-/use-spring-0.2.4.tgz#f93afad502351cf62544e843d8f95e414ee39326"
+  integrity sha512-TjpIGS+RRs5AKMjA5y/TwtfSTG4EgMCHflJhL3nc2NuvJoEHCmR2fa37slZt2NkLsZ5E+W9faDeLGLU/n9wfHg==
 
 use-subscription@1.5.1:
   version "1.5.1"
