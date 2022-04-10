@@ -6,14 +6,19 @@ module.exports = function (plop) {
       {
         type: "input",
         name: "name",
-        message: "what is the name of the app",
+        message: "what is the name of the component",
+      },
+      {
+        type: "input",
+        name: "path",
+        message: "type the path to the component directory",
       },
     ],
     actions: [
       {
         type: "addMany",
         base: "../templates/component",
-        destination: "../../src/Canvas/components/{{name}}",
+        destination: "../../{{path}}/components/{{name}}",
         transform: (data) => {
           return data;
         },

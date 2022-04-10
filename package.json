@@ -9,6 +9,7 @@
   "scripts": {
     "generate:app": "plop --plopfile plop/scripts/app.js",
     "generate:package": "plop --plopfile plop/scripts/package.js",
+    "generate:component": "plop --plopfile plop/scripts/component.js",
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
