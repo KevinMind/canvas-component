@@ -2,7 +2,7 @@ import React, { ComponentProps } from "react";
 import { ComponentMeta, StoryObj } from "@storybook/react";
 import {useSpring} from 'use-spring';
 
-import { withCanvasProvider, withMousePosition, useMousePos, withTodoList } from "../../../.storybook/decorators";
+import { withRenderFrameProvider, withMousePosition, useMousePos, withTodoList } from "../../../.storybook/decorators";
 import { Circle } from "../../components/Circle";
 
 const r = 125;
@@ -21,7 +21,7 @@ function UseSpring(config: Parameters<typeof useSpring>[1]) {
 
 export default {
   component: UseSpring,
-  decorators: [withCanvasProvider, withMousePosition, withTodoList],
+  decorators: [withRenderFrameProvider, withMousePosition, withTodoList],
   parameters: {
     canvasProvider: {
       width: 500,

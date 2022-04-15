@@ -1,46 +1,23 @@
 import React, {
   PropsWithChildren,
-  CanvasHTMLAttributes,
   useRef,
-  useState,
-  forwardRef,
   useEffect,
+  useState,
+  useMemo,
 } from "react";
 
-import { CanvasContext } from "./Canvas.context";
-import { Draw } from "./Canvas.types";
-import { useRequestAnimationFrame } from "../../hooks/useRequestAnimationFrame";
+import { RenderFrameContext } from "./RenderFrame.context";
+import { Draw, RenderFrameProps } from "./RenderFrame.types";
+import { useRequestAnimationFrame } from "./hooks/useRequestAnimationFrame";
 
-const Canvas = forwardRef<
-  HTMLCanvasElement,
-  PropsWithChildren<CanvasHTMLAttributes<{}>>
->(({ children, ...props }, ref) => {
-  return (
-    <canvas {...props} ref={ref}>
-      {children}
-    </canvas>
-  );
-});
-
-interface Props {
-  fillStyle?: string;
-  strokeStyle?: string;
-}
-
-export function CanvasProvider({
+export function RenderFrameProvider({
   children,
   fillStyle = "black",
   strokeStyle = "black",
-  ...canvasProps
-}: PropsWithChildren<CanvasHTMLAttributes<{}>> & Props) {
-  const [, setReady] = useState<boolean>(false);
+}: PropsWithChildren<RenderFrameProps>) {
+  const [ready, forceRender] = useState<boolean>(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const drawings = useRef<Map<Draw, true>>(new Map());
-
-  const setCanvasRef = (ref: HTMLCanvasElement) => {
-    canvasRef.current = ref;
-    setReady(true);
-  };
 
   const { start, stop } = useRequestAnimationFrame((frame) => {
     if (!canvasRef.current) return;
@@ -71,6 +48,16 @@ export function CanvasProvider({
     drawings.current.delete(draw);
   }
 
+  function _addCanvas(ref: HTMLCanvasElement) {
+    if (canvasRef.current === null) {
+      canvasRef.current = ref;
+      forceRender(true);
+    } else if (!ref.isSameNode(canvasRef.current)) {
+      throw new Error('<Canvas /> element already rendered in <RenderFrameProvider />');
+    }
+    
+  }
+
   useEffect(() => {
     start();
 
@@ -79,17 +66,18 @@ export function CanvasProvider({
     };
   }, [start, stop]);
 
+  const value = useMemo(() => {
+    return {
+      canvas: canvasRef.current,
+      add,
+      remove,
+      _addCanvas,
+    };
+  }, [ready]);
+
   return (
-    <CanvasContext.Provider
-      value={{
-        canvas: canvasRef.current,
-        add,
-        remove,
-      }}
-    >
-      <Canvas ref={setCanvasRef} {...canvasProps}>
-        {children}
-      </Canvas>
-    </CanvasContext.Provider>
+    <RenderFrameContext.Provider value={value}>
+      {children}
+    </RenderFrameContext.Provider>
   );
 }

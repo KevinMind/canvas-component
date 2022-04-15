@@ -45,6 +45,7 @@
     "scripts": "*",
     "tsconfig": "*",
     "tsup": "^5.10.1",
+    "two.js": "^0.8.5",
     "typescript": "^4.5.3",
     "use-spring": "^0.2.4"
   },

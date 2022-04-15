@@ -15,3 +15,8 @@ export interface Draw {
 export interface DrawnCanvasProps {
   rotation: number;
 }
+
+export interface RenderFrameProps {
+  fillStyle?: string;
+  strokeStyle?: string;
+}

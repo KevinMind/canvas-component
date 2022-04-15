@@ -1,11 +1,12 @@
-import React, { ComponentProps, useState, useRef, useEffect, createContext, useContext } from "react";
+import React, { useState, useRef, useEffect, createContext, useContext } from "react";
 import { StoryFn, StoryContext } from "@storybook/react";
 import {useMove} from '@use-gesture/react';
 import isChromatic from "chromatic/isChromatic";
 
-import { CanvasProvider } from "../src/components/Canvas/Canvas.provider";
+import { RenderFrameProvider } from "../src/RenderFrame.component";
+import {Canvas} from "../src/components/Canvas";
 
-export function withCanvasProvider(Story: StoryFn, ctx: StoryContext) {
+export function withRenderFrameProvider(Story: StoryFn, ctx: StoryContext) {
   const customParams = ctx.parameters?.canvasProvider ?? {};
 
   const { height } =
@@ -13,18 +14,18 @@ export function withCanvasProvider(Story: StoryFn, ctx: StoryContext) {
       .getElementById("storybook-preview-iframe")
       ?.getBoundingClientRect() ?? {};
 
-  const args: ComponentProps<typeof CanvasProvider> = {
+  const args = {
     width: ctx.canvasElement.offsetWidth,
     height,
     ...customParams,
+    style: { border: "1px solid black" },
   };
 
   return (
-    <div id="custom">
-      <CanvasProvider {...args} style={{ border: "1px solid black" }}>
-        <Story />
-      </CanvasProvider>
-    </div>
+    <RenderFrameProvider>
+      <Story />
+      <Canvas  {...args} />
+    </RenderFrameProvider>
   );
 }
 
@@ -123,11 +124,9 @@ export function withTodoList(Story: StoryFn) {
   }
 
   return (
-    <div style={{ position: "relative", width: "100%", height: "100%" }}>
-      <div style={{ position: "absolute", top: 0, left: 0 }}>
-        <Story />
-      </div>
-      <div style={{ position: "absolute", top: 0, left: 0 }}>
+    <>
+    <Story />
+    <div style={{ position: "fixed", top: 0, left: 0, zIndex: 999 }}>
         <div style={{ padding: 10 }}>
           <div style={{ marginBottom: 10 }}>
             <button onClick={toggle}>{visible ? "hide" : "show"}</button>
@@ -165,6 +164,6 @@ export function withTodoList(Story: StoryFn) {
           ) : null}
         </div>
       </div>
-    </div>
+    </>
   );
 }

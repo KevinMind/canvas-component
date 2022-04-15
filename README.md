@@ -15,6 +15,10 @@
 
 - [x] split Canvas component to separate package
 - [x] enable custom easing functions
+- [ ] two.js
+  - [ ] fix two.update() problem: sometimes two.update() erasing useRenderFrame shapes
+  - [ ] can we avoid needing to call two.update()?
+  - [ ] is there a way to prevent needing to erase and rewrite two.js shapes.. maybe we don't need to render two.js shapes in a useRenderFrame?
 - [ ] review current code base for opportunities to improve tests
 - [ ] add Polygon support for canvas
 - [ ] add FreeDrawing support for canvas
