@@ -1,7 +1,7 @@
-import { useCanvasFrame } from "../Canvas/Canvas.hooks";
+import { useRenderFrame } from "../../RenderFrame.hooks";
 import { drawCircle } from "./Circle.utilities";
 import { CircleArgs } from "./Circle.types";
 
 export function useCircle(args: CircleArgs) {
-  useCanvasFrame((ctx) => drawCircle(ctx, args));
+  useRenderFrame((ctx) => drawCircle(ctx, args));
 }

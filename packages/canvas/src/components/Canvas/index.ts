@@ -1,2 +1,1 @@
-export { CanvasProvider } from "./Canvas.provider";
-export { useCanvas, useCanvasFrame } from "./Canvas.hooks";
+export { Canvas } from "./Canvas.component";

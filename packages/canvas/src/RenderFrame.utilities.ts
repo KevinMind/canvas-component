@@ -4,3 +4,9 @@ export function degreesToRadians(degrees: number) {
   }
   return degrees * (Math.PI / 180);
 }
+
+export function throwCanvasContext() {
+  throw new Error(
+    "this function must be called within a <RenderFrameProvider> component scope"
+  );
+}

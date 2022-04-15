@@ -2,14 +2,14 @@ import React, { ComponentProps } from "react";
 import { ComponentMeta, StoryObj } from "@storybook/react";
 
 import {
-  withCanvasProvider,
+  withRenderFrameProvider,
   withTodoList,
 } from "../../../.storybook/decorators";
 import { Line } from "./Line.component";
 import { useAnimationFrame } from "../../hooks/useAnimationFrame";
 
 export default {
-  decorators: [withCanvasProvider, withTodoList],
+  decorators: [withRenderFrameProvider, withTodoList],
   component: Line,
 } as ComponentMeta<typeof Line>;
 

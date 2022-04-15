@@ -1,7 +1,7 @@
 import React, { ComponentProps } from "react";
 import { ComponentMeta, StoryObj } from "@storybook/react";
 
-import { withCanvasProvider, withTodoList} from "../../../.storybook/decorators";
+import { withRenderFrameProvider, withTodoList} from "../../../.storybook/decorators";
 import {
   useAnimationFrame,
 } from "../../hooks/useAnimationFrame";
@@ -65,7 +65,7 @@ function BezierEasing({ easing, interval, duration }: Pick<UseAnimationFrameArgs
 
 export default {
   component: BezierEasing,
-  decorators: [withCanvasProvider, withTodoList],
+  decorators: [withRenderFrameProvider, withTodoList],
   parameters: {
     canvasProvider: {
       width: 500,

@@ -1,4 +1,4 @@
-import { DrawnCanvasProps, Position } from "../Canvas/Canvas.types";
+import { DrawnCanvasProps, Position } from "../../RenderFrame.types";
 
 export interface CircleArgs extends DrawnCanvasProps {
   pos: Position;

@@ -3,13 +3,13 @@ import { ComponentMeta, StoryObj } from "@storybook/react";
 
 import { Circle } from "./Circle.component";
 import {
-  withCanvasProvider,
+  withRenderFrameProvider,
   withTodoList,
 } from "../../../.storybook/decorators";
 import { useAnimationFrame } from "../../hooks/useAnimationFrame";
 
 export default {
-  decorators: [withCanvasProvider, withTodoList],
+  decorators: [withRenderFrameProvider, withTodoList],
   component: Circle,
 } as ComponentMeta<typeof Circle>;
 
