@@ -35,7 +35,6 @@
     "@testing-library/react": "^12.1.4",
     "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^26.0.22",
-    "@use-gesture/react": "^10.2.11",
     "babel-loader": "^8.2.3",
     "bezier-easing": "^2.1.0",
     "chromatic": "^6.5.3",

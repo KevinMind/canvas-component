@@ -2,9 +2,10 @@ import React, { ComponentProps, useEffect, useState, useCallback } from "react";
 import { ComponentMeta, StoryObj } from "@storybook/react";
 
 import { useAnimationFrame } from "./hooks/useAnimationFrame";
-import { withRenderFrameProvider, withTodoList } from "../.storybook/decorators";
+import { withRenderFrameProvider, withMousePosition, useMousePos, withTodoList } from "../.storybook/decorators";
 import { RenderFrameProvider } from "./RenderFrame.component";
 import { useRenderFrame } from "./RenderFrame.hooks";
+import { useCircle } from "./components/Circle";
 
 function Input() {
   const [input, setInput] = useState<string>("");
@@ -99,7 +100,7 @@ function Smiley() {
 
 export default {
   component: RenderFrameProvider,
-  decorators: [withRenderFrameProvider, withTodoList],
+  decorators: [withTodoList, withMousePosition, withRenderFrameProvider],
 } as ComponentMeta<typeof RenderFrameProvider>;
 
 type RenderFrameProviderStory = StoryObj<ComponentProps<typeof RenderFrameProvider>>;
@@ -125,28 +126,12 @@ export const Default: RenderFrameProviderStory = {
   },
 };
 
-const useMousePosition = () => {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-
-  useEffect(() => {
-    const setFromEvent = (e: MouseEvent) =>
-      setPosition({ x: e.clientX, y: e.clientY });
-    window.addEventListener("mousemove", setFromEvent);
-
-    return () => {
-      window.removeEventListener("mousemove", setFromEvent);
-    };
-  }, []);
-
-  return position;
-};
-
 function RenderDraggable() {
-  const { x } = useMousePosition();
+  const [x] = useMousePos();
 
   return (
     <>
-      <RawCircle x={x + 100} y={100} radius={100} />
+      <RawCircle x={x} y={100} radius={100} />
     </>
   );
 }
@@ -229,4 +214,23 @@ export const CircleOfCircles: RenderFrameProviderStory = {
     },
   },
   render: () => <RenderCircleOfCircles />,
+};
+
+function RenderPoint() {
+  const [radius] = useAnimationFrame({from: 10, to: 100, duration: 5_000, infinite: true, auto: true, mode: 'pingpong'});
+  const [x, y] = useMousePos();
+
+  useCircle({pos: {x, y}, radius, rotation: 0});
+
+  return null;
+}
+
+export const Point: RenderFrameProviderStory = {
+  parameters: {
+    canvasProvider: {
+      width: 500,
+      height: 500,
+    },
+  },
+  render: () => <RenderPoint />,
 };
