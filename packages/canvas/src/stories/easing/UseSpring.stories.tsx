@@ -21,7 +21,7 @@ function UseSpring(config: Parameters<typeof useSpring>[1]) {
 
 export default {
   component: UseSpring,
-  decorators: [withRenderFrameProvider, withMousePosition, withTodoList],
+  decorators: [withTodoList, withMousePosition, withRenderFrameProvider],
   parameters: {
     canvasProvider: {
       width: 500,

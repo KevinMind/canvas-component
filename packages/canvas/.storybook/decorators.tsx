@@ -1,10 +1,8 @@
 import React, { useState, useRef, useEffect, createContext, useContext } from "react";
 import { StoryFn, StoryContext } from "@storybook/react";
-import {useMove} from '@use-gesture/react';
 import isChromatic from "chromatic/isChromatic";
 
-import { RenderFrameProvider } from "../src/RenderFrame.component";
-import {Canvas} from "../src/components/Canvas";
+import { useRenderFrameCanvas, RenderFrameProvider, Canvas } from "../src";
 
 export function withRenderFrameProvider(Story: StoryFn, ctx: StoryContext) {
   const customParams = ctx.parameters?.canvasProvider ?? {};
@@ -43,20 +41,38 @@ export function useMousePos(): MousePos {
   return ctx;
 }
 
-export function withMousePosition(Story: StoryFn, ctx: StoryContext) {
-  const [mousePos, setMousePos] = useState<[number, number]>([0, 0]);
+export function withMousePosition(Story: StoryFn) {
+  const canvas = useRenderFrameCanvas();
+  const [pos, setPos] = useState<[number, number]>([0, 0]);
 
-  const bind = useMove((state) => {
-    setMousePos(state.values);
-  });
+  useEffect(() => {
+    function update(e: MouseEvent) {
+      if (canvas) {
+        const rect = canvas.getBoundingClientRect();
+        
+        const insideX = rect.x + rect.width > e.clientX && e.clientX > rect.x;
+        const insideY = rect.y + rect.height > e.clientY && e.clientY > rect.y;
+
+        if (insideX && insideY) {
+          const x = Math.min(rect.width, Math.max(0, e.clientX - rect.x));
+          const y = Math.min(rect.height, Math.max(0, e.clientY - rect.y));
+          setPos([x, y]);
+        }
+        
+      }
+    }
+
+    window.addEventListener('mousemove', update);
+
+    return () => window.removeEventListener('mousemove', update);
+
+  }, [canvas]);
 
   return (
-    <MousePositionContext.Provider value={mousePos}>
-      <div {...bind()}>
-        <Story />
-      </div>
+    <MousePositionContext.Provider value={pos}>
+      <Story />
     </MousePositionContext.Provider>
-  );
+  )
 }
 
 interface Todo {

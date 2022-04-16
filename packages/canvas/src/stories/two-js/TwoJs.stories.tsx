@@ -11,30 +11,37 @@ import { useRenderFrameCanvas, useRenderFrame } from '../../RenderFrame.hooks';
 import { useLine } from '../../components/Line';
 
 function RenderTwoJS() {
+  const [radius] = useAnimationFrame({
+    from: 10,
+    to: 100,
+    duration: 5_000,
+    infinite: true,
+    auto: true,
+    mode: 'pingpong'
+  });
+
+  const [x, y] = useMousePos();
   const canvas = useRenderFrameCanvas();
   const [two, setTwo] = useState<Two>(new Two());
+  const circle = useRef<TwoCircle>();
 
   useEffect(() => {
     if (canvas) {
-      setTwo(new Two({autostart: true, domElement: canvas, type: Two.Types.canvas}));
+      console.log({
+        width: canvas.width,
+        height: canvas.height,
+      });
+      setTwo(new Two({
+        domElement:canvas,
+        type: Two.Types.canvas,
+        width: canvas.width,
+        height: canvas.height,
+        overdraw: true,
+        smoothing: true,
+      }));
     }
 
   }, [canvas]);
-
-  const circle = useRef<TwoCircle>();
-
-  const [x, y] = useMousePos();
-
-  // useCircle({radius: 500, pos: {x, y}, rotation: 0})
-
-  const [radius] = useAnimationFrame({
-    from: 100,
-    to: 200,
-    duration: 3_000,
-    infinite: true,
-    auto: true,
-    mode: "pingpong",
-  });
 
   const [red] = useAnimationFrame({
     from: 0,
@@ -44,7 +51,7 @@ function RenderTwoJS() {
     auto: true,
     mode: "pingpong",
   });
-
+  
   const [green] = useAnimationFrame({
     from: 0,
     to: 255,
@@ -53,7 +60,7 @@ function RenderTwoJS() {
     auto: true,
     mode: "pingpong-backward",
   });
-
+  
   useRenderFrame(() => {
     if (circle.current) circle.current.remove();
     
@@ -63,16 +70,26 @@ function RenderTwoJS() {
     two.update();
   });
 
-  useLine({start: {x: 0, y: 0}, end: {x, y}, rotation: 0});
+  /**
+   * When using two.js the native shapes need to have all properties doubled. It seems
+   * when binding two.js to the shared canvas the coordinates and radius are being halved somehow..
+   */
+  useLine({start: {x: 0, y: 0}, end: {x: x * 2, y: y * 2}, rotation: 0});
 
-  useCircle({pos: {x, y}, radius: radius + 10, rotation: 0});
+  useCircle({pos: {x: x * 2, y: y * 2}, radius: 200, rotation: 0});
 
   return null;
 }
 
 export default {
   component: RenderTwoJS,
-  decorators: [withRenderFrameProvider, withMousePosition, withTodoList],
+  decorators: [withTodoList, withMousePosition, withRenderFrameProvider],
+  parameters: {
+    canvasProvider: {
+      width: 500,
+      height: 500,
+    },
+  },
 } as ComponentMeta<typeof RenderTwoJS>;
 
 export const Default: StoryObj = {};
