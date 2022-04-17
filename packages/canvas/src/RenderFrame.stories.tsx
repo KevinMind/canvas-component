@@ -1,29 +1,13 @@
-import React, { ComponentProps, useEffect, useState, useCallback } from "react";
+import React, { ComponentProps } from "react";
 import { ComponentMeta, StoryObj } from "@storybook/react";
 
 import { useAnimationFrame } from "./hooks/useAnimationFrame";
 import { withRenderFrameProvider, withMousePosition, useMousePos, withTodoList } from "../.storybook/decorators";
 import { RenderFrameProvider } from "./RenderFrame.component";
 import { useRenderFrame } from "./RenderFrame.hooks";
-import { useCircle } from "./components/Circle";
+import { Circle, useCircle } from "./components/Circle";
 
-function Input() {
-  const [input, setInput] = useState<string>("");
-
-  return <input value={input} onChange={(e) => setInput(e.target.value)} />;
-}
-
-function RawCircle({ radius, x, y }: { x: number; y: number; radius: number }) {
-  useRenderFrame((context) => {
-    context.beginPath();
-    context.arc(x, y, radius, 0, 2 * Math.PI);
-    context.stroke();
-  });
-
-  return null;
-}
-
-function Circle({
+function CustomCircle({
   x,
   y,
   radius = 10,
@@ -32,30 +16,14 @@ function Circle({
   y: number;
   radius?: number;
 }) {
-  const [width, setWidth] = useState<number>(radius);
-  const [increment, setIncrement] = useState<boolean>(false);
-
-  const update = useCallback(() => {
-    setWidth((w) => {
-      if (w === radius) {
-        setIncrement(false);
-        return w - 1;
-      }
-      if (w === 0 || increment) {
-        setIncrement(true);
-        return w + 1;
-      }
-      return w - 1;
-    });
-  }, [increment, radius]);
-
-  useEffect(() => {
-    let int = setInterval(update, 10);
-
-    return () => {
-      clearInterval(int);
-    };
-  }, [update]);
+  const [width] = useAnimationFrame({
+    from: 0,
+    to: radius,
+    mode: "pingpong",
+    auto: true,
+    duration: 1_000,
+    infinite: true,
+  });
 
   useRenderFrame((context) => {
     context.strokeStyle = "green";
@@ -115,11 +83,10 @@ export const Default: RenderFrameProviderStory = {
   render: () => {
     return (
       <>
-        <Input />
         <Triangle />
-        <Circle x={150} y={150} radius={150} />
-        <Circle x={200} y={50} radius={100} />
-        <Circle x={100} y={50} radius={100} />
+        <CustomCircle x={150} y={150} radius={150} />
+        <CustomCircle x={200} y={50} radius={100} />
+        <CustomCircle x={100} y={50} radius={100} />
         <Smiley />
       </>
     );
@@ -131,7 +98,7 @@ function RenderDraggable() {
 
   return (
     <>
-      <RawCircle x={x} y={100} radius={100} />
+      <Circle pos={{x, y: 100}} radius={100} rotation={0} />
     </>
   );
 }
@@ -192,16 +159,18 @@ function RenderCircleOfCircles() {
 
   return (
     <>
-      <RawCircle x={x} y={y} radius={slowRadius} />
-      <RawCircle x={x} y={y} radius={radius} />
-      <RawCircle x={x + slow.x} y={y + slow.y} radius={slowRadius / 10} />
-      <RawCircle
-        x={x + slow.x + moon.x}
-        y={y + slow.y + moon.y}
+      <Circle pos={{x, y}} radius={slowRadius} rotation={0} />
+      <Circle pos={{x, y}} radius={radius} rotation={0} />
+      <Circle pos={{x: x + slow.x, y: y + slow.y}} radius={slowRadius / 10} rotation={0} />
+      <Circle
+        pos={{
+          x: x + slow.x + moon.x,
+          y: y + slow.y + moon.y,
+        }}
         radius={slowRadius / 20}
+        rotation={0}
       />
-
-      <RawCircle x={x + fast.x} y={y + fast.y} radius={radius / 10} />
+      <Circle pos={{x: x + fast.x, y: y + fast.y}} radius={radius / 10} rotation={0} />
     </>
   );
 }
