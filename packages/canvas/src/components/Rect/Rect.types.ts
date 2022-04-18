@@ -1,6 +1,6 @@
-import { DrawnCanvasProps, Position, FillAndStrokeArgs } from "../../RenderFrame.types";
+import { DrawnCanvasProps, Position, FillArgs, StrokeArgs } from "../../RenderFrame.types";
 
-export interface RectArgs extends DrawnCanvasProps, FillAndStrokeArgs {
+export interface RectArgs extends DrawnCanvasProps, FillArgs, StrokeArgs {
   pos: Position;
   width: number;
   height: number;

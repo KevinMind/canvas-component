@@ -1,5 +1,6 @@
 import React, { ComponentProps } from "react";
 import { ComponentMeta, StoryObj } from "@storybook/react";
+import randomColor from 'randomcolor';
 
 import {
   withRenderFrameProvider,
@@ -27,6 +28,18 @@ export const Default: LineStory = {
     },
   },
 };
+
+export const StrokeStyle: LineStory = {
+  ...Default,
+  args: {
+    ...Default.args,
+    strokeStyle: randomColor({
+      format: 'rgba',
+      alpha: 0.5,
+    }),
+    lineWidth: 10,
+  }
+}
 
 export const Quadratic: LineStory = {
   parameters: {

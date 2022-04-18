@@ -1,6 +1,6 @@
 import React, { ComponentProps } from "react";
 import { ComponentMeta, StoryObj } from "@storybook/react";
-import randomcolor from 'randomcolor';
+import randomColor from 'randomcolor';
 
 import { Ellipse } from "./Ellipse.component";
 import {
@@ -87,9 +87,21 @@ export const Filled: EllipseStory = {
   ...Default,
   args: {
     ...Default.args,
-    fillStyle: randomcolor({
+    fillStyle: randomColor({
       format: 'rgba',
       alpha: 0.5,
     }),
+  }
+}
+
+export const StrokeStyle: EllipseStory = {
+  ...Default,
+  args: {
+    ...Default.args,
+    strokeStyle: randomColor({
+      format: 'rgba',
+      alpha: 0.5,
+    }),
+    lineWidth: 10,
   }
 }

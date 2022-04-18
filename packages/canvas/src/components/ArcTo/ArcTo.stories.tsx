@@ -1,5 +1,6 @@
 import React, { ComponentProps } from "react";
 import { ComponentMeta, StoryObj } from "@storybook/react";
+import randomColor from "randomcolor";
 
 import { withRenderFrameProvider } from "../../../.storybook/decorators";
 
@@ -41,6 +42,18 @@ export const Default: ArcToStory = {
     radius: 40,
   },
 };
+
+export const StrokeStyle: ArcToStory = {
+  ...Default,
+  args: {
+    ...Default.args,
+    strokeStyle: randomColor({
+      format: 'rgba',
+      alpha: 0.5,
+    }),
+    lineWidth: 10,
+  }
+}
 
 function RenderArcWithHelpers(props: ArcToArgs) {
   const {pos0, pos1, pos2, radius} = props;
