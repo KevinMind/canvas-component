@@ -1,5 +1,6 @@
 import React, { ComponentProps } from "react";
 import { ComponentMeta, StoryObj } from "@storybook/react";
+import randomcolor from 'randomcolor';
 
 import { Ellipse } from "./Ellipse.component";
 import {
@@ -81,3 +82,14 @@ export const Rotating: EllipseStory = {
     },
   ],
 };
+
+export const Filled: EllipseStory = {
+  ...Default,
+  args: {
+    ...Default.args,
+    fillStyle: randomcolor({
+      format: 'rgba',
+      alpha: 0.5,
+    }),
+  }
+}

@@ -1,5 +1,6 @@
-import React, { ComponentProps, useContext } from "react";
+import React, { ComponentProps } from "react";
 import { ComponentMeta, StoryObj } from "@storybook/react";
+import randomColor from "randomcolor";
 
 import { withRenderFrameProvider } from "../../../.storybook/decorators";
 import { useAnimationFrame } from "../../hooks/useAnimationFrame";
@@ -29,6 +30,17 @@ export const Default: RectStory = {
     rotation: 0,
   },
 };
+
+export const Filled: RectStory = {
+  ...Default,
+  args: {
+    ...Default.args,
+    fillStyle: randomColor({
+      format: "rgba",
+      alpha: 0.5,
+    }),
+  }
+}
 
 function RenderExpanding() {
   const [width] = useAnimationFrame({
