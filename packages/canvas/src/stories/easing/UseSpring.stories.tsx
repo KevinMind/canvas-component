@@ -3,7 +3,7 @@ import { ComponentMeta, StoryObj } from "@storybook/react";
 import {useSpring} from 'use-spring';
 
 import { withRenderFrameProvider, withMousePosition, useMousePos, withTodoList } from "../../../.storybook/decorators";
-import { Circle } from "../../components/Circle";
+import { Ellipse } from "../../components/Ellipse";
 
 const r = 125;
 
@@ -13,8 +13,8 @@ function UseSpring(config: Parameters<typeof useSpring>[1]) {
 
   return (
     <>
-      <Circle pos={{x: springX, y: r}} radius={r} rotation={0} />
-      <Circle pos={{x, y: r}} radius={r} rotation={0} />
+      <Ellipse pos={{x: springX, y: r}} radius={r} rotation={0} />
+      <Ellipse pos={{x, y: r}} radius={r} rotation={0} />
     </>
   );
 }

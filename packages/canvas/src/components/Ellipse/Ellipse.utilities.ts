@@ -1,8 +1,8 @@
-import { CircleArgs } from "./Circle.types";
+import { EllipseArgs } from "./Ellipse.types";
 
 import { degreesToRadians } from "../../RenderFrame.utilities";
 
-export function drawCircle(ctx: CanvasRenderingContext2D, args: CircleArgs) {
+export function drawEllipse(ctx: CanvasRenderingContext2D, args: EllipseArgs) {
   const radiusX = args.radius;
   const radiusY = args?.radiusY ?? radiusX;
   const startAngle = 0;

@@ -1,5 +1,5 @@
 export * from "./components/Canvas";
-export * from "./components/Circle";
+export * from "./components/Ellipse";
 export * from "./components/Line";
 
 export * from "./hooks/useAnimationFrame";

@@ -5,7 +5,7 @@ import { withRenderFrameProvider, withTodoList} from "../../../.storybook/decora
 import {
   useAnimationFrame,
 } from "../../hooks/useAnimationFrame";
-import { Circle } from "../../components/Circle";
+import { Ellipse } from "../../components/Ellipse";
 import {UseAnimationFrameArgs} from '../../hooks/useAnimationFrame';
 
 const r = 125;
@@ -56,9 +56,9 @@ function BezierEasing({ easing, interval, duration }: Pick<UseAnimationFrameArgs
 
   return (
     <>
-      <Circle pos={{x, y: r}} radius={r} rotation={0} />
-      <Circle pos={{x, y: r}} radius={radius} rotation={0} />
-      <Circle pos={{x: 2 * x, y: r}} radius={r / 2} rotation={0} />
+      <Ellipse pos={{x, y: r}} radius={r} rotation={0} />
+      <Ellipse pos={{x, y: r}} radius={radius} rotation={0} />
+      <Ellipse pos={{x: 2 * x, y: r}} radius={r / 2} rotation={0} />
     </>
   );
 }
