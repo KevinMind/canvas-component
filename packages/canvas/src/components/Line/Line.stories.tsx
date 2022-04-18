@@ -28,6 +28,56 @@ export const Default: LineStory = {
   },
 };
 
+export const Quadratic: LineStory = {
+  parameters: {
+    canvasProvider: {
+      width: 500,
+      height: 500,
+    }
+  },
+  args: {
+    start: {
+      x: 0,
+      y: 0, 
+    },
+    cp1: {
+      x: 430,
+      y: 30,
+    },
+    end: {
+      x: 500,
+      y: 500,
+    },
+  },
+};
+
+export const BezierCurve: LineStory = {
+  parameters: {
+    canvasProvider: {
+      width: 500,
+      height: 500,
+    }
+  },
+  args: {
+    start: {
+      x: 0,
+      y: 0, 
+    },
+    cp1: {
+      x: 430,
+      y: 30,
+    },
+    cp2: {
+      x: 150,
+      y: 400,
+    },
+    end: {
+      x: 500,
+      y: 500,
+    },
+  },
+};
+
 function RenderManyLines({ width, height }: { width: number; height: number }) {
   const [x] = useAnimationFrame({
     auto: true,
