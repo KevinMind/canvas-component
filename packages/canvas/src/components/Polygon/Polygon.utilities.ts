@@ -1,14 +1,14 @@
+import { createDrawing } from "../../RenderFrame.utilities";
+
 import { PolygonArgs } from "./Polygon.types";
 
-export function drawPolygon(ctx: CanvasRenderingContext2D, {pos: {x, y}, sides, size}: PolygonArgs) {
+export const drawPolygon = createDrawing<PolygonArgs>((ctx, {pos:{ x, y}, sides, size}) => {
   const isCustomPolygon = Array.isArray(sides);
   const numSides = isCustomPolygon ? sides.length : sides;
   
   if (numSides < 3) {
     throw new Error('polygon must contain at least 3 sides');
   }
-
-  ctx.beginPath();
   
   if (isCustomPolygon) {
     const [first, ...rest] = sides;
@@ -31,6 +31,4 @@ export function drawPolygon(ctx: CanvasRenderingContext2D, {pos: {x, y}, sides, 
       ctx.lineTo (x + xTranslation, y + yTranslation);
     }
   }
-
-  ctx.stroke();
-}
+});

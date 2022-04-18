@@ -1,12 +1,12 @@
 import React, { ComponentProps, useState, useEffect } from "react";
 import { ComponentMeta, StoryObj } from "@storybook/react";
+import randomcolor from "randomcolor";
 
 import { withRenderFrameProvider } from "../../../.storybook/decorators";
 
 import { Polygon } from "./Polygon.component";
 import { usePolygon } from "./Polygon.hooks";
 import { PolygonArgs } from "./Polygon.types";
-import { useAnimationFrame } from "../../hooks/useAnimationFrame";
 
 export default {
   decorators: [withRenderFrameProvider],
@@ -31,6 +31,17 @@ export const Default: PolygonStory = {
     }
   },
 };
+
+export const Filled: PolygonStory = {
+  ...Default,
+  args: {
+    ...Default.args,
+    fillStyle: randomcolor({
+      format: 'rgba',
+      alpha: 0.5,
+    }),
+  }
+}
 
 function random(min: number, max: number) { // min and max included 
   return Math.floor(Math.random() * (max - min + 1) + min)
