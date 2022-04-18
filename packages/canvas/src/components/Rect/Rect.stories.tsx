@@ -31,11 +31,22 @@ export const Default: RectStory = {
   },
 };
 
-export const Filled: RectStory = {
+export const FillStyle: RectStory = {
   ...Default,
   args: {
     ...Default.args,
     fillStyle: randomColor({
+      format: "rgba",
+      alpha: 0.5,
+    }),
+  }
+}
+
+export const Stroke: RectStory = {
+  ...Default,
+  args: {
+    ...Default.args,
+    strokeStyle: randomColor({
       format: "rgba",
       alpha: 0.5,
     }),

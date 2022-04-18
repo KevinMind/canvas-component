@@ -1,6 +1,6 @@
 import React, { ComponentProps, useState, useEffect } from "react";
 import { ComponentMeta, StoryObj } from "@storybook/react";
-import randomcolor from "randomcolor";
+import randomColor from "randomcolor";
 
 import { withRenderFrameProvider } from "../../../.storybook/decorators";
 
@@ -32,14 +32,26 @@ export const Default: PolygonStory = {
   },
 };
 
-export const Filled: PolygonStory = {
+export const FillStyle: PolygonStory = {
   ...Default,
   args: {
     ...Default.args,
-    fillStyle: randomcolor({
+    fillStyle: randomColor({
       format: 'rgba',
       alpha: 0.5,
     }),
+  }
+}
+
+export const StrokeStyle: PolygonStory = {
+  ...Default,
+  args: {
+    ...Default.args,
+    strokeStyle: randomColor({
+      format: 'rgba',
+      alpha: 0.5,
+    }),
+    lineWidth: 2,
   }
 }
 
@@ -48,15 +60,7 @@ function random(min: number, max: number) { // min and max included
 }
 
 function RandomShape(props: PolygonArgs) {
-  usePolygon({
-    size: props.size,
-    sides: props.sides,
-    pos: {
-      x: props.pos.x,
-      y: props.pos.y,
-    },
-    rotation: 0,
-  });
+  usePolygon(props);
 
   return null;
 }
@@ -69,13 +73,14 @@ function RenderManyShapes({count}: {count: number}) {
 
     for (let x = 0; x < count; x++) {
       newShapes.push({
-        size: random(10, 100),
-        sides: random(3, 10),
+        size: random(10, Math.max(500 / count * 2, 20)),
+        sides: random(3, 8),
         pos: {
           x: Math.random() * 500,
           y: Math.random() * 500,
         },
         rotation: 0,
+        fillStyle: randomColor({alpha: 0.5, format: 'rgba'}),
       });
     }
 

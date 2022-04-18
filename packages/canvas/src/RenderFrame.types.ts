@@ -16,11 +16,16 @@ export interface DrawnCanvasProps {
   rotation: number;
 }
 
-export interface FillAndStrokeArgs {
+export interface FillArgs {
   fillStyle?: string;
 }
 
-export interface DrawingArguments extends Partial<DrawnCanvasProps>, Partial<FillAndStrokeArgs> {}
+export interface StrokeArgs {
+  strokeStyle?: string;
+  lineWidth?: number;
+}
+
+export interface DrawingArguments extends Partial<DrawnCanvasProps>, Partial<FillArgs>, Partial<StrokeArgs> {}
 
 export interface RenderFrameProps {
   fillStyle?: string;

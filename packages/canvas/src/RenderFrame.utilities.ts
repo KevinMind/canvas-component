@@ -21,15 +21,19 @@ export function createDrawing<A extends DrawingArguments>(makeDrawing: MakeDrawi
   return (ctx: CanvasRenderingContext2D, args: A) => {
     ctx.beginPath();
 
-    if (args.fillStyle) {
-      ctx.fillStyle = args.fillStyle;
-    }
-
     makeDrawing(ctx, args);
+
+    if (args.strokeStyle) {
+      ctx.strokeStyle = args.strokeStyle;
+    }
+    if (args.lineWidth) {
+      ctx.lineWidth = args.lineWidth;
+    }
 
     ctx.stroke();
 
     if (args.fillStyle) {
+      ctx.fillStyle = args.fillStyle;
       ctx.fill();
     }
 
