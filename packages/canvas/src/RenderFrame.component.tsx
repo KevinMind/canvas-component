@@ -55,7 +55,6 @@ export function RenderFrameProvider({
     } else if (!ref.isSameNode(canvasRef.current)) {
       throw new Error('<Canvas /> element already rendered in <RenderFrameProvider />');
     }
-    
   }
 
   useEffect(() => {

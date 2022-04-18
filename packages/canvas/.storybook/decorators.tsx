@@ -42,7 +42,7 @@ export function useMousePos(): MousePos {
 }
 
 export function withMousePosition(Story: StoryFn) {
-  const canvas = useRenderFrameCanvas();
+  const [canvas] = useRenderFrameCanvas();
   const [pos, setPos] = useState<[number, number]>([0, 0]);
 
   useEffect(() => {
