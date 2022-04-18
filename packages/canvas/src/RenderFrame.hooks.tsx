@@ -14,10 +14,12 @@ export function _usePrivateRenderFrameContext() {
   return context;
 }
 
-export function useRenderFrameCanvas() {
+export function useRenderFrameCanvas(): [HTMLCanvasElement | null, {width: number; height: number}] {
   const {canvas} = _usePrivateRenderFrameContext();
 
-  return canvas;
+  const {width = 0, height = 0} = canvas?.getBoundingClientRect() ?? {};
+
+  return [canvas, {width, height}];
 }
 
 export function useRenderFrame(draw: Draw) {
