@@ -32,8 +32,6 @@ export const Default: PolygonStory = {
   },
 };
 
-const COUNT = 20;
-
 function random(min: number, max: number) { // min and max included 
   return Math.floor(Math.random() * (max - min + 1) + min)
 }
@@ -74,9 +72,13 @@ function RenderManyShapes({count}: {count: number}) {
   
   }, [count]);
 
-  return shapes.map((shape) => (
-    <RandomShape {...shape} />
-  ))
+  return (
+    <>
+    {shapes.map((shape) => (
+      <RandomShape {...shape} key={shape.pos.x} />
+    ))}
+    </>
+  );
 }
 
 export const ManyShapes: StoryObj<ComponentProps<typeof RenderManyShapes>> = {
@@ -85,3 +87,20 @@ export const ManyShapes: StoryObj<ComponentProps<typeof RenderManyShapes>> = {
   },
   render: (args) => <RenderManyShapes {...args} />,
 };
+
+export const CustomPolygon: PolygonStory = {
+  args: {
+    sides: [
+      {x: 100, y: 100},
+      {x: 200, y: 100},
+      {x: 250, y: 250},
+      {x: 470, y: 300},
+      {x: 100, y: 400},
+    ],
+    size: 100,
+    pos: {
+      x: 250,
+      y: 250,
+    }
+  },
+}

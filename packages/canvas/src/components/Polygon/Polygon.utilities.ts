@@ -1,19 +1,35 @@
 import { PolygonArgs } from "./Polygon.types";
 
 export function drawPolygon(ctx: CanvasRenderingContext2D, {pos: {x, y}, sides, size}: PolygonArgs) {
-  if (sides < 3) {
+  const isCustomPolygon = Array.isArray(sides);
+  const numSides = isCustomPolygon ? sides.length : sides;
+  
+  if (numSides < 3) {
     throw new Error('polygon must contain at least 3 sides');
   }
 
   ctx.beginPath();
-  ctx.moveTo (x +  size * Math.cos(0), y +  size *  Math.sin(0));          
+  
+  if (isCustomPolygon) {
+    const [first, ...rest] = sides;
 
-  for (let i = 1; i <= sides; i += 1) {
-    const offset = i * 2 * Math.PI / sides;
-    const xTranslation = size * Math.cos(offset);
-    const yTranslation = size * Math.sin(offset);
+    ctx.lineTo(first.x, first.y);
 
-    ctx.lineTo (x + xTranslation, y + yTranslation);
+    for (let pos of rest) {
+      ctx.lineTo(pos.x, pos.y);
+    }
+
+    ctx.lineTo(first.x, first.y);
+  } else {
+    ctx.moveTo (x +  size * Math.cos(0), y +  size *  Math.sin(0));
+    
+    for (let i = 1; i <= sides; i += 1) {
+      const offset = i * 2 * Math.PI / sides;
+      const xTranslation = size * Math.cos(offset);
+      const yTranslation = size * Math.sin(offset);
+  
+      ctx.lineTo (x + xTranslation, y + yTranslation);
+    }
   }
 
   ctx.stroke();
