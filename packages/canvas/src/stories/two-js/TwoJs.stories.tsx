@@ -5,7 +5,7 @@ import Two from 'two.js';
 
 import { withTodoList, withRenderFrameProvider, withMousePosition, useMousePos } from '../../../.storybook/decorators';
 import { useAnimationFrame } from '../../hooks/useAnimationFrame';
-import { useCircle } from '../../components/Circle';
+import { useEllipse } from '../../components/Ellipse';
 
 import { useRenderFrameCanvas, useRenderFrame } from '../../RenderFrame.hooks';
 import { useLine } from '../../components/Line';
@@ -84,7 +84,7 @@ function RenderTwoJS() {
    */
   useLine({start: {x: 0, y: 0}, end: {x: x * 2, y: y * 2}, rotation: 0});
 
-  useCircle({pos: {x: x * 2, y: y * 2}, radius: 200, rotation: 0});
+  useEllipse({pos: {x: x * 2, y: y * 2}, radius: 200, rotation: 0});
 
   return null;
 }

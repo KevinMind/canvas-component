@@ -1,7 +1,7 @@
 import React, { ComponentProps } from "react";
 import { ComponentMeta, StoryObj } from "@storybook/react";
 
-import { Circle } from "./Circle.component";
+import { Ellipse } from "./Ellipse.component";
 import {
   withRenderFrameProvider,
   withTodoList,
@@ -10,12 +10,12 @@ import { useAnimationFrame } from "../../hooks/useAnimationFrame";
 
 export default {
   decorators: [withRenderFrameProvider, withTodoList],
-  component: Circle,
-} as ComponentMeta<typeof Circle>;
+  component: Ellipse,
+} as ComponentMeta<typeof Ellipse>;
 
-type CircleStory = StoryObj<ComponentProps<typeof Circle>>;
+type EllipseStory = StoryObj<ComponentProps<typeof Ellipse>>;
 
-export const Default: CircleStory = {
+export const Default: EllipseStory = {
   parameters: {
     canvasProvider: {
       height: 250,
@@ -32,7 +32,7 @@ export const Default: CircleStory = {
   },
 };
 
-export const Expanding: CircleStory = {
+export const Expanding: EllipseStory = {
   ...Default,
   decorators: [
     (Story, ctx) => {
@@ -49,7 +49,7 @@ export const Expanding: CircleStory = {
   ],
 };
 
-export const Elipse: CircleStory = {
+export const Elipse: EllipseStory = {
   ...Default,
   args: {
     ...Default.args,
@@ -57,7 +57,7 @@ export const Elipse: CircleStory = {
   },
 };
 
-export const Rotating: CircleStory = {
+export const Rotating: EllipseStory = {
   ...Elipse,
   decorators: [
     (Story, ctx) => {

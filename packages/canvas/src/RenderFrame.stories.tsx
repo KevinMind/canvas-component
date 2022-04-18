@@ -5,9 +5,9 @@ import { useAnimationFrame } from "./hooks/useAnimationFrame";
 import { withRenderFrameProvider, withMousePosition, useMousePos, withTodoList } from "../.storybook/decorators";
 import { RenderFrameProvider } from "./RenderFrame.component";
 import { useRenderFrame } from "./RenderFrame.hooks";
-import { Circle, useCircle } from "./components/Circle";
+import { Ellipse, useEllipse } from "./components/Ellipse";
 
-function CustomCircle({
+function CustomEllipse({
   x,
   y,
   radius = 10,
@@ -84,9 +84,9 @@ export const Default: RenderFrameProviderStory = {
     return (
       <>
         <Triangle />
-        <CustomCircle x={150} y={150} radius={150} />
-        <CustomCircle x={200} y={50} radius={100} />
-        <CustomCircle x={100} y={50} radius={100} />
+        <CustomEllipse x={150} y={150} radius={150} />
+        <CustomEllipse x={200} y={50} radius={100} />
+        <CustomEllipse x={100} y={50} radius={100} />
         <Smiley />
       </>
     );
@@ -98,7 +98,7 @@ function RenderDraggable() {
 
   return (
     <>
-      <Circle pos={{x, y: 100}} radius={100} rotation={0} />
+      <Ellipse pos={{x, y: 100}} radius={100} rotation={0} />
     </>
   );
 }
@@ -113,7 +113,7 @@ export const Draggable: RenderFrameProviderStory = {
   render: () => <RenderDraggable />,
 };
 
-function getPointInCircle(radius: number, degrees: number) {
+function getPointInEllipse(radius: number, degrees: number) {
   const radians = degrees * (Math.PI / 180);
 
   var x = Math.cos(radians) * radius;
@@ -122,7 +122,7 @@ function getPointInCircle(radius: number, degrees: number) {
   return { x, y };
 }
 
-function RenderCircleOfCircles() {
+function RenderEllipseOfEllipses() {
   const radius = 60;
   const slowRadius = 100;
   const x = 100;
@@ -144,8 +144,8 @@ function RenderCircleOfCircles() {
     infinite: true,
   });
 
-  const slow = getPointInCircle(slowRadius, slowRadian);
-  const moon = getPointInCircle(slowRadius * 0.3, moonRadian);
+  const slow = getPointInEllipse(slowRadius, slowRadian);
+  const moon = getPointInEllipse(slowRadius * 0.3, moonRadian);
 
   const [fastRadian] = useAnimationFrame({
     from: 0,
@@ -155,14 +155,14 @@ function RenderCircleOfCircles() {
     infinite: true,
   });
 
-  const fast = getPointInCircle(radius, fastRadian);
+  const fast = getPointInEllipse(radius, fastRadian);
 
   return (
     <>
-      <Circle pos={{x, y}} radius={slowRadius} rotation={0} />
-      <Circle pos={{x, y}} radius={radius} rotation={0} />
-      <Circle pos={{x: x + slow.x, y: y + slow.y}} radius={slowRadius / 10} rotation={0} />
-      <Circle
+      <Ellipse pos={{x, y}} radius={slowRadius} rotation={0} />
+      <Ellipse pos={{x, y}} radius={radius} rotation={0} />
+      <Ellipse pos={{x: x + slow.x, y: y + slow.y}} radius={slowRadius / 10} rotation={0} />
+      <Ellipse
         pos={{
           x: x + slow.x + moon.x,
           y: y + slow.y + moon.y,
@@ -170,26 +170,26 @@ function RenderCircleOfCircles() {
         radius={slowRadius / 20}
         rotation={0}
       />
-      <Circle pos={{x: x + fast.x, y: y + fast.y}} radius={radius / 10} rotation={0} />
+      <Ellipse pos={{x: x + fast.x, y: y + fast.y}} radius={radius / 10} rotation={0} />
     </>
   );
 }
 
-export const CircleOfCircles: RenderFrameProviderStory = {
+export const EllipseOfEllipses: RenderFrameProviderStory = {
   parameters: {
     canvasProvider: {
       width: 500,
       height: 200,
     },
   },
-  render: () => <RenderCircleOfCircles />,
+  render: () => <RenderEllipseOfEllipses />,
 };
 
 function RenderPoint() {
   const [radius] = useAnimationFrame({from: 10, to: 100, duration: 5_000, infinite: true, auto: true, mode: 'pingpong'});
   const [x, y] = useMousePos();
 
-  useCircle({pos: {x, y}, radius, rotation: 0});
+  useEllipse({pos: {x, y}, radius, rotation: 0});
 
   return null;
 }

@@ -4,18 +4,18 @@ import { ComponentMeta, StoryObj } from "@storybook/react";
 import { withRenderFrameProvider } from "../../../.storybook/decorators";
 import { useAnimationFrame } from "../../hooks/useAnimationFrame";
 
-import { Box } from "./Box.component";
-import { useBox } from "./Box.hooks";
-import { useCircle } from "../Circle";
+import { Rect } from "./Rect.component";
+import { useRect } from "./Rect.hooks";
+import { useEllipse } from "../Ellipse";
 
 export default {
   decorators: [withRenderFrameProvider],
-  component: Box,
-} as ComponentMeta<typeof Box>;
+  component: Rect,
+} as ComponentMeta<typeof Rect>;
 
-type BoxStory = StoryObj<ComponentProps<typeof Box>>;
+type RectStory = StoryObj<ComponentProps<typeof Rect>>;
 
-export const Default: BoxStory = {
+export const Default: RectStory = {
   parameters: {
     canvasProvider: {
       height: 250,
@@ -39,7 +39,7 @@ function RenderExpanding() {
     infinite: true,
   });
 
-  useBox({pos: {x: 125, y: 125}, width, height: width, rotation: 0});
+  useRect({pos: {x: 125, y: 125}, width, height: width, rotation: 0});
   return null;
 }
 
@@ -70,14 +70,14 @@ function RenderRotate() {
     auto: true,
     infinite: true,
   })
-  useBox({
+  useRect({
     pos: {x: 125, y: 125},
     width,
     height: width,
     rotation,
   });
 
-  useCircle({
+  useEllipse({
     pos: {x: 125, y: 125},
     radius: 100,
     radiusY: 125,
