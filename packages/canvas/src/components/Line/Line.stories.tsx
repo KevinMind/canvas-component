@@ -18,8 +18,8 @@ type LineStory = StoryObj<ComponentProps<typeof Line>>;
 
 export const Default: LineStory = {
   args: {
-    start: { x: 0, y: 0 },
-    end: { x: 250, y: 250 },
+    start: { x: 50, y: 50 },
+    end: { x: 200, y: 200 },
   },
   parameters: {
     canvasProvider: {
@@ -39,7 +39,23 @@ export const StrokeStyle: LineStory = {
     }),
     lineWidth: 10,
   }
-}
+};
+
+export const LineCap: LineStory = {
+  ...Default,
+  args: {
+    ...StrokeStyle.args,
+    lineCap: 'round'
+  },
+};
+
+export const DashedLine: LineStory = {
+  ...Default,
+  args: {
+    ...StrokeStyle.args,
+    lineDash: [10, 5],
+  },
+};
 
 export const Quadratic: LineStory = {
   parameters: {

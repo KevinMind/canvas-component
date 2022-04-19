@@ -24,6 +24,10 @@ export interface FillArgs {
 export interface StrokeArgs {
   strokeStyle?: CanvasRenderingContext2D['strokeStyle'];
   lineWidth?: CanvasRenderingContext2D['lineWidth'];
+  lineCap?: CanvasRenderingContext2D['lineCap'];
+  lineDashOffset?: CanvasRenderingContext2D['lineDashOffset'];
+  lineJoin?: CanvasRenderingContext2D['lineJoin'];
+  lineDash?: Parameters<CanvasRenderingContext2D['setLineDash']>[0];
 }
 
 export interface DrawingArguments extends Partial<BaseArgs>, Partial<FillArgs>, Partial<StrokeArgs> {}
