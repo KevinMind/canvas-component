@@ -23,6 +23,10 @@ export function createDrawing<A extends DrawingArguments>(makeDrawing: MakeDrawi
 
     makeDrawing(ctx, args);
 
+    if (args.filter) {
+      ctx.filter = args.filter;
+    }
+
     if (args.strokeStyle) {
       ctx.strokeStyle = args.strokeStyle;
     }
