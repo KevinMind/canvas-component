@@ -23,6 +23,18 @@ export function createDrawing<A extends DrawingArguments>(makeDrawing: MakeDrawi
 
     makeDrawing(ctx, args);
 
+    if (args.lineDash) {
+      ctx.setLineDash(args.lineDash);
+    }
+
+    if (args.lineDashOffset) {
+      ctx.lineDashOffset = args.lineDashOffset;
+    }
+
+    if (args.lineCap) {
+      ctx.lineCap = args.lineCap;
+    }
+
     if (args.filter) {
       ctx.filter = args.filter;
     }
