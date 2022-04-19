@@ -16,9 +16,20 @@
 - [x] split Canvas component to separate package
 - [x] enable custom easing functions
 - [ ] two.js
-  - [ ] fix two.update() problem: sometimes two.update() erasing useRenderFrame shapes
-  - [ ] can we avoid needing to call two.update()?
-  - [ ] is there a way to prevent needing to erase and rewrite two.js shapes.. maybe we don't need to render two.js shapes in a useRenderFrame?
+
+  - [x] fix two.update() problem: sometimes two.update() erasing useRenderFrame shapes
+  - [x] can we avoid needing to call two.update()? no, but we can centralize to hook
+  - [ ] is there a way to prevent needing to erase and rewrite two.js shapes.. maybe we don't need to render two.js shapes in a useRenderFrame? looks like only with refs, but this is kind of janky, probably better to describe two.js scene in a useRenderFrame closure, with all elements defined and modify their position each time we create them. Could try extracting two.js components to react components and don't use useRenderFrame at all. maybe that could work
+
+- [ ] finish adding base canvas rendering functionality
+
+  - [ ] add miter limit (with examples, still don't get what that is)
+  - [ ] finish rotation (make all elements rotatable around center point)
+  - [ ] add custom rotation point (rotate element around custom center point)
+  - [ ] add text functionality (render text, modify font, direction, etc)
+  - [ ] add gradient functionality (conic, linear, etc)
+  - [ ] add image functionality (render images and svgs)
+
 - [ ] review current code base for opportunities to improve tests
 - [ ] add Polygon support for canvas
 - [ ] add FreeDrawing support for canvas
