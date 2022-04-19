@@ -23,6 +23,22 @@ export function createDrawing<A extends DrawingArguments>(makeDrawing: MakeDrawi
 
     makeDrawing(ctx, args);
 
+    if (args.shadowColor) {
+      ctx.shadowColor = args.shadowColor;
+
+      if (args.shadowBlur) {
+        ctx.shadowBlur = args.shadowBlur;
+      }
+
+      if (args.shadowOffsetX) {
+        ctx.shadowOffsetX = args.shadowOffsetX;
+      }
+
+      if (args.shadowOffsetY) {
+        ctx.shadowOffsetY = args.shadowOffsetY;
+      }
+    }
+
     if (args.lineDash) {
       ctx.setLineDash(args.lineDash);
     }
