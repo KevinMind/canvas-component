@@ -12,20 +12,21 @@ export interface Draw {
   (ctx: CanvasRenderingContext2D, frame: number): void;
 }
 
-export interface DrawnCanvasProps {
+export interface BaseArgs {
   rotation: number;
+  filter?: CanvasRenderingContext2D['filter'];
 }
 
 export interface FillArgs {
-  fillStyle?: string;
+  fillStyle?: CanvasRenderingContext2D['fillStyle'];
 }
 
 export interface StrokeArgs {
-  strokeStyle?: string;
-  lineWidth?: number;
+  strokeStyle?: CanvasRenderingContext2D['strokeStyle'];
+  lineWidth?: CanvasRenderingContext2D['lineWidth'];
 }
 
-export interface DrawingArguments extends Partial<DrawnCanvasProps>, Partial<FillArgs>, Partial<StrokeArgs> {}
+export interface DrawingArguments extends Partial<BaseArgs>, Partial<FillArgs>, Partial<StrokeArgs> {}
 
 export interface RenderFrameProps {
   fillStyle?: string;
