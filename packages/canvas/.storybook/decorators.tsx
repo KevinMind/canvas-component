@@ -2,7 +2,20 @@ import React, { useState, useRef, useEffect, createContext, useContext } from "r
 import { StoryFn, StoryContext } from "@storybook/react";
 import isChromatic from "chromatic/isChromatic";
 
-import { useRenderFrameCanvas, RenderFrameProvider, Canvas } from "../src";
+import { useRenderFrameCanvas, RenderFrameProvider, Canvas, useEllipse } from "../src";
+
+export function withCenterDot(Story: StoryFn) {
+  const [canvas] = useRenderFrameCanvas();
+  let pos = {x: 0, y: 0};
+
+  if (canvas) {
+    pos.x = canvas.width / 2;
+    pos.y = canvas.height /2;
+  }
+  useEllipse({pos, radius: 1, fillStyle: 'black', rotation: 0});
+
+  return <Story />;
+}
 
 export function withRenderFrameProvider(Story: StoryFn, ctx: StoryContext) {
   const customParams = ctx.parameters?.canvasProvider ?? {};

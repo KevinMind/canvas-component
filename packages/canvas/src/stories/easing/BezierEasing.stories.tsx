@@ -14,7 +14,7 @@ import bezier from 'bezier-easing';
 
 export type EasingType = "linear" | "ease" | "ease-in" | "ease-out" | "ease-in-out";
 
-function bezierEasing(easingType: EasingType | [number, number, number, number]): (p: number) => number {
+export function bezierEasing(easingType: EasingType | [number, number, number, number]): (p: number) => number {
   if (Array.isArray(easingType)) {
     return bezier(...easingType);
   }
