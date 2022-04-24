@@ -23,15 +23,15 @@
 
 - [ ] finish adding base canvas rendering functionality
 
-  - [ ] add text functionality (render text, modify font, direction, etc)
+  - [x] add text functionality (render text, modify font, direction, etc)
   - [ ] add gradient functionality (conic, linear, etc)
-  - [ ] add image functionality (render images and svgs)
+  - [x] add image functionality (render images and svgs)
   - [ ] add miter limit (with examples, still don't get what that is)
   - [ ] finish rotation (make all elements rotatable around center point)
   - [ ] add custom rotation point (rotate element around custom center point)
 
 - [ ] review current code base for opportunities to improve tests
-- [ ] add Polygon support for canvas
+- [x] add Polygon support for canvas
 - [ ] add FreeDrawing support for canvas
 - [ ] add chain animations hook to canvas
 
