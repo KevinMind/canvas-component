@@ -19,6 +19,7 @@ interface MakeDrawing<A> {
 
 export function createDrawing<A extends DrawingArguments>(makeDrawing: MakeDrawing<A>) {
   return (ctx: CanvasRenderingContext2D, args: A) => {
+    ctx.restore();
     ctx.beginPath();
 
     makeDrawing(ctx, args);
