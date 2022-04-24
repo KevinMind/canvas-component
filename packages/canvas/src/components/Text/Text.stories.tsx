@@ -3,11 +3,12 @@ import { ComponentMeta, StoryObj } from "@storybook/react";
 import randomColor from "randomcolor";
 
 import { withRenderFrameProvider, withCenterDot } from "../../../.storybook/decorators";
+import { bezierEasing } from "../../utilities/bezier";
 
 import { Text } from "./Text.component";
 import { useAnimationFrame } from "../../hooks/useAnimationFrame";
 import { useText } from "./Text.hooks";
-import { bezierEasing } from "../../stories/easing/BezierEasing.stories";
+
 
 const fillStyle = randomColor({format: 'rgba', hue: 'green', luminosity: 'bright'});
 const strokeStyle = randomColor({format: 'rgba', hue: 'green', luminosity: 'dark'});
