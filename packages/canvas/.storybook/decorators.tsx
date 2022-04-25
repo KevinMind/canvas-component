@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, createContext, useContext } from "react";
+import React, { useState, useRef, useEffect, createContext, useContext, MouseEventHandler } from "react";
 import { StoryFn, StoryContext } from "@storybook/react";
 import isChromatic from "chromatic/isChromatic";
 
@@ -40,39 +40,116 @@ export function withRenderFrameProvider(Story: StoryFn, ctx: StoryContext) {
   );
 }
 
-type MousePos = [number, number];
+type HandleMouseMove = (x: number, y: number, e: MouseEvent) => void;
 
-const MousePositionContext = createContext<MousePos>([0, 0]);
+type HandleMouseIdle = () => void;
 
-export function useMousePos(): MousePos {
+interface UseMouseMoveArgs {
+  onMove?: HandleMouseMove;
+  onIdle?: HandleMouseIdle;
+}
+
+type MousePositionContextType = [number, number, {
+  addMoveListener: (handler: HandleMouseMove) => void;
+  removeMoveListener: (handler: HandleMouseMove) => void;
+  addIdleListener: (handler: HandleMouseIdle) => void;
+  removeIdleListener: (handler: HandleMouseIdle) => void;
+}]
+
+const MousePositionContext = createContext<MousePositionContextType>([0, 0, {
+  addMoveListener: () => {},
+  removeMoveListener: () => {},
+  addIdleListener: () => {},
+  removeIdleListener: () => {},
+}]);
+
+export function useMousePos({onIdle= () => {}, onMove = () => {}}: UseMouseMoveArgs = {}): MousePositionContextType {
   const ctx = useContext(MousePositionContext);
+  const moveHandler = useRef<HandleMouseMove | null>(null);
+  const idleHandler = useRef<HandleMouseIdle | null>(null);
   
   if (!ctx) {
     throw new Error('useMousePos() must be rendered in a story using the withMousePosition decorator');
   }
 
+  useEffect(() => {
+    if (!ctx) return;
+
+    const [,, listeners] = ctx;
+
+    if (onMove !== moveHandler.current) {
+      listeners.addMoveListener(onMove);
+      moveHandler.current = onMove;
+    }
+
+    if (onIdle !== idleHandler.current) {
+      listeners.addIdleListener(onIdle);
+      idleHandler.current = onIdle;
+    }
+
+    return () => {
+      listeners.removeMoveListener(onMove);
+      listeners.removeIdleListener(onIdle);
+    }
+
+  }, [ctx, onMove, onIdle]);
+
   return ctx;
 }
 
 export function withMousePosition(Story: StoryFn) {
+  const [idle, setIdle] = useState<boolean>(true);
   const [canvas] = useRenderFrameCanvas();
-  const [pos, setPos] = useState<[number, number]>([0, 0]);
+  const [position, setPosition] = useState<[number, number]>([0, 0]);
+
+  const moveListeners = useRef<Map<HandleMouseMove, true>>(new Map());
+  const idleListeners = useRef<Map<HandleMouseIdle, true>>(new Map());
+  // @TODO: fix typing for timeout
+  const idleTimeout = useRef<any>();
+
+  useEffect(() => {
+    if (idle) {
+      for (let handle of idleListeners.current.keys()) {
+        handle();
+      }
+    }
+  }, [idle]);
+
+  function setIdleTimeout() {
+    idleTimeout.current = setTimeout(() => {
+      setIdle(true);
+    }, 60);
+  }
+
+  function clearIdle() {
+    setIdle(false);
+    if (idleTimeout.current) {
+      clearTimeout(idleTimeout.current);
+    }
+  }
 
   useEffect(() => {
     function update(e: MouseEvent) {
-      if (canvas) {
-        const rect = canvas.getBoundingClientRect();
-        
-        const insideX = rect.x + rect.width > e.clientX && e.clientX > rect.x;
-        const insideY = rect.y + rect.height > e.clientY && e.clientY > rect.y;
+      if (!canvas) return;
 
-        if (insideX && insideY) {
-          const x = Math.min(rect.width, Math.max(0, e.clientX - rect.x));
-          const y = Math.min(rect.height, Math.max(0, e.clientY - rect.y));
-          setPos([x, y]);
+      clearIdle();
+
+      const rect = canvas.getBoundingClientRect();
+      
+      const insideX = rect.x + rect.width > e.clientX && e.clientX > rect.x;
+      const insideY = rect.y + rect.height > e.clientY && e.clientY > rect.y;
+
+      if (insideX && insideY) {
+        const x = Math.min(rect.width, Math.max(0, e.clientX - rect.x));
+        const y = Math.min(rect.height, Math.max(0, e.clientY - rect.y));
+        setPosition([x, y]);
+
+        for (let handler of moveListeners.current.keys()) {
+          handler(x, y, e);
         }
-        
       }
+
+      setIdleTimeout();
     }
 
     window.addEventListener('mousemove', update);
@@ -81,8 +158,34 @@ export function withMousePosition(Story: StoryFn) {
 
   }, [canvas]);
 
+  function addMoveListener(handler: HandleMouseMove) {
+    if (!moveListeners.current.has(handler)) {
+      moveListeners.current.set(handler, true);
+    }
+  }
+
+  function removeMoveListener(handler: HandleMouseMove) {
+    if (moveListeners.current.has(handler)) {
+      moveListeners.current.delete(handler);
+    }
+  }
+
+  function addIdleListener(handler: HandleMouseIdle) {
+    if (!idleListeners.current.has(handler)) {
+      idleListeners.current.set(handler, true);
+    }
+  }
+
+  function removeIdleListener(handler: HandleMouseIdle) {
+    if (idleListeners.current.has(handler)) {
+      idleListeners.current.delete(handler);
+    }
+  }
+
+  const [x, y] = position;
+
   return (
-    <MousePositionContext.Provider value={pos}>
+    <MousePositionContext.Provider value={[x, y, {addMoveListener, removeMoveListener, addIdleListener, removeIdleListener}]}>
       <Story />
     </MousePositionContext.Provider>
   )

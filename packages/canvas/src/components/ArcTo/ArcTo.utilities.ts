@@ -2,7 +2,7 @@ import { createDrawing } from "../../RenderFrame.utilities";
 
 import { ArcToArgs } from "./ArcTo.types";
 
-export const drawArcTo = createDrawing<ArcToArgs>((ctx, {pos0, pos1, pos2, radius}) => {
-  ctx.moveTo(pos0.x, pos0.y);
-  ctx.arcTo(pos1.x, pos1.y, pos2.x, pos2.y, radius);
+export const drawArcTo = createDrawing<ArcToArgs>((ctx, args) => {
+  ctx.moveTo(args.pos0.x, args.pos0.y);
+  ctx.arcTo(args.pos1.x, args.pos1.y, args.pos2.x, args.pos2.y, args.radius);
 });

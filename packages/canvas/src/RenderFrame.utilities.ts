@@ -22,7 +22,7 @@ export function createDrawing<A extends DrawingArguments>(makeDrawing: MakeDrawi
     ctx.restore();
     ctx.beginPath();
 
-    makeDrawing(ctx, args);
+    makeDrawing(ctx, {rotation: 0, ...args});
 
     if (args.shadowColor) {
       ctx.shadowColor = args.shadowColor;
