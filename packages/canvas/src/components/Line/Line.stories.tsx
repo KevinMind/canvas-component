@@ -107,6 +107,35 @@ export const BezierCurve: LineStory = {
   },
 };
 
+export const CurvedLine: LineStory = {
+  parameters: {
+    canvasProvider: {
+      width: 500,
+      height: 500,
+    }
+  },
+  args: {
+    start: {
+      x: 0,
+      y: 250, 
+    },
+    points: [
+      {x: 100, y: 50},
+      {x: 200, y: 100},
+      {x: 300, y: 400},
+      {x: 400, y: 100},
+    ],
+    end: {
+      x: 500,
+      y: 250,
+    },
+  },
+  render: (args) => {
+    console.log('args', args);
+    return <Line {...args} />
+  }
+};
+
 function RenderManyLines({ width, height }: { width: number; height: number }) {
   const [x] = useAnimationFrame({
     auto: true,
