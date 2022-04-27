@@ -7,16 +7,20 @@ import { Position } from "../../../RenderFrame.types";
 
 import { FourDCircleProps } from "./FourDCircle.types";
 
-export function FourDCircle(props: FourDCircleProps) {
+export function FourDCircle({
+  radius: maxRadius,
+  length,
+  ...props
+}: FourDCircleProps) {
   const [moving, setMoving] = useState<boolean>(false);
-  const radius = useRef<number>(props.radius);
+  const radius = useRef<number>(maxRadius);
   const trails = useRef<Position[]>([]);
 
   function handleMove(x: number, y: number) {
     if (!moving) {
       setMoving(true);
     }
-    if (trails.current.length > 25) {
+    if (trails.current.length > length) {
       trails.current.pop();
     }
     trails.current.unshift({x, y});
@@ -32,13 +36,20 @@ export function FourDCircle(props: FourDCircleProps) {
   });
 
   useEffect(() => {
-    if (moving) {
-      radius.current = props.radius;
+    function increase(): void {
+      if (radius.current < maxRadius) {
+        radius.current++;
+        requestAnimationFrame(increase);
+      }
       return;
+    }
+    if (moving) {
+      return increase();
     }
 
     function reduce(): void {
       if (radius.current === 0) {
+        trails.current = [];
         return;
       }
       radius.current--;
@@ -50,11 +61,13 @@ export function FourDCircle(props: FourDCircleProps) {
 
 
   useRenderFrame((ctx) => {
-    drawEllipse(ctx, {...props, pos: {x, y}});
+    drawEllipse(ctx, {...props, pos: {x, y}, radius: maxRadius});
 
     for (let x = 0; x < trails.current.length; x++) {
       const pos = trails.current[x];
-      drawEllipse(ctx, {...props, pos, radius: radius.current});
+      const perc = (trails.current.length - x) / trails.current.length;
+
+      drawEllipse(ctx, {...props, pos, radius: perc * radius.current});
     }
   });
 
