@@ -15,5 +15,7 @@ type FourDCircleStory = StoryObj<ComponentProps<typeof FourDCircle>>;
 export const Default: FourDCircleStory = {
   args: {
     radius: 20,
+    length: 50,
+    visible: false,
   },
 };
