@@ -11,6 +11,7 @@ import { useAnimationFrame } from "../../hooks/useAnimationFrame";
 import { useLine } from "./Line.hooks";
 import { Position } from "../../RenderFrame.types";
 import { LineArgs } from "./Line.types";
+import { bezierEasing } from "../../utilities/bezier";
 
 export default {
   decorators: [withRenderFrameProvider, withTodoList],
@@ -137,7 +138,8 @@ function Wave({
   const offsetY = amplitudeY * midPoint.y;
 
   const [y] = useAnimationFrame({
-    from: midPoint.y - offsetY,
+    easing: bezierEasing('ease-in-out'),
+    from: midPoint.y - offsetY * Math.LOG10E,
     to: midPoint.y + offsetY,
     auto: true,
     infinite: true,
