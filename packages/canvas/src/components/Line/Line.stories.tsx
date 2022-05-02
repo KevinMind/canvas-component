@@ -8,6 +8,9 @@ import {
 } from "../../../.storybook/decorators";
 import { Line } from "./Line.component";
 import { useAnimationFrame } from "../../hooks/useAnimationFrame";
+import { useLine } from "./Line.hooks";
+import { Position } from "../../RenderFrame.types";
+import { LineArgs } from "./Line.types";
 
 export default {
   decorators: [withRenderFrameProvider, withTodoList],
@@ -69,14 +72,17 @@ export const Quadratic: LineStory = {
       x: 0,
       y: 0, 
     },
-    cp1: {
-      x: 430,
-      y: 30,
-    },
+    points: [
+      {
+        x: 430,
+        y: 30,
+      }
+    ],
     end: {
       x: 500,
       y: 500,
     },
+    smooth: true,
   },
 };
 
@@ -92,48 +98,118 @@ export const BezierCurve: LineStory = {
       x: 0,
       y: 0, 
     },
-    cp1: {
-      x: 430,
-      y: 30,
-    },
-    cp2: {
-      x: 150,
-      y: 400,
-    },
+    points: [
+      {
+        x: 430,
+        y: 30,
+      },
+      {
+        x: 150,
+        y: 400,
+      },
+    ],
     end: {
       x: 500,
       y: 500,
     },
+    smooth: true,
   },
 };
 
-export const CurvedLine: LineStory = {
+function Wave({
+  waveLength,
+  amplitude = 0,
+  amplitudeX = amplitude,
+  amplitudeY = amplitude,
+  start,
+  end,
+  midPoint,
+}: {
+  waveLength: number;
+  amplitude?: number;
+  amplitudeX?: number;
+  amplitudeY?: number;
+  start: LineArgs['start'];
+  end: LineArgs['end'];
+  midPoint: Position;
+}) {
+  const offsetX = amplitudeX * midPoint.x;
+  const offsetY = amplitudeY * midPoint.y;
+
+  const [y] = useAnimationFrame({
+    from: midPoint.y - offsetY,
+    to: midPoint.y + offsetY,
+    auto: true,
+    infinite: true,
+    duration: waveLength * Math.LN2,
+    mode: 'pingpong',
+  });
+
+  const [x] = useAnimationFrame({
+    from: midPoint.x - offsetX,
+    to: midPoint.x + offsetX,
+    auto: true,
+    infinite: true,
+    duration: waveLength * Math.LN10,
+    mode: 'pingpong',
+  })
+
+  useLine({
+    smooth: true,
+    start,
+    points: [{x, y}],
+    end,
+    rotation: 0,
+    showControlPoints: true,
+  });
+
+  return null;
+
+}
+
+function RenderWaves() {
+  const start = {x: 0, y: 250};
+  const end = {x: 500, y: 250};
+  return (
+    <>
+      <Wave
+        start={start}
+        end={end}
+        midPoint={{x: 250, y: 250}}
+        amplitude={0.1}
+        waveLength={3_000}
+      />
+      <Wave
+        start={start}
+        end={end}
+        midPoint={{x: 250, y: 250}}
+        amplitude={0.3}
+        amplitudeX={0.8}
+        waveLength={6_000}
+      />
+      <Wave
+        start={start}
+        end={end}
+        midPoint={{x: 400, y: 250}}
+        amplitude={0.1}
+        amplitudeY={0.5}
+        waveLength={4_000}
+      />
+
+    </>
+  )
+
+}
+
+export const Waves: StoryObj = {
   parameters: {
     canvasProvider: {
       width: 500,
       height: 500,
     }
   },
-  args: {
-    start: {
-      x: 0,
-      y: 250, 
-    },
-    points: [
-      {x: 100, y: 50},
-      {x: 200, y: 100},
-      {x: 300, y: 400},
-      {x: 400, y: 100},
-    ],
-    end: {
-      x: 500,
-      y: 250,
-    },
-  },
-  render: (args) => {
-    console.log('args', args);
-    return <Line {...args} />
-  }
+  args: {},
+  render: () => <RenderWaves />,
 };
 
 function RenderManyLines({ width, height }: { width: number; height: number }) {
