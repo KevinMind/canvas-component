@@ -4,7 +4,7 @@ import { createDrawing } from "../../RenderFrame.utilities";
 import { CurveProps } from "./Curve.types";
 
 // This function is super inefficient.. need to rethink it's implementation
-export function getCurvePoints(p: Position[], tension = 0.5, numOfSeg = 25, close = false): Float32Array {
+function getCurvePoints(p: Position[], tension = 0.5, numOfSeg = 25, close = false): Float32Array {
 	const points = p.flatMap((point) => [point.x, point.y]);
   let pts: number[] = [];
   let i = 1;
