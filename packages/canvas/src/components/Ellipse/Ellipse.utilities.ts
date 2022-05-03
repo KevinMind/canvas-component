@@ -13,7 +13,7 @@ export const drawEllipse = createDrawing<EllipseArgs>((ctx, args) => {
     args.pos.y,
     radiusX,
     radiusY,
-    degreesToRadians(args.rotation),
+    degreesToRadians(args.rotation || 0),
     startAngle,
     endAngle
   );

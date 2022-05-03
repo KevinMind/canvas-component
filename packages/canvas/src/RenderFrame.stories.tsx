@@ -189,7 +189,7 @@ function RenderPoint() {
   const [radius] = useAnimationFrame({from: 10, to: 100, duration: 5_000, infinite: true, auto: true, mode: 'pingpong'});
   const [x, y] = useMousePos();
 
-  useEllipse({pos: {x, y}, radius, rotation: 0});
+  useEllipse({pos: {x, y}, radius});
 
   return null;
 }
