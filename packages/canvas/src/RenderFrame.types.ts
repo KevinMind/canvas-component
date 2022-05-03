@@ -13,7 +13,7 @@ export interface Draw {
 }
 
 export interface BaseArgs {
-  rotation: number;
+  rotation?: number;
   filter?: CanvasRenderingContext2D['filter'];
   shadowColor?: CanvasRenderingContext2D['shadowColor'];
   shadowBlur?: CanvasRenderingContext2D['shadowBlur'];

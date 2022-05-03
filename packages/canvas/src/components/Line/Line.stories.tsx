@@ -161,7 +161,6 @@ function Wave({
     start,
     points: [{x, y}],
     end,
-    rotation: 0,
     showControlPoints: true,
   });
 

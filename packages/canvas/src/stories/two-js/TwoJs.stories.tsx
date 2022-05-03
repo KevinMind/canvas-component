@@ -82,9 +82,9 @@ function RenderTwoJS() {
    * but it might not be worth it. (see examples here https://benchmarks.slaylines.io/threejs.html)
    *
    */
-  useLine({start: {x: 0, y: 0}, end: {x: x * 2, y: y * 2}, rotation: 0});
+  useLine({start: {x: 0, y: 0}, end: {x: x * 2, y: y * 2}});
 
-  useEllipse({pos: {x: x * 2, y: y * 2}, radius: 200, rotation: 0});
+  useEllipse({pos: {x: x * 2, y: y * 2}, radius: 200});
 
   return null;
 }

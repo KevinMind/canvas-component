@@ -20,7 +20,6 @@ export default {
       x: 250,
       y: 250,
     },
-    rotation: 0,
     width: 250,
     height: 250,
     fillStyle: 'green',

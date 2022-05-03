@@ -59,17 +59,17 @@ function RenderArcWithHelpers(props: ArcToArgs) {
   const {pos0, pos1, pos2, radius} = props;
 
   // Tangential lines
-  useLine({start: pos0, end: pos1, rotation: 0});
-  useLine({start: pos1, end: pos2, rotation: 0});
+  useLine({start: pos0, end: pos1});
+  useLine({start: pos1, end: pos2});
 
   // Start point
-  useEllipse({pos: {x: pos0.x, y: pos0.y}, radius: 5, rotation: 0});
+  useEllipse({pos: {x: pos0.x, y: pos0.y}, radius: 5});
   // Control points
-  useEllipse({pos: {x: pos1.x, y: pos1.y}, radius: 5, rotation: 0});
-  useEllipse({pos: {x: pos2.x, y: pos2.y}, radius: 5, rotation: 0});
+  useEllipse({pos: {x: pos1.x, y: pos1.y}, radius: 5});
+  useEllipse({pos: {x: pos2.x, y: pos2.y}, radius: 5});
 
   // arc circle
-  useEllipse({pos: {x: pos1.x, y: pos2.y}, radius, rotation: 0});
+  useEllipse({pos: {x: pos1.x, y: pos2.y}, radius});
 
   useArcTo(props);
 
@@ -97,7 +97,6 @@ function RenderMoving() {
     pos1,
     pos2,
     radius: 50,
-    rotation: 0,
   });
 
   return null;
@@ -115,7 +114,6 @@ function RenderRadius() {
     pos1: Default.args?.pos1!,
     pos2: Default.args?.pos2!,
     radius,
-    rotation: 0,
   });
 
   return null;

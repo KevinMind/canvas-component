@@ -12,7 +12,7 @@ export function withCenterDot(Story: StoryFn) {
     pos.x = canvas.width / 2;
     pos.y = canvas.height /2;
   }
-  useEllipse({pos, radius: 1, fillStyle: 'black', rotation: 0});
+  useEllipse({pos, radius: 1, fillStyle: 'black'});
 
   return <Story />;
 }

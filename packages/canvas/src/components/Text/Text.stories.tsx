@@ -100,7 +100,6 @@ function RenderAnimated() {
     },
     maxWidth,
     text: 'Hello world',
-    rotation: 0,
     font: `bold ${fontSize}px serif`,
     fillStyle,
     textAlign: 'center',

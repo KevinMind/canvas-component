@@ -79,7 +79,6 @@ function RenderManyShapes({count}: {count: number}) {
           x: Math.random() * 500,
           y: Math.random() * 500,
         },
-        rotation: 0,
         fillStyle: randomColor({alpha: 0.5, format: 'rgba'}),
       });
     }
