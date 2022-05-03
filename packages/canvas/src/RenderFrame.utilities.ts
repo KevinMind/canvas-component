@@ -1,4 +1,4 @@
-import { DrawingArguments } from "./RenderFrame.types";
+import { BaseArgs, DrawingArguments } from "./RenderFrame.types";
 
 export function degreesToRadians(degrees: number) {
   if (degrees > 360 || degrees < 0) {
@@ -13,8 +13,9 @@ export function throwCanvasContext() {
   );
 }
 
-interface MakeDrawing<A> {
-  (c: CanvasRenderingContext2D, args: A): void
+// @TODO: fix hack making rotation required in the makeDrawing function because we set a default value.
+interface MakeDrawing<A extends BaseArgs> {
+  (c: CanvasRenderingContext2D, args: A & {rotation: number}): void
 }
 
 export function createDrawing<A extends DrawingArguments>(makeDrawing: MakeDrawing<A>) {
