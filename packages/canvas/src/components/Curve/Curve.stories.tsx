@@ -87,12 +87,22 @@ function RenderWave() {
   const length = 5;
   const middle = length / 2;
 
-  for (let i = 0; i <= length; i++) {
-    const factor = Math.cos((middle - i) / length);
-    const x = i * 100;
-    points.push({x, y: 250 + (factor * offset)});
+  function getX(i: number) {
+    return i * 100;
   }
-  return <Curve points={points} tension={0.2} rotation={0} />;
+
+  function getY(i: number) {
+    const factor = Math.cos((middle - i) / length);
+
+    return 250 + (factor * offset);
+  }
+
+  for (let i = 0; i <= length; i++) {
+    points.push({x: getX(i), y: getY(i)});
+  }
+
+  points.push({x: getX(length), y: 500}, {x: getX(0), y: 500}, {x: getX(0), y: 250});
+  return <Curve points={points} tension={0.2} rotation={0} fillStyle="rgba(0,0, 240, 0.4)" close />;
 }
 
 export const Wave: StoryObj = {
