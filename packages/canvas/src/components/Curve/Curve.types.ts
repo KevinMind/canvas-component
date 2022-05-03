@@ -1,7 +1,7 @@
-import { BaseArgs, Position, StrokeArgs } from "../../RenderFrame.types";
+import { BaseArgs, FillArgs, Position, StrokeArgs } from "../../RenderFrame.types";
 
 // points: number[], tension = 0.5, numOfSeg = 25, close = false
-export interface CurveProps extends BaseArgs, StrokeArgs {
+export interface CurveProps extends BaseArgs, StrokeArgs, FillArgs {
   points: Position[];
   tension?: number;
   numOfSeg?: number;
