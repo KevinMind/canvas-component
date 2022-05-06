@@ -26,7 +26,7 @@ export const Default: EllipseStory = {
   },
   args: {
     radius: 125,
-    pos: {
+    center: {
       x: 125,
       y: 125,
     },

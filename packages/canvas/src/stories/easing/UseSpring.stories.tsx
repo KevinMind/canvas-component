@@ -13,8 +13,8 @@ function UseSpring(config: Parameters<typeof useSpring>[1]) {
 
   return (
     <>
-      <Ellipse pos={{x: springX, y: r}} radius={r} rotation={0} />
-      <Ellipse pos={{x, y: r}} radius={r} rotation={0} />
+      <Ellipse center={{x: springX, y: r}} radius={r} rotation={0} />
+      <Ellipse center={{x, y: r}} radius={r} rotation={0} />
     </>
   );
 }

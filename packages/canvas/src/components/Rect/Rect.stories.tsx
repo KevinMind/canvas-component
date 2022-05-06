@@ -24,7 +24,7 @@ export const Default: RectStory = {
     },
   },
   args: {
-    pos: {x: 125, y: 125},
+    center: {x: 125, y: 125},
     width: 200,
     height: 200,
   },
@@ -68,7 +68,7 @@ function RenderExpanding() {
     infinite: true,
   });
 
-  useRect({pos: {x: 125, y: 125}, width, height: width});
+  useRect({center: {x: 125, y: 125}, width, height: width});
   return null;
 }
 

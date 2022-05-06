@@ -16,7 +16,7 @@ export default {
     },
   },
   args: {
-    pos: {
+    center: {
       x: 250,
       y: 250,
     },

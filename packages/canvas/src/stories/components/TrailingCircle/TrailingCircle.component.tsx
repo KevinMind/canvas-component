@@ -38,11 +38,11 @@ export function TrailingCircle(props: TrailingCircleProps) {
   const trails = useTrails(x, y, 20);
 
   useRenderFrame((ctx) => {
-    drawEllipse(ctx, {...props, pos: {x, y}});
+    drawEllipse(ctx, {...props, center: {x, y}});
 
     for(let x = 0; x < trails.length; x++) {
       const pos = trails[x];
-      drawEllipse(ctx, {...props, pos, radius: props.radius - props.radius * x / trails.length});
+      drawEllipse(ctx, {...props, center: pos, radius: props.radius - props.radius * x / trails.length});
     }
     
   });

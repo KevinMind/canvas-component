@@ -2,7 +2,7 @@ import { createDrawing } from "../../RenderFrame.utilities";
 
 import { PolygonArgs } from "./Polygon.types";
 
-export const drawPolygon = createDrawing<PolygonArgs>((ctx, {pos:{ x, y}, sides, size}) => {
+export const drawPolygon = createDrawing<PolygonArgs>((ctx, {center:{ x, y}, sides, size}) => {
   const isCustomPolygon = Array.isArray(sides);
   const numSides = isCustomPolygon ? sides.length : sides;
   

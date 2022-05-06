@@ -98,7 +98,7 @@ function RenderDraggable() {
 
   return (
     <>
-      <Ellipse pos={{x, y: 100}} radius={100} rotation={0} />
+      <Ellipse center={{x, y: 100}} radius={100} rotation={0} />
     </>
   );
 }
@@ -159,18 +159,18 @@ function RenderEllipseOfEllipses() {
 
   return (
     <>
-      <Ellipse pos={{x, y}} radius={slowRadius} rotation={0} />
-      <Ellipse pos={{x, y}} radius={radius} rotation={0} />
-      <Ellipse pos={{x: x + slow.x, y: y + slow.y}} radius={slowRadius / 10} rotation={0} />
+      <Ellipse center={{x, y}} radius={slowRadius} rotation={0} />
+      <Ellipse center={{x, y}} radius={radius} rotation={0} />
+      <Ellipse center={{x: x + slow.x, y: y + slow.y}} radius={slowRadius / 10} rotation={0} />
       <Ellipse
-        pos={{
+        center={{
           x: x + slow.x + moon.x,
           y: y + slow.y + moon.y,
         }}
         radius={slowRadius / 20}
         rotation={0}
       />
-      <Ellipse pos={{x: x + fast.x, y: y + fast.y}} radius={radius / 10} rotation={0} />
+      <Ellipse center={{x: x + fast.x, y: y + fast.y}} radius={radius / 10} rotation={0} />
     </>
   );
 }
@@ -189,7 +189,7 @@ function RenderPoint() {
   const [radius] = useAnimationFrame({from: 10, to: 100, duration: 5_000, infinite: true, auto: true, mode: 'pingpong'});
   const [x, y] = useMousePos();
 
-  useEllipse({pos: {x, y}, radius});
+  useEllipse({center: {x, y}, radius});
 
   return null;
 }

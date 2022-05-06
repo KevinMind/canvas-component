@@ -29,7 +29,7 @@ type TextStory = StoryObj<ComponentProps<typeof Text>>;
 export const Default: TextStory = {
   args: {
     text: 'Hello world',
-    pos: {
+    center: {
       x: 250,
       y: 250,
     },
@@ -101,7 +101,7 @@ function RenderAnimated() {
   });
 
   useText({
-    pos: {
+    center: {
       x: 250,
       y: 250,
     },

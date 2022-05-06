@@ -25,7 +25,7 @@ export const Default: PolygonStory = {
   args: {
     sides: 3,
     size: 100,
-    pos: {
+    center: {
       x: 250,
       y: 250,
     }
@@ -82,7 +82,7 @@ function RenderManyShapes({count}: {count: number}) {
       newShapes.push({
         size: random(10, Math.max(500 / count * 2, 20)),
         sides: random(3, 8),
-        pos: {
+        center: {
           x: Math.random() * 500,
           y: Math.random() * 500,
         },
@@ -97,7 +97,7 @@ function RenderManyShapes({count}: {count: number}) {
   return (
     <>
     {shapes.map((shape) => (
-      <RandomShape {...shape} key={shape.pos.x} />
+      <RandomShape {...shape} key={shape.center.x} />
     ))}
     </>
   );
@@ -120,7 +120,7 @@ export const CustomPolygon: PolygonStory = {
       {x: 100, y: 400},
     ],
     size: 100,
-    pos: {
+    center: {
       x: 250,
       y: 250,
     }

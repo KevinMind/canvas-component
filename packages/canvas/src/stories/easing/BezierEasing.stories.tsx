@@ -34,9 +34,9 @@ function BezierEasing({ easing, interval, duration }: Pick<UseAnimationFrameArgs
 
   return (
     <>
-      <Ellipse pos={{x, y: r}} radius={r} rotation={0} />
-      <Ellipse pos={{x, y: r}} radius={radius} rotation={0} />
-      <Ellipse pos={{x: 2 * x, y: r}} radius={r / 2} rotation={0} />
+      <Ellipse center={{x, y: r}} radius={r} rotation={0} />
+      <Ellipse center={{x, y: r}} radius={radius} rotation={0} />
+      <Ellipse center={{x: 2 * x, y: r}} radius={r / 2} rotation={0} />
     </>
   );
 }

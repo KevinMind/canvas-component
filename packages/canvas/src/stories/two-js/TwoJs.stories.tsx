@@ -84,7 +84,7 @@ function RenderTwoJS() {
    */
   useLine({start: {x: 0, y: 0}, end: {x: x * 2, y: y * 2}});
 
-  useEllipse({pos: {x: x * 2, y: y * 2}, radius: 200});
+  useEllipse({center: {x: x * 2, y: y * 2}, radius: 200});
 
   return null;
 }

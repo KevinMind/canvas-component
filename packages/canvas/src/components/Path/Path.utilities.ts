@@ -8,7 +8,7 @@ export const drawPath = createDrawing<PathProps>((ctx, {points = []}) => {
     // We want to actually make an `angle` prop that determines the beginning thickness of the lines. maybe a pen type.
     // need to research caligraphy to know how to name it.
     const [first] = points;
-    drawEllipse(ctx, {pos: first, radius: 1});
+    drawEllipse(ctx, {center: first, radius: 1});
   }
 
   if (points.length > 1) {

@@ -22,7 +22,7 @@ export interface BaseArgs {
 }
 
 export interface ShapeArgs {
-  pos: Position;
+  center: Position;
 }
 
 export interface FillArgs {

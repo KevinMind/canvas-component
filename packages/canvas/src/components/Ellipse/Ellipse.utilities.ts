@@ -9,8 +9,8 @@ export const drawEllipse = createDrawing<EllipseArgs>((ctx, args) => {
   const endAngle = 2 * Math.PI;
 
   ctx.ellipse(
-    args.pos.x,
-    args.pos.y,
+    args.center.x,
+    args.center.y,
     radiusX,
     radiusY,
     0,

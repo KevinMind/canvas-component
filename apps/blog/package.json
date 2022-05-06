@@ -10,7 +10,7 @@
     "lint": "TIMING=1 next lint",
     "format": "yarn lint --fix",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf .next",
-    "test-storybook": "test-storybook",
+    "test:storybook": "test-storybook",
     "storybook": "start-storybook -p 7006",
     "build-storybook": "build-storybook"
   },

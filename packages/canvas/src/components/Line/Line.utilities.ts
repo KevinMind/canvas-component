@@ -6,7 +6,7 @@ import { LineArgs } from "./Line.types";
 export const drawLine = createDrawing<LineArgs>((ctx, {smooth, ...args}) => {
   if (args.showControlPoints) {
     for (let pos of args.points || []) {
-      drawEllipse(ctx, {pos, radius: 1});
+      drawEllipse(ctx, {center: pos, radius: 1});
     }
   }
 

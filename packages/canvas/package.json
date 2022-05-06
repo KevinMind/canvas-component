@@ -16,7 +16,7 @@
     "lint": "TIMING=1 eslint src",
     "format": "yarn lint --fix",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
-    "test-storybook": "test-storybook --url http://localhost:8006",
+    "test:storybook": "test-storybook --url http://localhost:8006",
     "storybook": "start-storybook -p 8006",
     "build-storybook": "build-storybook"
   },

@@ -23,7 +23,7 @@ baseImage.src = 'https://yari-demos.prod.mdn.mozit.cloud/en-US/docs/Web/API/Canv
 export const Default: ImageStory = {
   args: {
     image: baseImage,
-    pos: {
+    center: {
       x: 250,
       y: 250,
     },

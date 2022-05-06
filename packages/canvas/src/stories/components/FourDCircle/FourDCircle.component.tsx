@@ -61,13 +61,13 @@ export function FourDCircle({
 
 
   useRenderFrame((ctx) => {
-    drawEllipse(ctx, {...props, pos: {x, y}, radius: maxRadius});
+    drawEllipse(ctx, {...props, center: {x, y}, radius: maxRadius});
 
     for (let x = 0; x < trails.current.length; x++) {
       const pos = trails.current[x];
       const perc = (trails.current.length - x) / trails.current.length;
 
-      drawEllipse(ctx, {...props, pos, radius: perc * radius.current});
+      drawEllipse(ctx, {...props, center: pos, radius: perc * radius.current});
     }
   });
 

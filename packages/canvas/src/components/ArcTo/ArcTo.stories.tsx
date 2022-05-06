@@ -63,13 +63,13 @@ function RenderArcWithHelpers(props: ArcToArgs) {
   useLine({start: pos1, end: pos2});
 
   // Start point
-  useEllipse({pos: {x: pos0.x, y: pos0.y}, radius: 5});
+  useEllipse({center: {x: pos0.x, y: pos0.y}, radius: 5});
   // Control points
-  useEllipse({pos: {x: pos1.x, y: pos1.y}, radius: 5});
-  useEllipse({pos: {x: pos2.x, y: pos2.y}, radius: 5});
+  useEllipse({center: {x: pos1.x, y: pos1.y}, radius: 5});
+  useEllipse({center: {x: pos2.x, y: pos2.y}, radius: 5});
 
   // arc circle
-  useEllipse({pos: {x: pos1.x, y: pos2.y}, radius});
+  useEllipse({center: {x: pos1.x, y: pos2.y}, radius});
 
   useArcTo(props);
 

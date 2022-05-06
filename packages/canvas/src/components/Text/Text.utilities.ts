@@ -23,10 +23,10 @@ export const drawText = createDrawing<TextProps>((ctx, args) => {
 
   if (args.fillStyle) {
     ctx.fillStyle = args.fillStyle;
-    ctx.fillText(args.text, args.pos.x, args.pos.y, args.maxWidth);
+    ctx.fillText(args.text, args.center.x, args.center.y, args.maxWidth);
   }
   if (args.strokeStyle) {
     ctx.strokeStyle = args.strokeStyle;
-    ctx.strokeText(args.text, args.pos.x, args.pos.y, args.maxWidth);
+    ctx.strokeText(args.text, args.center.x, args.center.y, args.maxWidth);
   }
 });

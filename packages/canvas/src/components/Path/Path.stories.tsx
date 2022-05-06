@@ -52,7 +52,7 @@ function RenderPath() {
 
   return (
     <>
-      <Ellipse pos={{x, y}} radius={penDown ? 2 : 10} />
+      <Ellipse center={{x, y}} radius={penDown ? 2 : 10} />
       {drawings.map((points) => (
         <Path points={points} />
       ))}

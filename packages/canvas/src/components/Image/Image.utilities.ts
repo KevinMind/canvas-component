@@ -8,8 +8,8 @@ export const drawImage = createDrawing<ImageProps>((ctx, args) => {
   const imageWidth = typeof args.image.width === 'number' ? args.image.width : args.image.width.animVal.value;
   const imageHeight = typeof args.image.height === 'number' ? args.image.height : args.image.height.animVal.value;
 
-  const centerX = args.pos.x - imageWidth / 2;
-  const centerY = args.pos.y - imageHeight / 2;
+  const centerX = args.center.x - imageWidth / 2;
+  const centerY = args.center.y - imageHeight / 2;
 
 
   if ('sx' in args) {

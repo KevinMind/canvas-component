@@ -23,7 +23,7 @@ function RenderWithMouse() {
   const [x, y] = useMousePos();
 
   return (
-    <Ellipse pos={{x, y}} rotation={0} fillStyle="rgba(255, 255, 255, 0.6)" strokeStyle="white" radius={50} />
+    <Ellipse center={{x, y}} rotation={0} fillStyle="rgba(255, 255, 255, 0.6)" strokeStyle="white" radius={50} />
   )
 }
 

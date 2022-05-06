@@ -26,7 +26,7 @@ export function createDrawing<A extends DrawingArguments>(makeDrawing: MakeDrawi
     const rotation = args.rotation || 0;
 
     if ('pos' in args && rotation > 0) {
-      const {x, y} = args.pos;
+      const {x, y} = args.center;
       ctx.translate(x, y);
       ctx.rotate(degreesToRadians(rotation));
       ctx.translate(-x, -y);
