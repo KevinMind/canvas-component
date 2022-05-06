@@ -15,8 +15,8 @@ export const drawPolygon = createDrawing<PolygonArgs>((ctx, {center:{ x, y}, sid
 
     ctx.lineTo(first.x, first.y);
 
-    for (let pos of rest) {
-      ctx.lineTo(pos.x, pos.y);
+    for (let vertices of rest) {
+      ctx.lineTo(vertices.x, vertices.y);
     }
 
     ctx.lineTo(first.x, first.y);

@@ -20,13 +20,13 @@ export function withRotation(Story: StoryFn, ctx: StoryContext) {
 
 export function withCenterDot(Story: StoryFn) {
   const [canvas] = useRenderFrameCanvas();
-  let pos = {x: 0, y: 0};
+  let center = {x: 0, y: 0};
 
   if (canvas) {
-    pos.x = canvas.width / 2;
-    pos.y = canvas.height /2;
+    center.x = canvas.width / 2;
+    center.y = canvas.height /2;
   }
-  useEllipse({center: pos, radius: 1, fillStyle: 'black'});
+  useEllipse({center, radius: 1, fillStyle: 'black'});
 
   return <Story />;
 }
