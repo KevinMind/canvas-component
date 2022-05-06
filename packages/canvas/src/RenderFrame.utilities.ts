@@ -23,7 +23,16 @@ export function createDrawing<A extends DrawingArguments>(makeDrawing: MakeDrawi
     ctx.restore();
     ctx.beginPath();
 
-    makeDrawing(ctx, {rotation: 0, ...args});
+    const rotation = args.rotation || 0;
+
+    if ('pos' in args && rotation > 0) {
+      const {x, y} = args.pos;
+      ctx.translate(x, y);
+      ctx.rotate(degreesToRadians(rotation));
+      ctx.translate(-x, -y);
+    }
+
+    makeDrawing(ctx, {...args, rotation});
 
     if (args.shadowColor) {
       ctx.shadowColor = args.shadowColor;

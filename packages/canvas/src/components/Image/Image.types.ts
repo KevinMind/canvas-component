@@ -1,10 +1,8 @@
-import { BaseArgs } from "../../RenderFrame.types";
+import { BaseArgs, ShapeArgs } from "../../RenderFrame.types";
 
-interface BasicImage extends BaseArgs {
+interface BasicImage extends BaseArgs, ShapeArgs {
   image: CanvasImageSource;
   smooth?: boolean;
-  dx: number;
-  dy: number;
 }
 
 interface SimpleImage extends BasicImage {

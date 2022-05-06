@@ -1,9 +1,8 @@
-import React, { ComponentProps, useEffect, useRef } from "react";
+import React, { ComponentProps } from "react";
 import { ComponentMeta, StoryObj } from "@storybook/react";
 
 import { Image as ImageComponent } from "./Image.component";
-import { withRenderFrameProvider } from "../../../.storybook/decorators";
-import { useRenderFrame } from "../../RenderFrame.hooks";
+import { withRenderFrameProvider, withRotation } from "../../../.storybook/decorators";
 
 export default {
   decorators: [withRenderFrameProvider],
@@ -18,15 +17,24 @@ export default {
 
 type ImageStory = StoryObj<ComponentProps<typeof ImageComponent>>;
 
-const baseImage = new Image(40, 50);
+const baseImage = new Image(300, 227);
 baseImage.src = 'https://yari-demos.prod.mdn.mozit.cloud/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage/rhino.jpg';
 
 export const Default: ImageStory = {
   args: {
     image: baseImage,
-    dx: 100,
-    dy: 100,
+    pos: {
+      x: 250,
+      y: 250,
+    },
   },
+};
+
+export const Rotate: ImageStory = {
+  // @TODO: fix broken decorator function signature
+  // @ts-ignore
+  decorators: [withRotation],
+  ...Default,
 };
 
 export const Styled: ImageStory = {

@@ -5,6 +5,7 @@ import randomColor from 'randomcolor';
 import { Ellipse } from "./Ellipse.component";
 import {
   withRenderFrameProvider,
+  withRotation,
   withTodoList,
 } from "../../../.storybook/decorators";
 import { useAnimationFrame } from "../../hooks/useAnimationFrame";
@@ -57,29 +58,11 @@ export const Elipse: EllipseStory = {
   },
 };
 
-export const Rotating: EllipseStory = {
+export const Rotate: EllipseStory = {
+  // @TODO: fix broken decorator function signature
+  // @ts-ignore
+  decorators: [withRotation],
   ...Elipse,
-  decorators: [
-    (Story, ctx) => {
-      const [rotation] = useAnimationFrame({
-        auto: true,
-        duration: 1000,
-        infinite: true,
-        from: 0,
-        to: 360,
-      });
-      const [radius] = useAnimationFrame({
-        auto: true,
-        mode: "pingpong",
-        duration: 1000,
-        from: 0,
-        to: 125,
-      });
-      ctx.args.rotation = rotation;
-      ctx.args.radius = radius;
-      return <Story />;
-    },
-  ],
 };
 
 export const Filled: EllipseStory = {

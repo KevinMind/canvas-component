@@ -2,7 +2,7 @@ import React, { ComponentProps, useState, useEffect } from "react";
 import { ComponentMeta, StoryObj } from "@storybook/react";
 import randomColor from "randomcolor";
 
-import { withRenderFrameProvider } from "../../../.storybook/decorators";
+import { withRenderFrameProvider, withRotation } from "../../../.storybook/decorators";
 
 import { Polygon } from "./Polygon.component";
 import { usePolygon } from "./Polygon.hooks";
@@ -30,6 +30,13 @@ export const Default: PolygonStory = {
       y: 250,
     }
   },
+};
+
+export const Rotate: PolygonStory = {
+  // @TODO: fix broken decorator function signature
+  // @ts-ignore
+  decorators: [withRotation],
+  ...Default,
 };
 
 export const FillStyle: PolygonStory = {

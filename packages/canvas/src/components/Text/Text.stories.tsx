@@ -2,7 +2,7 @@ import React, { ComponentProps } from "react";
 import { ComponentMeta, StoryObj } from "@storybook/react";
 import randomColor from "randomcolor";
 
-import { withRenderFrameProvider, withCenterDot } from "../../../.storybook/decorators";
+import { withRenderFrameProvider, withCenterDot, withRotation } from "../../../.storybook/decorators";
 import { bezierEasing } from "../../utilities/bezier";
 
 import { Text } from "./Text.component";
@@ -38,6 +38,13 @@ export const Default: TextStory = {
     textAlign: 'center',
     textBaseline: 'middle',
   },
+};
+
+export const Rotate: TextStory = {
+  // @TODO: fix broken decorator function signature
+  // @ts-ignore
+  decorators: [withRotation],
+  ...Default,
 };
 
 export const Stroke: TextStory = {

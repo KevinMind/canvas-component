@@ -1,8 +1,22 @@
-import React, { useState, useRef, useEffect, createContext, useContext, MouseEventHandler } from "react";
+import React, { useState, useRef, useEffect, createContext, useContext } from "react";
 import { StoryFn, StoryContext } from "@storybook/react";
 import isChromatic from "chromatic/isChromatic";
 
-import { useRenderFrameCanvas, RenderFrameProvider, Canvas, useEllipse } from "../src";
+import { useRenderFrameCanvas, RenderFrameProvider, Canvas, useEllipse, useAnimationFrame } from "../src";
+
+export function withRotation(Story: StoryFn, ctx: StoryContext) {
+  const [rotation] = useAnimationFrame({
+    from: 0,
+    to: 360,
+    duration: 3_000,
+    auto: true,
+    infinite: true,
+  });
+
+  ctx.args.rotation = rotation;
+
+  return <Story />
+}
 
 export function withCenterDot(Story: StoryFn) {
   const [canvas] = useRenderFrameCanvas();

@@ -1,7 +1,6 @@
-import { BaseArgs, Position, FillArgs, StrokeArgs } from "../../RenderFrame.types";
+import { BaseArgs, ShapeArgs, FillArgs, StrokeArgs } from "../../RenderFrame.types";
 
-export interface RectArgs extends BaseArgs, FillArgs, StrokeArgs {
-  pos: Position;
+export interface RectArgs extends BaseArgs, ShapeArgs, FillArgs, StrokeArgs {
   width: number;
   height: number;
 }

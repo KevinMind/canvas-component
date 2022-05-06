@@ -21,6 +21,10 @@ export interface BaseArgs {
   shadowOffsetY?: CanvasRenderingContext2D['shadowOffsetY'];
 }
 
+export interface ShapeArgs {
+  pos: Position;
+}
+
 export interface FillArgs {
   fillStyle?: CanvasRenderingContext2D['fillStyle'];
 }
@@ -34,7 +38,7 @@ export interface StrokeArgs {
   lineDash?: Parameters<CanvasRenderingContext2D['setLineDash']>[0];
 }
 
-export interface DrawingArguments extends Partial<BaseArgs>, Partial<FillArgs>, Partial<StrokeArgs> {}
+export interface DrawingArguments extends Partial<BaseArgs>, Partial<ShapeArgs>, Partial<FillArgs>, Partial<StrokeArgs> {}
 
 export interface RenderFrameProps {
   fillStyle?: string;

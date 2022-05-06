@@ -1,17 +1,25 @@
-import { createDrawing } from "../../RenderFrame.utilities";
+import { createDrawing, degreesToRadians } from "../../RenderFrame.utilities";
 
 import { ImageProps } from "./Image.types";
 
 export const drawImage = createDrawing<ImageProps>((ctx, args) => {  
   ctx.imageSmoothingEnabled = args.smooth ?? false;
+
+  const imageWidth = typeof args.image.width === 'number' ? args.image.width : args.image.width.animVal.value;
+  const imageHeight = typeof args.image.height === 'number' ? args.image.height : args.image.height.animVal.value;
+
+  const centerX = args.pos.x - imageWidth / 2;
+  const centerY = args.pos.y - imageHeight / 2;
+
+
   if ('sx' in args) {
     // complex image
-    ctx.drawImage(args.image, args.sx, args.sy, args.sWidth, args.sHeight, args.dx, args.dy, args.dWidth, args.dHeight);
+    ctx.drawImage(args.image, args.sx, args.sy, args.sWidth, args.sHeight, centerX, centerY, args.dWidth, args.dHeight);
   } else if ('dWidth' in args) {
     // simple image
-    ctx.drawImage(args.image, args.dx, args.dy, args.dWidth, args.dHeight);
+    ctx.drawImage(args.image, centerX, centerY, args.dWidth, args.dHeight);
   } else {
     // basic image
-    ctx.drawImage(args.image, args.dx, args.dy);
+    ctx.drawImage(args.image, centerX, centerY);
   }
 })
