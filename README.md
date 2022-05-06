@@ -27,7 +27,7 @@
   - [ ] add gradient functionality (conic, linear, etc)
   - [x] add image functionality (render images and svgs)
   - [ ] add miter limit (with examples, still don't get what that is)
-  - [ ] finish rotation (make all elements rotatable around center point)
+  - [x] finish rotation (make all elements rotatable around center point)
   - [ ] add custom rotation point (rotate element around custom center point)
   - [ ] add ability to bend vertices of polygons, inverted rect, etc.
 
