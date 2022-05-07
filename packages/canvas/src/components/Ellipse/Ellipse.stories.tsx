@@ -9,6 +9,7 @@ import {
   withTodoList,
 } from "../../../.storybook/decorators";
 import { useAnimationFrame } from "../../hooks/useAnimationFrame";
+import { useLinearGradient } from "../../hooks/useLinearGradient";
 
 export default {
   decorators: [withRenderFrameProvider, withTodoList],
@@ -86,4 +87,31 @@ export const StrokeStyle: EllipseStory = {
     }),
     lineWidth: 10,
   }
+};
+
+function RenderGradient() {
+  const grd = useLinearGradient({
+    start: {x: 0, y: 250},
+    end: {x: 250, y: 250},
+    colorStops: [
+      [0, 'red'],
+      [0.3, 'red'],
+      [0.31, 'yellow'],
+      [0.7, 'yellow'],
+      [0.71, 'black'],
+      [1, 'black'],
+    ],
+  });
+
+  return (
+    <Ellipse
+      radius={125}
+      center={{x: 125, y: 125}}
+      fillStyle={grd}
+    />
+  )
 }
+
+export const LinearGradient: StoryObj = {
+  render: () => <RenderGradient />,
+};

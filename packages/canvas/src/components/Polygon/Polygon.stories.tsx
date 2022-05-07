@@ -7,6 +7,7 @@ import { withRenderFrameProvider, withRotation } from "../../../.storybook/decor
 import { Polygon } from "./Polygon.component";
 import { usePolygon } from "./Polygon.hooks";
 import { PolygonArgs } from "./Polygon.types";
+import { useLinearGradient } from "../../hooks/useLinearGradient";
 
 export default {
   decorators: [withRenderFrameProvider],
@@ -61,6 +62,35 @@ export const StrokeStyle: PolygonStory = {
     lineWidth: 2,
   }
 }
+
+function RenderGradient() {
+  const grd = useLinearGradient({
+    start: {x: 0, y: 250},
+    end: {x: 500, y: 250},
+    colorStops: [
+      [0, 'red'],
+      [0.3, 'red'],
+      [0.31, 'yellow'],
+      [0.7, 'yellow'],
+      [0.71, 'black'],
+      [1, 'black'],
+    ],
+  });
+
+  return (
+    <Polygon
+      sides={8}
+      size={250}
+      center={{x: 250, y: 250}}
+      fillStyle={grd}
+    />
+  )
+}
+
+export const LinearGradient: StoryObj = {
+  render: () => <RenderGradient />,
+};
+
 
 function random(min: number, max: number) { // min and max included 
   return Math.floor(Math.random() * (max - min + 1) + min)

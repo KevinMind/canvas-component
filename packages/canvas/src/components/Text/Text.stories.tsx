@@ -8,6 +8,7 @@ import { bezierEasing } from "../../utilities/bezier";
 import { Text } from "./Text.component";
 import { useAnimationFrame } from "../../hooks/useAnimationFrame";
 import { useText } from "./Text.hooks";
+import { useLinearGradient } from "../../hooks/useLinearGradient";
 
 
 const fillStyle = randomColor({format: 'rgba', hue: 'green', luminosity: 'bright'});
@@ -60,6 +61,35 @@ export const Fill: TextStory = {
     ...Default.args,
     fillStyle,
   },
+};
+
+
+function RenderGradient() {
+  const grd = useLinearGradient({
+    start: {x: 0, y: 250},
+    end: {x: 500, y: 250},
+    colorStops: [
+      [0, 'red'],
+      [0.4, 'red'],
+      [0.41, 'yellow'],
+      [0.6, 'yellow'],
+      [0.61, 'black'],
+      [1, 'black'],
+    ],
+  });
+
+  return (
+    <Text
+      {...Default.args}
+      text={Default.args?.text!}
+      center={{x: 250, y: 250}}
+      fillStyle={grd || 'black'}
+    />
+  )
+}
+
+export const LinearGradient: StoryObj = {
+  render: () => <RenderGradient />,
 };
 
 export const Shadow: TextStory = {

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, createContext, useContext } from "r
 import { StoryFn, StoryContext } from "@storybook/react";
 import isChromatic from "chromatic/isChromatic";
 
-import { useRenderFrameCanvas, RenderFrameProvider, Canvas, useEllipse, useAnimationFrame } from "../src";
+import { useRenderFrameCanvas, RenderFrameProvider, Canvas, useEllipse, useAnimationFrame} from "../src";
 
 export function withRotation(Story: StoryFn, ctx: StoryContext) {
   const [rotation] = useAnimationFrame({
