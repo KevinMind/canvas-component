@@ -30,6 +30,11 @@
   - [x] finish rotation (make all elements rotatable around center point)
   - [ ] add custom rotation point (rotate element around custom center point)
   - [x] add ability to bend vertices of polygons, inverted rect, etc.
+  - [ ] create clipPath component for creating clips based on polygon (maybe createa clip variant as in createDrawing | creatClip   for each functional drawing; allowing any shape to be a clip)
+
+  - [ ] fork repo
+  - [ ] setup chromatic/turborepo again on new repo
+  - [ ] create vanilla and core packages to extract from react
 
 - [ ] review current code base for opportunities to improve tests
 - [x] add Polygon support for canvas
