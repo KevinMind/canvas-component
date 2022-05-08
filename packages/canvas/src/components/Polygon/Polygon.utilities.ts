@@ -22,15 +22,18 @@ export const drawPolygon = createDrawing<PolygonArgs>((ctx, args) => {
   }
   
   if (Array.isArray(args.sides)) {
-    const [first, ...rest] = args.sides;
+    const [first, ...sides] = args.sides;
 
-    drawSide(ctx, first);
+    const firstPoint = Array.isArray(first) ? first[1] : first;
 
-    for (let vertices of rest) {
-      drawSide(ctx, vertices);
+    ctx.moveTo(firstPoint.x, firstPoint.y);
+
+    for (let side of sides) {
+      drawSide(ctx, side);
     }
 
     drawSide(ctx, first);
+
   } else if ('sideLength' in args) {
     ctx.moveTo (args.center.x +  args.sideLength * Math.cos(0), args.center.y +  args.sideLength *  Math.sin(0));
     
@@ -39,14 +42,14 @@ export const drawPolygon = createDrawing<PolygonArgs>((ctx, args) => {
       const xTranslation = args.sideLength * Math.cos(offset);
       const yTranslation = args.sideLength * Math.sin(offset);
 
-      const nextPoint: Position = {
+      const nextPoint = {
         x: args.center.x + xTranslation,
         y: args.center.y + yTranslation,
       }
 
       const controlPoint = args.controlPoint || nextPoint;
-  
-      ctx.quadraticCurveTo(controlPoint.x, controlPoint.y, nextPoint.x, nextPoint.y);
+
+      drawSide(ctx, [controlPoint, nextPoint]);
     }
   }
 });
