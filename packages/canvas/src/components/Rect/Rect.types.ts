@@ -3,5 +3,6 @@ import { BaseArgs, ShapeArgs, FillArgs, StrokeArgs } from "../../RenderFrame.typ
 export interface RectArgs extends BaseArgs, ShapeArgs, FillArgs, StrokeArgs {
   width: number;
   height: number;
+  borderRadius?: number;
 }
 

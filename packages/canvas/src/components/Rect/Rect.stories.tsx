@@ -104,3 +104,11 @@ function RenderExpanding() {
 export const Exapanding: StoryObj = {
   render: () => <RenderExpanding />,
 };
+
+export const Rounded: RectStory = {
+  ...Default,
+  args: {
+    ...Default.args,
+    borderRadius: 10,
+  },
+};

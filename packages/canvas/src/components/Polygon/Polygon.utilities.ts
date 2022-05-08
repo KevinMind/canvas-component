@@ -1,34 +1,52 @@
+import { Position } from "../../RenderFrame.types";
 import { createDrawing } from "../../RenderFrame.utilities";
 
-import { PolygonArgs } from "./Polygon.types";
+import { PolygonArgs, Side } from "./Polygon.types";
 
-export const drawPolygon = createDrawing<PolygonArgs>((ctx, {center:{ x, y}, sides, size}) => {
-  const isCustomPolygon = Array.isArray(sides);
-  const numSides = isCustomPolygon ? sides.length : sides;
+function drawSide(ctx: CanvasRenderingContext2D, side: Side) {
+  const [cp, pos] = Array.isArray(side) ? side : [side, side];
+  ctx.quadraticCurveTo(cp.x, cp.y, pos.x, pos.y);
+}
+
+export const drawPolygon = createDrawing<PolygonArgs>((ctx, args) => {
+  let numSides: number;
+
+  if (Array.isArray(args.sides)) {
+    numSides = args.sides.length;
+  } else {
+    numSides = args.sides;
+  }
   
   if (numSides < 3) {
     throw new Error('polygon must contain at least 3 sides');
   }
   
-  if (isCustomPolygon) {
-    const [first, ...rest] = sides;
+  if (Array.isArray(args.sides)) {
+    const [first, ...rest] = args.sides;
 
-    ctx.lineTo(first.x, first.y);
+    drawSide(ctx, first);
 
     for (let vertices of rest) {
-      ctx.lineTo(vertices.x, vertices.y);
+      drawSide(ctx, vertices);
     }
 
-    ctx.lineTo(first.x, first.y);
-  } else {
-    ctx.moveTo (x +  size * Math.cos(0), y +  size *  Math.sin(0));
+    drawSide(ctx, first);
+  } else if ('sideLength' in args) {
+    ctx.moveTo (args.center.x +  args.sideLength * Math.cos(0), args.center.y +  args.sideLength *  Math.sin(0));
     
-    for (let i = 1; i <= sides; i += 1) {
-      const offset = i * 2 * Math.PI / sides;
-      const xTranslation = size * Math.cos(offset);
-      const yTranslation = size * Math.sin(offset);
+    for (let i = 1; i <= args.sides; i += 1) {
+      const offset = i * 2 * Math.PI / args.sides;
+      const xTranslation = args.sideLength * Math.cos(offset);
+      const yTranslation = args.sideLength * Math.sin(offset);
+
+      const nextPoint: Position = {
+        x: args.center.x + xTranslation,
+        y: args.center.y + yTranslation,
+      }
+
+      const controlPoint = args.controlPoint || nextPoint;
   
-      ctx.lineTo (x + xTranslation, y + yTranslation);
+      ctx.quadraticCurveTo(controlPoint.x, controlPoint.y, nextPoint.x, nextPoint.y);
     }
   }
 });

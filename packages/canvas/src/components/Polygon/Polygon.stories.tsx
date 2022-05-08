@@ -25,11 +25,27 @@ type PolygonStory = StoryObj<ComponentProps<typeof Polygon>>;
 export const Default: PolygonStory = {
   args: {
     sides: 3,
-    size: 100,
+    sideLength: 100,
     center: {
       x: 250,
       y: 250,
-    }
+    },
+  },
+};
+
+export const BentRectangle: PolygonStory = {
+  args: {
+    sides: [
+      [{x: 100, y: 100}, {x: 100, y: 100}],
+      [{x: 250, y: 150}, {x: 400, y: 100}],
+      [{x: 400, y: 400}, {x: 400, y: 400}],
+      [{x: 100, y: 400}, {x: 100, y: 400}],
+      [{x: 100, y: 100}, {x: 100, y: 100}],
+    ],
+    center: {
+      x: 250,
+      y: 250,
+    },
   },
 };
 
@@ -80,7 +96,7 @@ function RenderGradient() {
   return (
     <Polygon
       sides={8}
-      size={250}
+      sideLength={250}
       center={{x: 250, y: 250}}
       fillStyle={grd}
     />
@@ -110,7 +126,7 @@ function RenderManyShapes({count}: {count: number}) {
 
     for (let x = 0; x < count; x++) {
       newShapes.push({
-        size: random(10, Math.max(500 / count * 2, 20)),
+        sideLength: random(10, Math.max(500 / count * 2, 20)),
         sides: random(3, 8),
         center: {
           x: Math.random() * 500,
@@ -145,14 +161,14 @@ export const CustomPolygon: PolygonStory = {
     sides: [
       {x: 100, y: 100},
       {x: 200, y: 100},
-      {x: 250, y: 250},
-      {x: 470, y: 300},
+      [{x: 200, y: 230}, {x: 250, y: 250}],
+      [{x: 300, y: 150}, {x: 470, y: 300}],
       {x: 100, y: 400},
     ],
-    size: 100,
+    sideLength: 100,
     center: {
       x: 250,
       y: 250,
     }
   },
-}
+};

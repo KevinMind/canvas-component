@@ -80,5 +80,6 @@ export function createDrawing<A extends DrawingArguments>(makeDrawing: MakeDrawi
       ctx.fill();
     }
 
+
   }
 }
