@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "lib": ["dom", "ES2015"],
+    "jsx": "react",
+    "allowJs": true
+  },
+  "extends": "tsconfig/base.json",
+  "include": [".", ".eslintrc.js"],
+  "exclude": ["dist", "build", "node_modules"]
+}
