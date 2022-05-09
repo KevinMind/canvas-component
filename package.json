@@ -1,9 +1,9 @@
 {
-  "name": "blog",
+  "name": "canvas-component",
   "private": true,
   "version": "1.0.0",
   "main": "index.js",
-  "repository": "https://github.com/KevinMind/blog",
+  "repository": "https://github.com/KevinMind/canvas-component",
   "author": "Kevin Meinhardt <kmeinhardt7@gmail.com>",
   "license": "MIT",
   "scripts": {

@@ -1,8 +1,0 @@
-storybook-static
-.next
-.turbo
-node_modules
-
-build-storybook.log
-
-**/*.graphql.d.ts

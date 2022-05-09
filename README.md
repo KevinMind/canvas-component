@@ -1,21 +1,10 @@
-# blog
+# canvas-component
 
 ## Todo
 
-- [x] Setup monorepo
-- [x] add CI integration with vercel and basic package
-- [x] add component library package and website
-- [x] setup next.js and build step
-- [x] setup jest and storybook
-- [x] setup chromatic
-- [ ] setup CMS
-- [ ] setup backend API
-- [ ] create blog layout and home page layout
-- [ ] import components from previous project
-
 - [x] split Canvas component to separate package
 - [x] enable custom easing functions
-- [ ] two.js
+- [x] two.js
 
   - [x] fix two.update() problem: sometimes two.update() erasing useRenderFrame shapes
   - [x] can we avoid needing to call two.update()? no, but we can centralize to hook
@@ -38,7 +27,7 @@
 
 - [ ] review current code base for opportunities to improve tests
 - [x] add Polygon support for canvas
-- [ ] add FreeDrawing support for canvas
+- [x] add FreeDrawing support for canvas
 - [ ] add chain animations hook to canvas
 
 ## Repo package structure
