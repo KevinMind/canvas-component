@@ -3,7 +3,7 @@ name: Chromatic
 on: push
 
 jobs:
-  chromatic:
+  chromatic-canvas:
     runs-on: ubuntu-latest
 
     steps:
@@ -28,4 +28,27 @@ jobs:
           autoAcceptChanges: "main"
           workingDir: "packages/canvas"
 
+  chromatic-canvas-component:
     runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - uses: actions/cache@v2
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Build
+        run: yarn build
+
+      - name: Chromatic (Canvas)
+        uses: chromaui/action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN_CANVAS_COMPONENT }}
+          autoAcceptChanges: "main"
+          workingDir: "packages/canvas-component"

@@ -2,6 +2,8 @@
 
 ## Todo
 
+- [ ] add univeersal chromatic config with univesal federated storybook so we can have one chromatic project with multiple storybooks.
+
 - [x] split Canvas component to separate package
 - [x] enable custom easing functions
 - [x] two.js
