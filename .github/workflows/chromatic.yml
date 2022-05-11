@@ -3,7 +3,7 @@ name: Chromatic
 on: push
 
 jobs:
-  chromatic-canvas:
+  chromatic-canvas-react:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,9 +24,9 @@ jobs:
         uses: chromaui/action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN_CANVAS }}
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN_CANVAS_REACT }}
           autoAcceptChanges: "main"
-          workingDir: "packages/canvas"
+          workingDir: "packages/canvas-react"
 
   chromatic-canvas-component:
     runs-on: ubuntu-latest
