@@ -3,32 +3,7 @@ name: Chromatic
 on: push
 
 jobs:
-  chromatic-canvas-react:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v1
-
-      - uses: actions/cache@v2
-        with:
-          path: "**/node_modules"
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-
-      - name: Install dependencies
-        run: yarn
-
-      - name: Build
-        run: yarn build
-
-      - name: Chromatic (React)
-        uses: chromaui/action@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN_CANVAS_REACT }}
-          autoAcceptChanges: "main"
-          workingDir: "packages/canvas-react"
-
-  chromatic-canvas-component:
+  chromatic-canvas-component-core:
     runs-on: ubuntu-latest
 
     steps:
@@ -49,6 +24,31 @@ jobs:
         uses: chromaui/action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN_CANVAS_COMPONENT }}
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN_CANVAS_COMPONENT_CORE }}
           autoAcceptChanges: "main"
           workingDir: "packages/canvas-component"
+
+  chromatic-canvas-component-react:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - uses: actions/cache@v2
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Build
+        run: yarn build
+
+      - name: Chromatic (React)
+        uses: chromaui/action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN_CANVAS_COMPONENT_REACT }}
+          autoAcceptChanges: "main"
+          workingDir: "packages/canvas-component-react"

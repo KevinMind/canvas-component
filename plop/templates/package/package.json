@@ -1,5 +1,5 @@
 {
-  "name": "{{name}}",
+  "name": "@canvas-component/{{name}}",
   "version": "0.0.0",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
