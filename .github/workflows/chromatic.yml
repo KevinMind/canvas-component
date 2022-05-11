@@ -20,7 +20,7 @@ jobs:
       - name: Build
         run: yarn build
 
-      - name: Chromatic (Canvas)
+      - name: Chromatic (React)
         uses: chromaui/action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -45,7 +45,7 @@ jobs:
       - name: Build
         run: yarn build
 
-      - name: Chromatic (Canvas)
+      - name: Chromatic (core)
         uses: chromaui/action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
