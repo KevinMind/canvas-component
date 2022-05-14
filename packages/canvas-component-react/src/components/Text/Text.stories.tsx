@@ -4,12 +4,11 @@ import randomColor from "randomcolor";
 
 import { withRenderFrameProvider, withCenterDot, withRotation } from "../../../.storybook/decorators";
 import { bezierEasing } from "../../utilities/bezier";
-
-import { Text } from "./Text.component";
 import { useAnimationFrame } from "../../hooks/useAnimationFrame";
-import { useText } from "./Text.hooks";
 import { useLinearGradient } from "../../hooks/useLinearGradient";
 
+import { Text } from "./Text.component";
+import { useText } from "./Text.hooks";
 
 const fillStyle = randomColor({format: 'rgba', hue: 'green', luminosity: 'bright'});
 const strokeStyle = randomColor({format: 'rgba', hue: 'green', luminosity: 'dark'});

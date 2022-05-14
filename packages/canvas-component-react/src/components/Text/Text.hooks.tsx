@@ -1,8 +1,7 @@
+import { drawText, TextArgs } from "@canvas-component/core";
+
 import { useRenderFrame } from "../../RenderFrame.hooks";
 
-import { TextProps } from "./Text.types";
-import { drawText } from "./Text.utilities";
-
-export function useText(args: TextProps) {
+export function useText(args: TextArgs) {
   useRenderFrame((ctx) => drawText(ctx, args));
 }
