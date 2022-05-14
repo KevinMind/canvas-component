@@ -29,7 +29,6 @@ export function createDrawing<A extends DrawingArguments>(
     }
 
     if (args.shadowColor) {
-      console.log(args);
       ctx.shadowColor = args.shadowColor;
 
       if (args.shadowBlur) {
