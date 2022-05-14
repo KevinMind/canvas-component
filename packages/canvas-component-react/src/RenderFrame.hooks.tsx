@@ -1,7 +1,7 @@
 import { useContext, useEffect } from "react";
+import { Draw } from "@canvas-component/core";
 
 import { RenderFrameContext } from "./RenderFrame.context";
-import { Draw } from "./RenderFrame.types";
 import { throwCanvasContext } from "./RenderFrame.utilities";
 
 export function _usePrivateRenderFrameContext() {

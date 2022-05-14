@@ -1,9 +1,9 @@
 import React, { ComponentProps, useEffect, useState } from "react";
 import { ComponentMeta, StoryObj } from "@storybook/react";
+import { Position } from "@canvas-component/core";
 
 import { withMousePosition, withRenderFrameProvider, useMousePos } from "../../../.storybook/decorators";
 import { Ellipse } from "../Ellipse";
-import { Position } from "../../RenderFrame.types";
 
 import { Path } from "./Path.component";
 

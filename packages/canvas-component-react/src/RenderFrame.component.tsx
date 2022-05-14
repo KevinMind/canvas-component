@@ -5,9 +5,10 @@ import React, {
   useState,
   useMemo,
 } from "react";
+import { Draw } from "@canvas-component/core";
 
 import { RenderFrameContext } from "./RenderFrame.context";
-import { Draw, RenderFrameProps } from "./RenderFrame.types";
+import { RenderFrameProps } from "./RenderFrame.types";
 import { useRequestAnimationFrame } from "./hooks/useRequestAnimationFrame";
 
 export function RenderFrameProvider({

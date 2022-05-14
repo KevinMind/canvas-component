@@ -1,9 +1,8 @@
 import React, { useRef, useState, useEffect } from "react";
-import { drawEllipse } from "@canvas-component/core";
+import { drawEllipse, Position } from "@canvas-component/core";
 
 import { useMousePos } from "../../../../.storybook/decorators";
 import { useRenderFrame } from "../../../RenderFrame.hooks";
-import { Position } from "../../../RenderFrame.types";
 
 import { FourDCircleProps } from "./FourDCircle.types";
 

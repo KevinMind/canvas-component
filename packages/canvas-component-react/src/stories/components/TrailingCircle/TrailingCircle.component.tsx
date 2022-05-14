@@ -1,11 +1,10 @@
 import React from "react";
 import { useSpring } from "use-spring";
-import { drawEllipse } from "@canvas-component/core";
+import { drawEllipse, Position } from "@canvas-component/core";
 
 import { useMousePos } from "../../../../.storybook/decorators";
 
 import { useRenderFrame } from "../../../RenderFrame.hooks";
-import { Position } from "../../../RenderFrame.types";
 
 import { TrailingCircleProps } from "./TrailingCircle.types";
 

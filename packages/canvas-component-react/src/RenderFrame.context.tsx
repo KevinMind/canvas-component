@@ -1,5 +1,6 @@
 import { createContext } from "react";
-import { Draw } from "./RenderFrame.types";
+import { Draw } from "@canvas-component/core";
+
 import { throwCanvasContext } from "./RenderFrame.utilities";
 
 export interface RenderFrameContextValue {

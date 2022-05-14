@@ -1,6 +1,7 @@
 import React, { ComponentProps } from "react";
 import { ComponentMeta, StoryObj } from "@storybook/react";
 import randomColor from 'randomcolor';
+import { Position, LineArgs } from "@canvas-component/core";
 
 import {
   withRenderFrameProvider,
@@ -9,8 +10,6 @@ import {
 import { Line } from "./Line.component";
 import { useAnimationFrame } from "../../hooks/useAnimationFrame";
 import { useLine } from "./Line.hooks";
-import { Position } from "../../RenderFrame.types";
-import { LineArgs } from "./Line.types";
 import { bezierEasing } from "../../utilities/bezier";
 
 export default {

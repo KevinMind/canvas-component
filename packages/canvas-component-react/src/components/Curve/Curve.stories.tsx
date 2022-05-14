@@ -1,9 +1,9 @@
 import React, { ComponentProps } from "react";
 import { ComponentMeta, StoryObj } from "@storybook/react";
+import { Position } from "@canvas-component/core";
 
 import { Curve } from "./Curve.component";
 import { withRenderFrameProvider, withTodoList } from "../../../.storybook/decorators";
-import { Position } from "../../RenderFrame.types";
 import { useAnimationFrame } from "../../hooks/useAnimationFrame";
 import { bezierEasing } from "../../utilities/bezier";
 

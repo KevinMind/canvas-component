@@ -1,4 +1,4 @@
-import { Position } from "../../../RenderFrame.types";
+import { Position } from "@canvas-component/core";
 
 export type ActiveZone = 'top' | 'right' | 'bottom' | 'left' | 'dead';
 

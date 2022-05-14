@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useSpring } from 'use-spring';
+import { Position } from '@canvas-component/core';
 
 import { useMousePos } from '../../../../.storybook/decorators';
-import { Position } from '../../../RenderFrame.types';
 import { ElasticRectProps, ActiveZone } from './ElasticRect.types';
 
 export function useRectPoints({width, height, center}: ElasticRectProps) {

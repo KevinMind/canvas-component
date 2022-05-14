@@ -1,7 +1,7 @@
 import React, { ComponentProps } from "react";
 import { ComponentMeta, StoryObj } from "@storybook/react";
 import randomColor from "randomcolor";
-import { ArcToArgs } from "@canvas-component/core";
+import { ArcToArgs, Position } from "@canvas-component/core";
 
 import { withRenderFrameProvider } from "../../../.storybook/decorators";
 
@@ -10,7 +10,6 @@ import { useArcTo } from "./ArcTo.hooks";
 import { useEllipse } from "../Ellipse";
 import { useLine } from "../Line";
 import { useAnimationFrame } from "../../hooks/useAnimationFrame";
-import { Position } from "../../RenderFrame.types";
 
 export default {
   decorators: [withRenderFrameProvider],
