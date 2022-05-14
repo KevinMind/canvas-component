@@ -20,6 +20,9 @@
     "storybook": "start-storybook -p 8006",
     "build-storybook": "build-storybook"
   },
+  "dependencies": {
+    "@canvas-component/core": "*"
+  },
   "devDependencies": {
     "@babel/core": "^7.17.8",
     "@storybook/addon-actions": "^6.4.19",

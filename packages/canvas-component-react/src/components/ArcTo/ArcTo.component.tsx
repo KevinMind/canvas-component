@@ -1,9 +1,8 @@
 import React from "react";
 
 import { useArcTo } from "./ArcTo.hooks";
-import { ArcToArgs } from "./ArcTo.types";
 
-export function ArcTo(props: ArcToArgs) {
+export function ArcTo(props: Parameters<typeof useArcTo>[0]) {
   useArcTo(props);
 
   return null;

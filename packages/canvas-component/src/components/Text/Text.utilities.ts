@@ -1,7 +1,7 @@
-import { TextProps } from "./Text.types";
+import { TextArgs } from "./Text.types";
 import { createDrawing } from "../../RenderFrame.utilities";
 
-export const drawText = createDrawing<TextProps>((ctx, args) => {
+export const drawText = createDrawing<TextArgs>((ctx, args) => {
   if (!args.fillStyle && !args.strokeStyle) {
     throw new Error("must provide either fillStyle or strokeStyle");
   }

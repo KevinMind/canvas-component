@@ -1,11 +1,11 @@
 import React, { ComponentProps } from "react";
 import { ComponentMeta, StoryObj } from "@storybook/react";
 import randomColor from "randomcolor";
+import { ArcToArgs } from "@canvas-component/core";
 
 import { withRenderFrameProvider } from "../../../.storybook/decorators";
 
 import { ArcTo } from "./ArcTo.component";
-import { ArcToArgs } from "./ArcTo.types";
 import { useArcTo } from "./ArcTo.hooks";
 import { useEllipse } from "../Ellipse";
 import { useLine } from "../Line";
