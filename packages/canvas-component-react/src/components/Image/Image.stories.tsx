@@ -57,22 +57,19 @@ function RenderSmoothing({smooth}: {smooth: boolean}) {
     <ImageComponent
       image={smoothImage}
       rotation={0}
-      dx={50}
-      dy={50}
+      center={{x: 50, y: 50}}
     />
     <ImageComponent
       image={smoothImage}
       rotation={0}
-      dx={0}
-      dy={0}
+      center={{x: 0, y: 0}}
       dWidth={smoothImage.width * 4}
       dHeight={smoothImage.height * 4}
     />
     <ImageComponent
       image={smoothImage}
       rotation={0}
-      dx={100}
-      dy={50}
+      center={{x: 100, y: 50}}
       dWidth={smoothImage.width * 4}
       dHeight={smoothImage.height * 4}
       smooth={smooth}

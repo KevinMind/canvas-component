@@ -1,8 +1,7 @@
+import { drawImage, ImageArgs } from "@canvas-component/core";
+
 import { useRenderFrame } from "../../RenderFrame.hooks";
 
-import { ImageProps } from "./Image.types";
-import { drawImage } from "./Image.utilities";
-
-export function useImage(args: ImageProps) {
+export function useImage(args: ImageArgs) {
   useRenderFrame((ctx) => drawImage(ctx, args));
 }
