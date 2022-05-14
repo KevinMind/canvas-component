@@ -28,9 +28,8 @@ export function createDrawing<A extends DrawingArguments>(
       ctx.translate(-x, -y);
     }
 
-    makeDrawing(ctx, { ...args, rotation });
-
     if (args.shadowColor) {
+      console.log(args);
       ctx.shadowColor = args.shadowColor;
 
       if (args.shadowBlur) {
@@ -68,6 +67,8 @@ export function createDrawing<A extends DrawingArguments>(
     if (args.lineWidth) {
       ctx.lineWidth = args.lineWidth;
     }
+
+    makeDrawing(ctx, { ...args, rotation });
 
     ctx.stroke();
 
