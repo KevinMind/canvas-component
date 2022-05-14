@@ -1,5 +1,6 @@
+import { drawEllipse } from "@canvas-component/core";
+
 import { createDrawing } from "../../RenderFrame.utilities";
-import { drawEllipse } from "../Ellipse";
 
 import { PathProps } from "./Path.types";
 

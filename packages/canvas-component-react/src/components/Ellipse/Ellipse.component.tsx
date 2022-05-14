@@ -1,9 +1,8 @@
 import React from "react";
 
 import { useEllipse } from "./Ellipse.hooks";
-import { EllipseArgs } from "./Ellipse.types";
 
-export function Ellipse(props: EllipseArgs) {
+export function Ellipse(props: Parameters<typeof useEllipse>[0]) {
   useEllipse(props);
 
   return null;
