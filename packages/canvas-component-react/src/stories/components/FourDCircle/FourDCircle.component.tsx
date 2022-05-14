@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
+import { drawEllipse } from "@canvas-component/core";
 
 import { useMousePos } from "../../../../.storybook/decorators";
-import { drawEllipse } from "../../../components/Ellipse";
 import { useRenderFrame } from "../../../RenderFrame.hooks";
 import { Position } from "../../../RenderFrame.types";
 

@@ -1,4 +1,4 @@
-import { RectArgs } from "../../components/Rect";
+import { RectArgs } from "@canvas-component/core";
 
 export interface FilterProps extends RectArgs {}
 

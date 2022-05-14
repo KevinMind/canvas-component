@@ -1,4 +1,4 @@
-import { EllipseArgs } from "../../../components/Ellipse/Ellipse.types";
+import { EllipseArgs } from "@canvas-component/core";
 
 export interface TrailingCircleProps extends EllipseArgs {
 }
