@@ -6,7 +6,6 @@ import { withRenderFrameProvider, withRotation } from "../../../.storybook/decor
 
 import { Polygon } from "./Polygon.component";
 import { usePolygon } from "./Polygon.hooks";
-import { PolygonArgs } from "./Polygon.types";
 import { useLinearGradient } from "../../hooks/useLinearGradient";
 
 export default {
@@ -20,7 +19,9 @@ export default {
   },
 } as ComponentMeta<typeof Polygon>;
 
-type PolygonStory = StoryObj<ComponentProps<typeof Polygon>>;
+type PolygonProps = ComponentProps<typeof Polygon>;
+
+type PolygonStory = StoryObj<PolygonProps>;
 
 export const Default: PolygonStory = {
   args: {
@@ -112,17 +113,17 @@ function random(min: number, max: number) { // min and max included
   return Math.floor(Math.random() * (max - min + 1) + min)
 }
 
-function RandomShape(props: PolygonArgs) {
+function RandomShape(props: PolygonProps) {
   usePolygon(props);
 
   return null;
 }
 
 function RenderManyShapes({count}: {count: number}) {
-  const [shapes, setShapes] = useState<PolygonArgs[]>([]);
+  const [shapes, setShapes] = useState<PolygonProps[]>([]);
 
   useEffect(() => {
-    const newShapes: PolygonArgs[] = [];
+    const newShapes: PolygonProps[] = [];
 
     for (let x = 0; x < count; x++) {
       newShapes.push({

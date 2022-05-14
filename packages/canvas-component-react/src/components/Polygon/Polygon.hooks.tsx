@@ -1,7 +1,6 @@
-import { useRenderFrame } from "../../RenderFrame.hooks";
-import { PolygonArgs } from "./Polygon.types";
+import { drawPolygon, PolygonArgs } from "@canvas-component/core";
 
-import { drawPolygon } from "./Polygon.utilities";
+import { useRenderFrame } from "../../RenderFrame.hooks";
 
 export function usePolygon(args: PolygonArgs) {
   useRenderFrame((ctx) => drawPolygon(ctx, args));
