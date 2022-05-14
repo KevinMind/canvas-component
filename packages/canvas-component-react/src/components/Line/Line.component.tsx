@@ -1,9 +1,8 @@
 import React from "react";
 
 import { useLine } from "./Line.hooks";
-import { LineArgs } from "./Line.types";
 
-export function Line(props: LineArgs) {
+export function Line(props: Parameters<typeof useLine>[0]) {
   useLine(props);
 
   return null;
