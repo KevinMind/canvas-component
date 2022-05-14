@@ -1,9 +1,8 @@
 import React from "react";
 
 import { useCurve } from "./Curve.hooks";
-import { CurveProps } from "./Curve.types";
 
-export function Curve(props: CurveProps) {
+export function Curve(props: Parameters<typeof useCurve>[0]) {
   useCurve(props);
 
   return null;
