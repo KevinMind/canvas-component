@@ -1,2 +1,3 @@
 export * from "./Path.component";
-export * from "./Path.types";
+export * from "./Path.hooks";
+

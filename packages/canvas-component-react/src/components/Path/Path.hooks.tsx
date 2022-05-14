@@ -1,8 +1,7 @@
+import { drawPath, PathArgs } from "@canvas-component/core";
+
 import { useRenderFrame } from "../../RenderFrame.hooks";
-import { PathProps } from "./Path.types";
 
-import { drawPath } from "./Path.utilities";
-
-export function usePath(args: PathProps) {
+export function usePath(args: PathArgs) {
   useRenderFrame((ctx) => drawPath(ctx, args));
 }
