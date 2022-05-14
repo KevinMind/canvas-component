@@ -7,7 +7,6 @@ import { useAnimationFrame } from "../../hooks/useAnimationFrame";
 
 import { Rect } from "./Rect.component";
 import { useRect } from "./Rect.hooks";
-import { useEllipse } from "../Ellipse";
 import { useLinearGradient } from "../../hooks/useLinearGradient";
 
 export default {

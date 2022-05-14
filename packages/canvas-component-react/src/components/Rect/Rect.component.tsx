@@ -1,9 +1,8 @@
 import React from "react";
 
 import { useRect } from "./Rect.hooks";
-import { RectArgs } from "./Rect.types";
 
-export function Rect(props: RectArgs) {
+export function Rect(props: Parameters<typeof useRect>[0]) {
   useRect(props);
 
   return null;
