@@ -8,9 +8,12 @@ import { drawImage } from "./Image.utilities";
 export default {} as Meta;
 
 const Template: Story<ImageArgs> = (args, ctx) => {
-  const canvasContext = getCanvasContext(ctx);
+  const canvas = getCanvasContext(ctx);
 
-  drawImage(canvasContext, args);
+  canvas.add((canvasContext) => {
+    drawImage(canvasContext, args);
+  });
+
   return "";
 };
 
@@ -43,21 +46,23 @@ smoothImage.src =
   "https://interactive-examples.mdn.mozilla.net/media/examples/star.png";
 
 const RenderSmoothing: Story<ImageArgs> = (args, ctx) => {
-  const canvasContext = getCanvasContext(ctx);
+  const canvas = getCanvasContext(ctx);
 
-  drawImage(canvasContext, { image: smoothImage, center: { x: 50, y: 50 } });
-  drawImage(canvasContext, {
-    image: smoothImage,
-    center: { x: 0, y: 0 },
-    dWidth: smoothImage.width * 4,
-    dHeight: smoothImage.height * 4,
-  });
-  drawImage(canvasContext, {
-    image: smoothImage,
-    center: { x: 100, y: 50 },
-    dWidth: smoothImage.width * 4,
-    dHeight: smoothImage.height * 4,
-    smooth: args.smooth,
+  canvas.add((canvasContext) => {
+    drawImage(canvasContext, { image: smoothImage, center: { x: 50, y: 50 } });
+    drawImage(canvasContext, {
+      image: smoothImage,
+      center: { x: 0, y: 0 },
+      dWidth: smoothImage.width * 4,
+      dHeight: smoothImage.height * 4,
+    });
+    drawImage(canvasContext, {
+      image: smoothImage,
+      center: { x: 100, y: 50 },
+      dWidth: smoothImage.width * 4,
+      dHeight: smoothImage.height * 4,
+      smooth: args.smooth,
+    });
   });
 
   return "";

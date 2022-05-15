@@ -9,9 +9,12 @@ import { drawRect } from "./Rect.utilities";
 export default {} as Meta;
 
 const Template: Story<RectArgs> = (args, ctx) => {
-  const canvasContext = getCanvasContext(ctx);
+  const canvas = getCanvasContext(ctx);
 
-  drawRect(canvasContext, args);
+  canvas.add((canvasContext) => {
+    drawRect(canvasContext, args);
+  });
+
   return "";
 };
 

@@ -9,9 +9,12 @@ import { drawEllipse } from "./Ellipse.utilities";
 export default {} as Meta;
 
 const Template: Story<EllipseArgs> = (args, ctx) => {
-  const canvasContext = getCanvasContext(ctx);
+  const canvas = getCanvasContext(ctx);
 
-  drawEllipse(canvasContext, args);
+  canvas.add((canvasContext) => {
+    drawEllipse(canvasContext, args);
+  });
+
   return "";
 };
 

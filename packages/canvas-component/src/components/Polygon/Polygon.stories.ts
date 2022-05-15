@@ -9,9 +9,12 @@ import { drawPolygon } from "./Polygon.utilities";
 export default {} as Meta;
 
 const Template: Story<PolygonArgs> = (args, ctx) => {
-  const canvasContext = getCanvasContext(ctx);
+  const canvas = getCanvasContext(ctx);
 
-  drawPolygon(canvasContext, args);
+  canvas.add((canvasContext) => {
+    drawPolygon(canvasContext, args);
+  });
+
   return "";
 };
 

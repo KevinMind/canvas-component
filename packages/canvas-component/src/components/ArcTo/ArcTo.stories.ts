@@ -11,9 +11,12 @@ import { drawArcTo } from "./ArcTo.utilities";
 export default {} as Meta;
 
 const Template: Story<ArcToArgs> = (args, ctx) => {
-  const canvasContext = getCanvasContext(ctx);
+  const canvas = getCanvasContext(ctx);
 
-  drawArcTo(canvasContext, args);
+  canvas.add((ctx) => {
+    drawArcTo(ctx, args);
+  });
+
   return "";
 };
 
@@ -47,24 +50,27 @@ Stroke.args = {
 };
 
 const HelpersTemplate: Story<ArcToArgs> = (args, ctx) => {
-  const canvasContext = getCanvasContext(ctx);
-  const { pos0, pos1, pos2, radius } = args;
+  const canvas = getCanvasContext(ctx);
 
-  // Tangential lines
-  // @TODO: uncomment when drawLine is implemented
-  // drawLine(canvasContext, {start: pos0, end: pos1});
-  // drawLine(canvasContext, {start: pos1, end: pos2});
+  canvas.add((ctx) => {
+    const { pos0, pos1, pos2, radius } = args;
 
-  // Start point
-  drawEllipse(canvasContext, { center: { x: pos0.x, y: pos0.y }, radius: 5 });
-  // Control points
-  drawEllipse(canvasContext, { center: { x: pos1.x, y: pos1.y }, radius: 5 });
-  drawEllipse(canvasContext, { center: { x: pos2.x, y: pos2.y }, radius: 5 });
+    // Tangential lines
+    // @TODO: uncomment when drawLine is implemented
+    // drawLine(canvasContext, {start: pos0, end: pos1});
+    // drawLine(canvasContext, {start: pos1, end: pos2});
 
-  // arc circle
-  drawEllipse(canvasContext, { center: { x: pos1.x, y: pos2.y }, radius });
+    // Start point
+    drawEllipse(ctx, { center: { x: pos0.x, y: pos0.y }, radius: 5 });
+    // Control points
+    drawEllipse(ctx, { center: { x: pos1.x, y: pos1.y }, radius: 5 });
+    drawEllipse(ctx, { center: { x: pos2.x, y: pos2.y }, radius: 5 });
 
-  drawArcTo(canvasContext, args);
+    // arc circle
+    drawEllipse(ctx, { center: { x: pos1.x, y: pos2.y }, radius });
+
+    drawArcTo(ctx, args);
+  });
 
   return "";
 };

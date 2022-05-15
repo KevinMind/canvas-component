@@ -1,8 +1,10 @@
 import { addDecorator } from "@storybook/html";
 
+import { Canvas } from "../src";
+
 const CANVAS_CONTEXT_KEY = "__canvas_context";
 
-export function getCanvasContext(ctx: any): CanvasRenderingContext2D {
+export function getCanvasContext(ctx: any): Canvas {
   const canvasContext = ctx[CANVAS_CONTEXT_KEY];
 
   if (!canvasContext) {
@@ -13,13 +15,18 @@ export function getCanvasContext(ctx: any): CanvasRenderingContext2D {
 }
 
 addDecorator((fn, ctx) => {
-  const canvas = document.createElement("canvas");
-  canvas.width = 500;
-  canvas.height = 500;
+  const el = document.createElement("canvas");
+  el.width = 500;
+  el.height = 500;
+  el.style.border = "1px solid";
 
-  ctx[CANVAS_CONTEXT_KEY] = canvas.getContext("2d");
+  const canvas = new Canvas(el);
+
+  ctx[CANVAS_CONTEXT_KEY] = canvas;
+
+  canvas.start();
 
   fn(ctx.args);
 
-  return canvas;
+  return el;
 });

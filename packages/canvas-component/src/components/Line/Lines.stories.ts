@@ -9,9 +9,12 @@ import { drawLine } from "./Line.utilities";
 export default {} as Meta;
 
 const Template: Story<LineArgs> = (args, ctx) => {
-  const canvasContext = getCanvasContext(ctx);
+  const canvas = getCanvasContext(ctx);
 
-  drawLine(canvasContext, args);
+  canvas.add((canvasContext) => {
+    drawLine(canvasContext, args);
+  });
+
   return "";
 };
 

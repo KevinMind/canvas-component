@@ -10,3 +10,5 @@ export * from "./components/Text";
 
 export * from "./RenderFrame.types";
 export * from "./RenderFrame.utilities";
+
+export { Canvas } from "./Canvas";

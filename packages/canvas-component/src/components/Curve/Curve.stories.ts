@@ -8,9 +8,12 @@ import { drawCurve } from "./Curve.utilities";
 export default {} as Meta;
 
 const Template: Story<CurveArgs> = (args, ctx) => {
-  const canvasContext = getCanvasContext(ctx);
+  const canvas = getCanvasContext(ctx);
 
-  drawCurve(canvasContext, args);
+  canvas.add((canvasContext) => {
+    drawCurve(canvasContext, args);
+  });
+
   return "";
 };
 

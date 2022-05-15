@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "lib": ["dom", "es2019"],
+    "lib": ["dom", "ES2015", "es2019"],
     "jsx": "react",
-    "allowJs": true
+    "target": "es2015"
   },
   "extends": "tsconfig/base.json",
   "include": [".", ".eslintrc.js"],

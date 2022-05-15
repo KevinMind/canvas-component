@@ -20,9 +20,12 @@ const strokeStyle = randomColor({
 });
 
 const Template: Story<TextArgs> = (args, ctx) => {
-  const canvasContext = getCanvasContext(ctx);
+  const canvas = getCanvasContext(ctx);
 
-  drawText(canvasContext, args);
+  canvas.add((canvasContext) => {
+    drawText(canvasContext, args);
+  });
+
   return "";
 };
 

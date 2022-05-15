@@ -8,9 +8,12 @@ import { drawPath } from "./Path.utilities";
 export default {} as Meta;
 
 const Template: Story<PathArgs> = (args, ctx) => {
-  const canvasContext = getCanvasContext(ctx);
+  const canvas = getCanvasContext(ctx);
 
-  drawPath(canvasContext, args);
+  canvas.add((canvasContext) => {
+    drawPath(canvasContext, args);
+  });
+
   return "";
 };
 
