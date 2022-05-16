@@ -15,7 +15,7 @@ const Template: Story<RectArgs> = (args, ctx) => {
     drawRect(canvasContext, args);
   });
 
-  return "";
+  return canvas.canvas;
 };
 
 export const Default = Template.bind({});

@@ -14,7 +14,7 @@ const Template: Story<PathArgs> = (args, ctx) => {
     drawPath(canvasContext, args);
   });
 
-  return "";
+  return canvas.canvas;
 };
 
 export const Default = Template.bind({});

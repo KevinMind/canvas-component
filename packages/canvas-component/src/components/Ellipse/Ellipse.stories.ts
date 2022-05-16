@@ -15,7 +15,7 @@ const Template: Story<EllipseArgs> = (args, ctx) => {
     drawEllipse(canvasContext, args);
   });
 
-  return "";
+  return canvas.canvas;
 };
 
 export const Default = Template.bind({});

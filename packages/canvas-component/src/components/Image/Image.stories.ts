@@ -14,7 +14,7 @@ const Template: Story<ImageArgs> = (args, ctx) => {
     drawImage(canvasContext, args);
   });
 
-  return "";
+  return canvas.canvas;
 };
 
 const baseImage = new Image(300, 227);
@@ -65,7 +65,7 @@ const RenderSmoothing: Story<ImageArgs> = (args, ctx) => {
     });
   });
 
-  return "";
+  return canvas.canvas;
 };
 
 export const Smooth = RenderSmoothing.bind({});

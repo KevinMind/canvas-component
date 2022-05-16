@@ -17,7 +17,7 @@ const Template: Story = (_args, ctx) => {
     canvas.stop();
   }, 10_000);
 
-  return "";
+  return canvas.canvas;
 };
 
 export const Default = Template.bind({});

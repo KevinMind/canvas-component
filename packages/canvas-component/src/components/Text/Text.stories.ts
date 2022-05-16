@@ -26,7 +26,7 @@ const Template: Story<TextArgs> = (args, ctx) => {
     drawText(canvasContext, args);
   });
 
-  return "";
+  return canvas.canvas;
 };
 
 export const Default = Template.bind({});

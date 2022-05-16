@@ -26,7 +26,11 @@ addDecorator((fn, ctx) => {
 
   canvas.start();
 
-  fn(ctx.args);
+  const wrapper = document.createElement("div");
+  
+  const story = fn(ctx.args);
 
-  return el;
+  wrapper.append(story);
+
+  return wrapper;
 });

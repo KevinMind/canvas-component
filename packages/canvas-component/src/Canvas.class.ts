@@ -1,20 +1,21 @@
+import { IntCanvas } from "./Canvas.types";
 import { Draw } from "./RenderFrame.types";
 
-export class Canvas {
-  id?: number;
+export class Canvas implements IntCanvas {
+  #id?: number;
+
   canvas: HTMLCanvasElement;
   context: CanvasRenderingContext2D;
   drawings: Map<Draw, true> = new Map();
 
-  constructor(el: HTMLCanvasElement) {
-    this.canvas = el;
-
-    const context = this.canvas.getContext("2d");
+  constructor(canvas: HTMLCanvasElement) {
+    const context = canvas.getContext("2d");
 
     if (!context) {
       throw new Error("cannot find canvas context");
     }
 
+    this.canvas = canvas;
     this.context = context;
   }
 
@@ -30,16 +31,16 @@ export class Canvas {
     const self = this;
     function render(frame = 0) {
       self.render(frame);
-      self.id = window.requestAnimationFrame(render);
+      self.#id = window.requestAnimationFrame(render);
     }
 
     render();
   }
 
   public stop(): void {
-    if (this.id) {
-      window.cancelAnimationFrame(this.id);
-      this.id = 0;
+    if (this.#id) {
+      window.cancelAnimationFrame(this.#id);
+      this.#id = 0;
     }
   }
 

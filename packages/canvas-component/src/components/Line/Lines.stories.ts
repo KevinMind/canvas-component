@@ -15,7 +15,7 @@ const Template: Story<LineArgs> = (args, ctx) => {
     drawLine(canvasContext, args);
   });
 
-  return "";
+  return canvas.canvas;
 };
 
 export const Default = Template.bind({});

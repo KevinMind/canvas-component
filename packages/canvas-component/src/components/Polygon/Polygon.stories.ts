@@ -15,7 +15,7 @@ const Template: Story<PolygonArgs> = (args, ctx) => {
     drawPolygon(canvasContext, args);
   });
 
-  return "";
+  return canvas.canvas;
 };
 
 export const Default = Template.bind({});

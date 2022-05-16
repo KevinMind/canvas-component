@@ -14,7 +14,7 @@ const Template: Story<CurveArgs> = (args, ctx) => {
     drawCurve(canvasContext, args);
   });
 
-  return "";
+  return canvas.canvas;
 };
 
 export const Default = Template.bind({});

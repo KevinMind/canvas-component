@@ -17,7 +17,7 @@ const Template: Story<ArcToArgs> = (args, ctx) => {
     drawArcTo(ctx, args);
   });
 
-  return "";
+  return canvas.canvas;
 };
 
 export const Default = Template.bind({});
@@ -72,7 +72,7 @@ const HelpersTemplate: Story<ArcToArgs> = (args, ctx) => {
     drawArcTo(ctx, args);
   });
 
-  return "";
+  return canvas.canvas;
 };
 
 export const WithHelpers = HelpersTemplate.bind({});
