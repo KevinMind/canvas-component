@@ -8,12 +8,11 @@ export function degreesToRadians(degrees: number) {
 }
 
 // @TODO: fix hack making rotation required in the makeDrawing function because we set a default value.
-interface MakeDrawing<A extends BaseArgs> {
-  (c: CanvasRenderingContext2D, args: A & { rotation: number }): void;
+interface MakeDrawing<A extends BaseArgs, R = void> {
+  (c: CanvasRenderingContext2D, args: A & { rotation: number }): R;
 }
-
-export function createDrawing<A extends DrawingArguments>(
-  makeDrawing: MakeDrawing<A>
+export function createDrawing<A extends DrawingArguments, R = void>(
+  makeDrawing: MakeDrawing<A, R>
 ) {
   return (ctx: CanvasRenderingContext2D, args: A) => {
     ctx.restore();
@@ -67,7 +66,7 @@ export function createDrawing<A extends DrawingArguments>(
       ctx.lineWidth = args.lineWidth;
     }
 
-    makeDrawing(ctx, { ...args, rotation });
+    const result = makeDrawing(ctx, { ...args, rotation });
 
     ctx.stroke();
 
@@ -75,5 +74,7 @@ export function createDrawing<A extends DrawingArguments>(
       ctx.fillStyle = args.fillStyle;
       ctx.fill();
     }
+
+    return result;
   };
 }
