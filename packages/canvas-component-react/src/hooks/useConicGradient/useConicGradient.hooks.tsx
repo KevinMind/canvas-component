@@ -1,20 +1,10 @@
-import { useRef } from "react";
-import { useRenderFrame } from "../../RenderFrame.hooks";
-import { CreateConicGradientArgs } from "./useConicGradient.types";
+import { CreateConicGradientArgs } from "@canvas-component/core";
+import { useCanvas } from "../../RenderFrame.hooks";
 
-export function useConicGradient({colorStops = [], ...args}: CreateConicGradientArgs) {
-  const gradient = useRef<CanvasGradient>();
+export function useConicGradient(args: CreateConicGradientArgs): CanvasGradient | undefined {
+  const context = useCanvas();
 
-  useRenderFrame((ctx) => {
-    const grd = ctx.createConicGradient(args.angle, args.center.x, args.center.y);
+  if (!context) return;
 
-    for (let colorStop of colorStops) {
-      grd.addColorStop(...colorStop);
-    }
-
-    gradient.current = grd;
-  });
-
-  return gradient.current;
-
+  return context.createConicGradient(args);
 }

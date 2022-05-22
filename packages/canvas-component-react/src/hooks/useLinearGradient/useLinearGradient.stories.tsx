@@ -5,14 +5,13 @@ import { withRenderFrameProvider } from "../../../.storybook/decorators";
 import { useRect } from "../../components/Rect";
 
 import { useLinearGradient } from "./useLinearGradient.hooks";
-import { CreateLinearGradientArgs } from "./useLinearGradient.types";
 
-function RenderLinearGradient(args: CreateLinearGradientArgs) {
+function RenderLinearGradient(args: Parameters<typeof useLinearGradient>[0]) {
   useRect({
     width: 250,
     height: 150,
     center: {x: 250, y: 250},
-    fillStyle: useLinearGradient(args)
+    fillStyle: useLinearGradient(args),
   });
   return null;
 }

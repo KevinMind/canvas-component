@@ -1,4 +1,3 @@
-export interface RenderFrameProps {
-  fillStyle?: string;
-  strokeStyle?: string;
-}
+import { CanvasHTMLAttributes, PropsWithChildren } from "react";
+
+export type RenderFrameProps =PropsWithChildren<CanvasHTMLAttributes<{}>>;

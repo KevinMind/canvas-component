@@ -5,14 +5,14 @@ import { withRenderFrameProvider } from "../../../.storybook/decorators";
 import { useRect } from "../../components/Rect";
 
 import { useConicGradient } from "./useConicGradient.hooks";
-import { CreateConicGradientArgs } from "./useConicGradient.types";
 
-function RenderConicGradient(args: CreateConicGradientArgs) {
+function RenderConicGradient(args: Parameters<typeof useConicGradient>[0]) {
+  const fillStyle = useConicGradient(args);
   useRect({
     width: 250,
     height: 150,
     center: {x: 250, y: 250},
-    fillStyle: useConicGradient(args)
+    fillStyle,
   });
   return null;
 }

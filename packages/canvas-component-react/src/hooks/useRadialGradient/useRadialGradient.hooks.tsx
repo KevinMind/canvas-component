@@ -1,20 +1,10 @@
-import { useRef } from "react";
-import { useRenderFrame } from "../../RenderFrame.hooks";
-import { CreateRadialGradientArgs } from "./useRadialGradient.types";
+import { CreateRadialGradientArgs } from "@canvas-component/core";
+import { useCanvas } from "../../RenderFrame.hooks";
 
-export function useRadialGradient({colorStops = [], ...args}: CreateRadialGradientArgs) {
-  const gradient = useRef<CanvasGradient>();
+export function useRadialGradient(args: CreateRadialGradientArgs): CanvasGradient | undefined {
+  const context = useCanvas();
 
-  useRenderFrame((ctx) => {
-    const grd = ctx.createRadialGradient(args.start.x, args.start.y, args.startRadius, args.end.x, args.end.y, args.endRadius);
+  if (!context) return;
 
-    for (let colorStop of colorStops) {
-      grd.addColorStop(...colorStop);
-    }
-
-    gradient.current = grd;
-  });
-
-  return gradient.current;
-
+  return context.createRadialGradient(args);
 }

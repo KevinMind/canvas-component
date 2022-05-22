@@ -1,20 +1,10 @@
-import { useRef } from "react";
-import { useRenderFrame } from "../../RenderFrame.hooks";
-import { CreateLinearGradientArgs } from "./useLinearGradient.types";
+import { CreateLinearGradientArgs } from "@canvas-component/core";
+import { useCanvas } from "../../RenderFrame.hooks";
 
-export function useLinearGradient({colorStops = [], ...args}: CreateLinearGradientArgs) {
-  const gradient = useRef<CanvasGradient>();
+export function useLinearGradient(args: CreateLinearGradientArgs): CanvasGradient | undefined {
+  const context = useCanvas();
 
-  useRenderFrame((ctx) => {
-    const grd = ctx.createLinearGradient(args.start.x, args.start.y, args.end.x, args.end.y);
+  if (!context) return;
 
-    for (let colorStop of colorStops) {
-      grd.addColorStop(...colorStop);
-    }
-
-    gradient.current = grd;
-  });
-
-  return gradient.current;
-
+  return context.createLinearGradient(args);
 }

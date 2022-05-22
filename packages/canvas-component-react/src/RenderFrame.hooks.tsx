@@ -2,28 +2,30 @@ import { useContext, useEffect } from "react";
 import { Draw } from "@canvas-component/core";
 
 import { RenderFrameContext } from "./RenderFrame.context";
-import { throwCanvasContext } from "./RenderFrame.utilities";
 
-export function _usePrivateRenderFrameContext() {
+export function useCanvas() {
   const context = useContext(RenderFrameContext);
-
-  if (!context) {
-    throwCanvasContext()
-  }
 
   return context;
 }
 
 export function useRenderFrameCanvas(): [HTMLCanvasElement | null, {width: number; height: number}] {
-  const {canvas} = _usePrivateRenderFrameContext();
+  const context = useCanvas();
 
-  const {width = 0, height = 0} = canvas?.getBoundingClientRect() ?? {};
+  if (!context) {
+    return [null, {
+      height: 0,
+      width: 0,
+    }];
+  }
 
-  return [canvas, {width, height}];
+  const {width, height} = context.canvas.getBoundingClientRect();
+
+  return [context.canvas, {width, height}];
 }
 
 export function useRenderFrame(draw: Draw) {
-  const context = _usePrivateRenderFrameContext();
+  const context = useCanvas();
 
   useEffect(() => {
     if (!context) return;

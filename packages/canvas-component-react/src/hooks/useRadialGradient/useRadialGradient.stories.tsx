@@ -6,10 +6,9 @@ import { withRenderFrameProvider } from "../../../.storybook/decorators";
 import { useEllipse } from "../../components/Ellipse";
 
 import { useRadialGradient } from "./useRadialGradient.hooks";
-import { CreateRadialGradientArgs } from "./useRadialGradient.types";
 
 
-function RenderLinearGradient(args: CreateRadialGradientArgs) {
+function RenderLinearGradient(args: Parameters<typeof useRadialGradient>[0]) {
   useEllipse({
     radius: 250,
     center: {x: 250, y: 250},
