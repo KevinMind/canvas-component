@@ -3,7 +3,7 @@ import {
   ShapeArgs,
   StrokeArgs,
   FillArgs,
-} from "../../RenderFrame.types";
+} from "../../createDrawing.types";
 
 export interface TextArgs
   extends BaseArgs,

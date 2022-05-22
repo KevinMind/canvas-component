@@ -4,7 +4,7 @@ import {
   FillArgs,
   StrokeArgs,
   ShapeArgs,
-} from "../../RenderFrame.types";
+} from "../../createDrawing.types";
 
 export type SimpleSide = Position;
 export type SideWithControlPoint = [Position, Position];

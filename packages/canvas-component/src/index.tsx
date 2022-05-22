@@ -8,11 +8,13 @@ export * from "./components/Polygon";
 export * from "./components/Rect";
 export * from "./components/Text";
 
-export * from "./RenderFrame.types";
-export * from "./RenderFrame.utilities";
+export * from "./createDrawing.types";
+export * from "./createDrawing.utilities";
 
 export { Canvas } from "./Canvas.class";
 export * from "./Canvas.types";
+
+export * from "./Gradient.types";
 
 export { Animation } from "./Animation.class";
 export * from "./Animation.types";

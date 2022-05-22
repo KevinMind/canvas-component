@@ -3,7 +3,7 @@ import {
   ShapeArgs,
   FillArgs,
   StrokeArgs,
-} from "../../RenderFrame.types";
+} from "../../createDrawing.types";
 
 export interface RectArgs extends BaseArgs, ShapeArgs, FillArgs, StrokeArgs {
   width: number;

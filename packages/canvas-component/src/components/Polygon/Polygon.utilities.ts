@@ -1,4 +1,4 @@
-import { createDrawing } from "../../RenderFrame.utilities";
+import { createDrawing } from "../../createDrawing.utilities";
 
 import { PolygonArgs, Side } from "./Polygon.types";
 

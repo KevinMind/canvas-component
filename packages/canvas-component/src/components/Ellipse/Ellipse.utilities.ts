@@ -1,6 +1,6 @@
 import { EllipseArgs } from "./Ellipse.types";
 
-import { createDrawing } from "../../RenderFrame.utilities";
+import { createDrawing } from "../../createDrawing.utilities";
 
 export const drawEllipse = createDrawing<EllipseArgs>((ctx, args) => {
   const radiusX = args.radius;

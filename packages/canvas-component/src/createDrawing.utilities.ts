@@ -1,4 +1,4 @@
-import { BaseArgs, DrawingArguments } from "./RenderFrame.types";
+import { BaseArgs, DrawingArguments } from "./createDrawing.types";
 
 export function degreesToRadians(degrees: number) {
   if (degrees > 360 || degrees < 0) {

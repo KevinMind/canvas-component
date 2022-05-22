@@ -1,4 +1,4 @@
-import { createDrawing } from "../../RenderFrame.utilities";
+import { createDrawing } from "../../createDrawing.utilities";
 
 import { ImageArgs } from "./Image.types";
 

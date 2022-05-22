@@ -3,7 +3,7 @@ import {
   FillArgs,
   Position,
   StrokeArgs,
-} from "../../RenderFrame.types";
+} from "../../createDrawing.types";
 
 // points: number[], tension = 0.5, numOfSeg = 25, close = false
 export interface CurveArgs extends BaseArgs, StrokeArgs, FillArgs {

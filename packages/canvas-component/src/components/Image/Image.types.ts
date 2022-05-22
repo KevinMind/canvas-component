@@ -1,4 +1,4 @@
-import { BaseArgs, ShapeArgs } from "../../RenderFrame.types";
+import { BaseArgs, ShapeArgs } from "../../createDrawing.types";
 
 interface BasicImage extends BaseArgs, ShapeArgs {
   image: CanvasImageSource;

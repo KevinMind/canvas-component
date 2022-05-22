@@ -1,4 +1,4 @@
-import { createDrawing } from "../../RenderFrame.utilities";
+import { createDrawing } from "../../createDrawing.utilities";
 import { drawEllipse } from "../Ellipse";
 
 import { LineArgs } from "./Line.types";

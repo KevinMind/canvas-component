@@ -3,7 +3,7 @@ import {
   FillArgs,
   StrokeArgs,
   ShapeArgs,
-} from "../../RenderFrame.types";
+} from "../../createDrawing.types";
 
 export interface EllipseArgs extends BaseArgs, ShapeArgs, FillArgs, StrokeArgs {
   radius: number;

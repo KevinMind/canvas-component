@@ -1,4 +1,4 @@
-import { Position, BaseArgs, StrokeArgs } from "../../RenderFrame.types";
+import { Position, BaseArgs, StrokeArgs } from "../../createDrawing.types";
 
 export interface PathArgs extends BaseArgs, StrokeArgs {
   points?: Position[];

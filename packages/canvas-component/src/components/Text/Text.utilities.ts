@@ -1,5 +1,5 @@
 import { TextArgs } from "./Text.types";
-import { createDrawing } from "../../RenderFrame.utilities";
+import { createDrawing } from "../../createDrawing.utilities";
 
 export const drawText = createDrawing<TextArgs>((ctx, args) => {
   if (!args.fillStyle && !args.strokeStyle) {

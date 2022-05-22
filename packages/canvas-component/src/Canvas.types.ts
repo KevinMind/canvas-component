@@ -1,4 +1,4 @@
-import { Draw } from "./RenderFrame.types";
+import { Draw } from "./createDrawing.types";
 
 export interface IntCanvas {
   canvas: HTMLCanvasElement;

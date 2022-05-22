@@ -1,5 +1,62 @@
 import { IntCanvas } from "./Canvas.types";
-import { Draw } from "./RenderFrame.types";
+import { Draw } from "./createDrawing.types";
+import { createDrawing } from "./createDrawing.utilities";
+import {
+  CreateConicGradientArgs,
+  CreateLinearGradientArgs,
+  CreateRadialGradientArgs,
+} from "./Gradient.types";
+
+export const createConicGradient = createDrawing<
+  CreateConicGradientArgs,
+  CanvasGradient
+>((ctx, { colorStops = [], ...args }) => {
+  const grd = ctx.createConicGradient(args.angle, args.center.x, args.center.y);
+
+  for (let colorStop of colorStops) {
+    grd.addColorStop(...colorStop);
+  }
+
+  return grd;
+});
+
+export const createLinearGradient = createDrawing<
+  CreateLinearGradientArgs,
+  CanvasGradient
+>((ctx, { colorStops = [], ...args }) => {
+  const grd = ctx.createLinearGradient(
+    args.start.x,
+    args.start.y,
+    args.end.x,
+    args.end.y
+  );
+
+  for (let colorStop of colorStops) {
+    grd.addColorStop(...colorStop);
+  }
+
+  return grd;
+});
+
+export const createRadialGradient = createDrawing<
+  CreateRadialGradientArgs,
+  CanvasGradient
+>((ctx, { colorStops = [], ...args }) => {
+  const grd = ctx.createRadialGradient(
+    args.start.x,
+    args.start.y,
+    args.startRadius,
+    args.end.x,
+    args.end.y,
+    args.endRadius
+  );
+
+  for (let colorStop of colorStops) {
+    grd.addColorStop(...colorStop);
+  }
+
+  return grd;
+});
 
 export class Canvas implements IntCanvas {
   #id?: number;
@@ -63,5 +120,17 @@ export class Canvas implements IntCanvas {
 
   public remove(draw: Draw) {
     this.drawings.delete(draw);
+  }
+
+  public createConicGradient(args: CreateConicGradientArgs) {
+    return createConicGradient(this.context, args);
+  }
+
+  public createLinearGradient(args: CreateLinearGradientArgs) {
+    return createLinearGradient(this.context, args);
+  }
+
+  public createRadialGradient(args: CreateRadialGradientArgs) {
+    return createRadialGradient(this.context, args);
   }
 }

@@ -1,4 +1,4 @@
-import { Position } from "../../RenderFrame.types";
+import { Position } from "./createDrawing.types";
 
 type ColorStopArgs = [...Parameters<CanvasGradient["addColorStop"]>];
 

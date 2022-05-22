@@ -1,5 +1,5 @@
-import { Position } from '../../RenderFrame.types';
-import { createDrawing } from '../../RenderFrame.utilities';
+import { Position } from '../../createDrawing.types';
+import { createDrawing } from '../../createDrawing.utilities';
 
 import { RectArgs } from './Rect.types'; 
 
