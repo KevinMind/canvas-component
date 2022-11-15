@@ -1,11 +1,12 @@
-import React, { ComponentProps } from "react";
-import { ComponentMeta, StoryObj } from "@storybook/react";
+import React, { ComponentProps, useMemo } from "react";
+import { ComponentMeta, StoryContext, StoryObj } from "@storybook/react";
 
 import { useAnimationFrame } from "./hooks/useAnimationFrame";
 import { withRenderFrameProvider, withMousePosition, useMousePos, withTodoList } from "../.storybook/decorators";
 import { RenderFrameProvider } from "./RenderFrame.component";
 import { useRenderFrame } from "./RenderFrame.hooks";
 import { Ellipse, useEllipse } from "./components/Ellipse";
+import { EllipseArgs } from "@canvas-component/core";
 
 function CustomEllipse({
   x,
@@ -68,7 +69,7 @@ function Smiley() {
 
 export default {
   component: RenderFrameProvider,
-  decorators: [withTodoList, withMousePosition, withRenderFrameProvider],
+  decorators: [withRenderFrameProvider, withTodoList, withMousePosition],
 } as ComponentMeta<typeof RenderFrameProvider>;
 
 type RenderFrameProviderStory = StoryObj<ComponentProps<typeof RenderFrameProvider>>;
@@ -203,3 +204,71 @@ export const Point: RenderFrameProviderStory = {
   },
   render: () => <RenderPoint />,
 };
+
+interface BenchmarkProos {
+  shapeCount: number;
+}
+
+function getRandomArbitrary(min: number, max: number) {
+  return Math.random() * (max - min) + min;
+}
+
+interface MovingEllipseProps extends EllipseArgs {
+  duration: number;
+}
+
+function getInitialProps(): MovingEllipseProps {
+  const x = getRandomArbitrary(0, 500);
+  const y = getRandomArbitrary(0, 500);
+  const duration = getRandomArbitrary(500, 3_000);
+  const radius = getRandomArbitrary(10, 30);
+
+  return {
+    center: {
+      x,
+      y,
+    },
+    duration,
+    radius,
+  };
+}
+
+function MovingEllipse(props: MovingEllipseProps) {
+  const [x] = useAnimationFrame({
+    duration: props.duration,
+    from: -100,
+    to: props.center.x,
+    mode: 'backward',
+    auto: true,
+    infinite: true,
+  });
+  return <Ellipse {...props} center={{x, y: props.center.y}} />;
+}
+
+function RenderBenchmark(props: BenchmarkProos) {
+
+  const shapes = useMemo(() => {
+    return Array.apply(null, Array(props.shapeCount)).map(getInitialProps);
+  }, [props.shapeCount]);
+
+  return (
+    <>
+    {shapes.map((props) => (
+      <MovingEllipse {...props} key={`${props.center.x}-${props.center.y}`}/>
+    ))}
+    </>
+  );
+}
+
+export const Benchmark: StoryObj<ComponentProps<typeof RenderBenchmark>> = {
+  parameters: {
+    canvasProvider: {
+      width: 500,
+      height: 500,
+    },
+  },
+  args: {
+    shapeCount: 1,
+  },
+  render: (args) => <RenderBenchmark {...args} />
+}

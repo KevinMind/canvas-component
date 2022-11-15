@@ -2,7 +2,8 @@ import { Story, Meta } from "@storybook/html";
 
 import { Animation } from "./Animation.class";
 import { getCanvasContext } from "../.storybook/decorators";
-import { drawEllipse } from "./components/Ellipse";
+import { drawEllipse, EllipseArgs } from "./components/Ellipse";
+import { Canvas } from "./Canvas.class";
 
 export default {} as Meta;
 
@@ -54,3 +55,58 @@ const Template: Story = (_args, ctx) => {
 };
 
 export const Default = Template.bind({});
+
+function getRandomArbitrary(min: number, max: number) {
+  return Math.random() * (max - min) + min;
+}
+
+function getInitialProps() {
+  const xOffest = getRandomArbitrary(0, 250);
+  const y = getRandomArbitrary(0, 500);
+  const duration = getRandomArbitrary(500, 3_000);
+  const radius = getRandomArbitrary(10, 30);
+
+  return {
+    y,
+    xOffest,
+    duration,
+    radius,
+  };
+}
+
+interface BenchmarkProos {
+  shapeCount: number;
+}
+
+const BenchmarkTemplate: Story<BenchmarkProos> = (args, ctx) => {
+  const canvas = getCanvasContext(ctx);
+
+  for (let x = 0; x < args.shapeCount; x++) {
+    const props = getInitialProps();
+
+    const x = new Animation({
+      from: -100,
+      to: 500 + props.xOffest,
+      mode: "backward",
+      auto: true,
+      infinite: true,
+      duration: props.duration,
+    });
+
+    x.start();
+
+    canvas.add((ctx) => {
+      drawEllipse(ctx, { ...props, center: { x: x.value, y: props.y } });
+    });
+  }
+
+  console.log("size", canvas.size);
+
+  return canvas.canvas;
+};
+
+export const Benchmark = BenchmarkTemplate.bind({});
+
+Benchmark.args = {
+  shapeCount: 10,
+};

@@ -65,6 +65,8 @@ export class Canvas implements IntCanvas {
   context: CanvasRenderingContext2D;
   drawings: Map<Draw, true> = new Map();
 
+  #avgCycleTime: number = 0;
+
   constructor(canvas: HTMLCanvasElement) {
     const context = canvas.getContext("2d");
 
@@ -74,6 +76,19 @@ export class Canvas implements IntCanvas {
 
     this.canvas = canvas;
     this.context = context;
+
+    const dpr = window.devicePixelRatio;
+    const rect = this.canvas.getBoundingClientRect();
+
+    console.log({ dpr, rect });
+
+    // this.canvas.width = rect.width * dpr;
+    // this.canvas.height = rect.height * dpr;
+
+    // this.context.scale(dpr, dpr);
+
+    // this.canvas.style.width = rect.width + "px";
+    // this.canvas.style.height = rect.height + "px";
   }
 
   get width(): number {
@@ -85,11 +100,10 @@ export class Canvas implements IntCanvas {
   }
 
   public start(): void {
-    const self = this;
-    function render(frame = 0) {
-      self.render(frame);
-      self.#id = window.requestAnimationFrame(render);
-    }
+    const render = (frame = 0) => {
+      this.render(frame);
+      this.#id = window.requestAnimationFrame(render);
+    };
 
     render();
   }
@@ -104,12 +118,9 @@ export class Canvas implements IntCanvas {
   private render(frame = 0) {
     this.context.clearRect(0, 0, this.width, this.height);
 
-    this.drawings.forEach((_, draw) => {
-      this.context.resetTransform();
-      this.context.setLineDash([]);
-      this.context.beginPath();
+    for (let draw of this.drawings.keys()) {
       draw(this.context, frame);
-    });
+    }
   }
 
   public add(draw: Draw) {
@@ -132,5 +143,9 @@ export class Canvas implements IntCanvas {
 
   public createRadialGradient(args: CreateRadialGradientArgs) {
     return createRadialGradient(this.context, args);
+  }
+
+  public get size(): number {
+    return this.drawings.size;
   }
 }

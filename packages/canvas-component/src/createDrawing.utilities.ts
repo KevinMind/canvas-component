@@ -18,6 +18,13 @@ export function createDrawing<A extends DrawingArguments, R = void>(
     ctx.restore();
     ctx.beginPath();
 
+    if ("center" in args) {
+      args.center = {
+        x: Math.round(args?.center?.x ?? 0),
+        y: Math.round(args?.center?.y ?? 0),
+      };
+    }
+
     const rotation = args.rotation || 0;
 
     if (!!args.center && rotation > 0) {
