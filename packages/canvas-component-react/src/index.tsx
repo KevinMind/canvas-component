@@ -1,17 +1,19 @@
-export * from "./components/ArcTo";
-export * from "./components/Curve";
-export * from "./components/Ellipse";
-export * from "./components/Image";
-export * from "./components/Line";
-export * from './components/Path';
-export * from "./components/Polygon";
-export * from "./components/Rect";
-export * from "./components/Text";
+// ==============================================
+// Two.js React - High-Performance Canvas Library
+// ==============================================
 
-export * from "./hooks/useAnimationFrame";
-export * from './hooks/useLinearGradient';
+// Primary API - Two.js powered components
+export * from './two-js-react';
 
+// Animation utilities
+export * from './animation';
+export * from "./hooks/useAnimationValue";
+
+// Bezier easing
 export * from './utilities/bezier';
 
-export {RenderFrameProvider} from './RenderFrame.component';
-export { useRenderFrame, useRenderFrameCanvas } from './RenderFrame.hooks';
+// Accessibility
+export * from './accessibility';
+
+// Interactive hooks
+export * from './hooks/useInteractive';

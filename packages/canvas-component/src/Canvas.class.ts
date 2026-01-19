@@ -6,6 +6,7 @@ import {
   CreateLinearGradientArgs,
   CreateRadialGradientArgs,
 } from "./Gradient.types";
+import { InteractionManager } from "./engine/InteractionManager";
 
 export const createConicGradient = createDrawing<
   CreateConicGradientArgs,
@@ -64,6 +65,7 @@ export class Canvas implements IntCanvas {
   canvas: HTMLCanvasElement;
   context: CanvasRenderingContext2D;
   drawings: Map<Draw, true> = new Map();
+  interaction: InteractionManager;
 
   constructor(canvas: HTMLCanvasElement) {
     const context = canvas.getContext("2d");
@@ -74,6 +76,7 @@ export class Canvas implements IntCanvas {
 
     this.canvas = canvas;
     this.context = context;
+    this.interaction = new InteractionManager(canvas);
   }
 
   get width(): number {
@@ -99,6 +102,7 @@ export class Canvas implements IntCanvas {
       window.cancelAnimationFrame(this.#id);
       this.#id = 0;
     }
+    this.interaction.destroy();
   }
 
   private render(frame = 0) {

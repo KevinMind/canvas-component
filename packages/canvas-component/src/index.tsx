@@ -18,3 +18,6 @@ export * from "./Gradient.types";
 
 export { Animation } from "./Animation.class";
 export * from "./Animation.types";
+
+// Engine utilities for performance optimization
+export * from "./engine";

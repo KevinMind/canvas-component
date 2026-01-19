@@ -1,37 +1,117 @@
 import React, { useState, useRef, useEffect, createContext, useContext } from "react";
 import { StoryFn, StoryContext } from "@storybook/react";
-import isChromatic from "chromatic/isChromatic";
 
-import { useRenderFrameCanvas, RenderFrameProvider, useEllipse, useAnimationFrame} from "../src";
+import { TwoProvider, useTwoContext } from "../src/two-js-react";
 
-export function withRotation(Story: StoryFn, ctx: StoryContext) {
-  const [rotation] = useAnimationFrame({
-    from: 0,
-    to: 360,
-    duration: 3_000,
-    auto: true,
-    infinite: true,
-  });
+/**
+ * useAnimationFrameState - State-based animation hook for stories/visual testing
+ *
+ * This hook causes re-renders every frame and should ONLY be used in stories
+ * for visual testing. For production use, use useAnimationValue which is zero-render.
+ */
+export type PlayModes = "forward" | "backward" | "pingpong" | "pingpong-backward";
 
-  ctx.args.rotation = rotation;
-
-  return <Story />
+interface AnimationConfig {
+  from: number;
+  to: number;
+  duration?: number;
+  easing?: (t: number) => number;
+  mode?: PlayModes;
+  infinite?: boolean;
+  auto?: boolean;
 }
 
-export function withCenterDot(Story: StoryFn) {
-  const [canvas] = useRenderFrameCanvas();
-  let center = {x: 0, y: 0};
+const linearEasing = (t: number) => t;
 
-  if (canvas) {
-    center.x = canvas.width / 2;
-    center.y = canvas.height /2;
+export function useAnimationFrameState(config: AnimationConfig): [
+  number,
+  { start(mode?: PlayModes): void; stop(): void; reset(): void }
+] {
+  const {
+    from,
+    to,
+    duration = Number.MAX_SAFE_INTEGER,
+    easing = linearEasing,
+    mode: initialMode = 'forward',
+    infinite = false,
+    auto = false,
+  } = config;
+
+  const [value, setValue] = useState(from);
+  const mode = useRef<PlayModes>(initialMode);
+  const rafId = useRef<number>();
+  const startTime = useRef<number>(0);
+
+  function stop() {
+    if (rafId.current) {
+      cancelAnimationFrame(rafId.current);
+      rafId.current = undefined;
+    }
   }
-  useEllipse({center, radius: 1, fillStyle: 'black'});
 
-  return <Story />;
+  function start(playMode?: PlayModes) {
+    if (playMode) {
+      mode.current = playMode;
+    }
+
+    startTime.current = performance.now();
+
+    function tick(currentTime: number) {
+      const elapsed = currentTime - startTime.current;
+      let progress = Math.min(elapsed / duration, 1);
+
+      if (mode.current.includes('backward')) {
+        progress = 1 - progress;
+      }
+
+      const easedProgress = easing(progress);
+      setValue(from + (to - from) * easedProgress);
+
+      if (elapsed >= duration) {
+        if (infinite) {
+          switch (mode.current) {
+            case 'forward':
+            case 'backward':
+              start(mode.current);
+              return;
+            case 'pingpong':
+              start('pingpong-backward');
+              return;
+            case 'pingpong-backward':
+              start('pingpong');
+              return;
+          }
+        }
+        return;
+      }
+
+      rafId.current = requestAnimationFrame(tick);
+    }
+
+    rafId.current = requestAnimationFrame(tick);
+  }
+
+  function reset() {
+    stop();
+    setValue(from);
+    mode.current = initialMode;
+  }
+
+  useEffect(() => {
+    if (auto) {
+      start();
+    }
+    return () => stop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [auto]);
+
+  return [value, { start, stop, reset }];
 }
 
-export function withRenderFrameProvider(Story: StoryFn, ctx: StoryContext) {
+/**
+ * Decorator that wraps story in TwoProvider
+ */
+export function withTwoProvider(Story: StoryFn, ctx: StoryContext) {
   const customParams = ctx.parameters?.canvasProvider ?? {};
 
   const { height } =
@@ -40,21 +120,23 @@ export function withRenderFrameProvider(Story: StoryFn, ctx: StoryContext) {
       ?.getBoundingClientRect() ?? {};
 
   const args = {
-    width: ctx.canvasElement.offsetWidth,
-    height,
-    ...customParams,
-    style: { border: "1px solid black" },
+    width: customParams.width ?? ctx.canvasElement?.offsetWidth ?? 800,
+    height: customParams.height ?? height ?? 600,
   };
 
   return (
-    <RenderFrameProvider {...args}>
-      <Story />
-    </RenderFrameProvider>
+    <div style={{ border: "1px solid black", display: "inline-block" }}>
+      <TwoProvider {...args}>
+        <Story />
+      </TwoProvider>
+    </div>
   );
 }
 
+/**
+ * Mouse position tracking
+ */
 type HandleMouseMove = (x: number, y: number, e: MouseEvent) => void;
-
 type HandleMouseIdle = () => void;
 
 interface UseMouseMoveArgs {
@@ -80,7 +162,7 @@ export function useMousePos({onIdle= () => {}, onMove = () => {}}: UseMouseMoveA
   const ctx = useContext(MousePositionContext);
   const moveHandler = useRef<HandleMouseMove | null>(null);
   const idleHandler = useRef<HandleMouseIdle | null>(null);
-  
+
   if (!ctx) {
     throw new Error('useMousePos() must be rendered in a story using the withMousePosition decorator');
   }
@@ -111,14 +193,13 @@ export function useMousePos({onIdle= () => {}, onMove = () => {}}: UseMouseMoveA
 }
 
 export function withMousePosition(Story: StoryFn) {
-  const [idle, setIdle] = useState<boolean>(true);
-  const [canvas] = useRenderFrameCanvas();
   const [position, setPosition] = useState<[number, number]>([0, 0]);
+  const [idle, setIdle] = useState<boolean>(true);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const moveListeners = useRef<Map<HandleMouseMove, true>>(new Map());
   const idleListeners = useRef<Map<HandleMouseIdle, true>>(new Map());
-  // @TODO: fix typing for timeout
-  const idleTimeout = useRef<any>();
+  const idleTimeout = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
     if (idle) {
@@ -142,13 +223,14 @@ export function withMousePosition(Story: StoryFn) {
   }
 
   useEffect(() => {
-    function update(e: MouseEvent) {
-      if (!canvas) return;
+    const container = containerRef.current;
+    if (!container) return;
 
+    function update(e: MouseEvent) {
       clearIdle();
 
-      const rect = canvas.getBoundingClientRect();
-      
+      const rect = container!.getBoundingClientRect();
+
       const insideX = rect.x + rect.width > e.clientX && e.clientX > rect.x;
       const insideY = rect.y + rect.height > e.clientY && e.clientY > rect.y;
 
@@ -169,7 +251,7 @@ export function withMousePosition(Story: StoryFn) {
 
     return () => window.removeEventListener('mousemove', update);
 
-  }, [canvas]);
+  }, []);
 
   function addMoveListener(handler: HandleMouseMove) {
     if (!moveListeners.current.has(handler)) {
@@ -198,117 +280,10 @@ export function withMousePosition(Story: StoryFn) {
   const [x, y] = position;
 
   return (
-    <MousePositionContext.Provider value={[x, y, {addMoveListener, removeMoveListener, addIdleListener, removeIdleListener}]}>
-      <Story />
-    </MousePositionContext.Provider>
-  )
-}
-
-interface Todo {
-  id: number;
-  text: string;
-  done: boolean;
-}
-
-export function withTodoList(Story: StoryFn) {
-  const [text, setText] = useState<string>("");
-  const [todos, setTodos] = useState<Todo[]>([]);
-  const [visible, setVisible] = useState<boolean>(false);
-  const input = useRef<HTMLInputElement>(null);
-
-  function update(text: string) {
-    setText(text);
-  }
-
-  function submit() {
-    if (text.length > 0) {
-      setTodos((curr) => [...curr, { id: Math.random(), done: false, text }]);
-      update("");
-      input.current?.focus();
-    }
-  }
-
-  useEffect(() => {
-    function onEnter(e: KeyboardEvent) {
-      if (e.key === "Enter") {
-        submit();
-      }
-    }
-
-    window.addEventListener("keyup", onEnter);
-
-    return () => {
-      window.removeEventListener("keyup", onEnter);
-    };
-  });
-
-  if (isChromatic()) {
-    return <Story />;
-  }
-
-  function toggleTodo(id: number) {
-    setTodos((curr) =>
-      curr.map((todo) => {
-        if (todo.id === id) {
-          return {
-            ...todo,
-            done: !todo.done,
-          };
-        }
-        return todo;
-      })
-    );
-  }
-
-  function deleteTodo(id: number) {
-    setTodos((curr) => curr.filter((todo) => todo.id !== id));
-  }
-
-  function toggle() {
-    setVisible((visible) => !visible);
-  }
-
-  return (
-    <>
-    <Story />
-    <div style={{ position: "fixed", top: 0, left: 0, zIndex: 999 }}>
-        <div style={{ padding: 10 }}>
-          <div style={{ marginBottom: 10 }}>
-            <button onClick={toggle}>{visible ? "hide" : "show"}</button>
-          </div>
-          {visible ? (
-            <>
-              <div style={{ display: "flex", justifyContent: "space-around" }}>
-                <input
-                  onChange={(e) => update(e.target.value)}
-                  value={text}
-                  ref={input}
-                />
-                <button onClick={submit}>Submit</button>
-              </div>
-              <ul>
-                {todos.map((todo) => (
-                  <li
-                    key={todo.id}
-                    style={{
-                      background: "rgba(200, 200, 200, 0.5)",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      marginBottom: 8,
-                    }}
-                  >
-                    <button onClick={() => deleteTodo(todo.id)}>X</button>
-                    {todo.text}
-                    <button onClick={() => toggleTodo(todo.id)}>
-                      {todo.done ? "undo" : "done"}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </>
-          ) : null}
-        </div>
-      </div>
-    </>
+    <div ref={containerRef}>
+      <MousePositionContext.Provider value={[x, y, {addMoveListener, removeMoveListener, addIdleListener, removeIdleListener}]}>
+        <Story />
+      </MousePositionContext.Provider>
+    </div>
   );
 }
