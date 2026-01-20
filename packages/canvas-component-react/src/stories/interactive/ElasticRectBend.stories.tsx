@@ -270,19 +270,22 @@ function ElasticRectBendDemo({
   };
 
   // Calculate signed pressure for each edge
-  // Positive = mouse outside outer edge, approaching (push inward)
-  // Negative = mouse between outer and inner edge (push outward)
-  // Zero = mouse inside inner rectangle (tension released) or far away
+  // Pressure is based on proximity to the VISIBLE boundary:
+  // - Between outer (red) and visible: inward pressure, max at visible edge
+  // - Between visible and inner (green): outward pressure, max at visible edge
+  // - Outside outer (red): no pressure (too far)
+  // - Inside inner (green): no pressure (tension released)
   function getEdgePressure(edge: 'top' | 'right' | 'bottom' | 'left'): number {
-    const outer = vertices;
-    const inner = innerVertices;
+    const outer = outerVertices;   // Red - tension starts here when coming IN
+    const visible = vertices;       // The visible rectangle boundary
+    const inner = innerVertices;    // Green - tension releases here when going IN
 
     // Check if mouse is fully inside the inner rectangle (tension released)
     const insideInner = mouseX > inner.topLeft.x && mouseX < inner.topRight.x &&
                         mouseY > inner.topLeft.y && mouseY < inner.bottomLeft.y;
     if (insideInner) return 0;
 
-    // Check if mouse is within the horizontal/vertical bounds for this edge
+    // Check bounds relative to outer detection zone
     const inHorizontalBounds = mouseX > outer.topLeft.x && mouseX < outer.topRight.x;
     const inVerticalBounds = mouseY > outer.topLeft.y && mouseY < outer.bottomLeft.y;
 
@@ -290,72 +293,70 @@ function ElasticRectBendDemo({
       case 'top': {
         if (!inHorizontalBounds) return 0;
 
-        // Mouse is above the outer top edge (outside) - push inward
-        if (mouseY < outer.topLeft.y) {
-          const dist = outer.topLeft.y - mouseY;
-          if (dist > 0 && dist < margin) {
-            return 1 - (dist / margin); // Positive = inward pressure
-          }
+        // Between outer (red) and visible - INWARD pressure
+        // Pressure increases as mouse approaches visible edge
+        if (mouseY >= outer.topLeft.y && mouseY < visible.topLeft.y) {
+          const zoneSize = visible.topLeft.y - outer.topLeft.y;
+          const distFromVisible = visible.topLeft.y - mouseY;
+          return distFromVisible / zoneSize; // 0 at outer, 1 at visible
         }
-        // Mouse is between outer and inner top edge (buffer zone) - push outward
-        else if (mouseY >= outer.topLeft.y && mouseY < inner.topLeft.y) {
-          const bufferSize = inner.topLeft.y - outer.topLeft.y;
-          const dist = mouseY - outer.topLeft.y;
-          return -(1 - (dist / bufferSize)); // Negative = outward pressure
+        // Between visible and inner (green) - OUTWARD pressure
+        // Pressure decreases as mouse moves toward inner
+        else if (mouseY >= visible.topLeft.y && mouseY < inner.topLeft.y) {
+          const zoneSize = inner.topLeft.y - visible.topLeft.y;
+          const distFromVisible = mouseY - visible.topLeft.y;
+          return -(1 - distFromVisible / zoneSize); // -1 at visible, 0 at inner
         }
         return 0;
       }
       case 'bottom': {
         if (!inHorizontalBounds) return 0;
 
-        // Mouse is below the outer bottom edge (outside) - push inward
-        if (mouseY > outer.bottomLeft.y) {
-          const dist = mouseY - outer.bottomLeft.y;
-          if (dist > 0 && dist < margin) {
-            return 1 - (dist / margin); // Positive = inward pressure
-          }
+        // Between outer (red) and visible - INWARD pressure
+        if (mouseY <= outer.bottomLeft.y && mouseY > visible.bottomLeft.y) {
+          const zoneSize = outer.bottomLeft.y - visible.bottomLeft.y;
+          const distFromVisible = mouseY - visible.bottomLeft.y;
+          return distFromVisible / zoneSize;
         }
-        // Mouse is between outer and inner bottom edge (buffer zone) - push outward
-        else if (mouseY <= outer.bottomLeft.y && mouseY > inner.bottomLeft.y) {
-          const bufferSize = outer.bottomLeft.y - inner.bottomLeft.y;
-          const dist = outer.bottomLeft.y - mouseY;
-          return -(1 - (dist / bufferSize)); // Negative = outward pressure
+        // Between visible and inner (green) - OUTWARD pressure
+        else if (mouseY <= visible.bottomLeft.y && mouseY > inner.bottomLeft.y) {
+          const zoneSize = visible.bottomLeft.y - inner.bottomLeft.y;
+          const distFromVisible = visible.bottomLeft.y - mouseY;
+          return -(1 - distFromVisible / zoneSize);
         }
         return 0;
       }
       case 'left': {
         if (!inVerticalBounds) return 0;
 
-        // Mouse is to the left of outer left edge (outside) - push inward
-        if (mouseX < outer.topLeft.x) {
-          const dist = outer.topLeft.x - mouseX;
-          if (dist > 0 && dist < margin) {
-            return 1 - (dist / margin); // Positive = inward pressure
-          }
+        // Between outer (red) and visible - INWARD pressure
+        if (mouseX >= outer.topLeft.x && mouseX < visible.topLeft.x) {
+          const zoneSize = visible.topLeft.x - outer.topLeft.x;
+          const distFromVisible = visible.topLeft.x - mouseX;
+          return distFromVisible / zoneSize;
         }
-        // Mouse is between outer and inner left edge (buffer zone) - push outward
-        else if (mouseX >= outer.topLeft.x && mouseX < inner.topLeft.x) {
-          const bufferSize = inner.topLeft.x - outer.topLeft.x;
-          const dist = mouseX - outer.topLeft.x;
-          return -(1 - (dist / bufferSize)); // Negative = outward pressure
+        // Between visible and inner (green) - OUTWARD pressure
+        else if (mouseX >= visible.topLeft.x && mouseX < inner.topLeft.x) {
+          const zoneSize = inner.topLeft.x - visible.topLeft.x;
+          const distFromVisible = mouseX - visible.topLeft.x;
+          return -(1 - distFromVisible / zoneSize);
         }
         return 0;
       }
       case 'right': {
         if (!inVerticalBounds) return 0;
 
-        // Mouse is to the right of outer right edge (outside) - push inward
-        if (mouseX > outer.topRight.x) {
-          const dist = mouseX - outer.topRight.x;
-          if (dist > 0 && dist < margin) {
-            return 1 - (dist / margin); // Positive = inward pressure
-          }
+        // Between outer (red) and visible - INWARD pressure
+        if (mouseX <= outer.topRight.x && mouseX > visible.topRight.x) {
+          const zoneSize = outer.topRight.x - visible.topRight.x;
+          const distFromVisible = mouseX - visible.topRight.x;
+          return distFromVisible / zoneSize;
         }
-        // Mouse is between outer and inner right edge (buffer zone) - push outward
-        else if (mouseX <= outer.topRight.x && mouseX > inner.topRight.x) {
-          const bufferSize = outer.topRight.x - inner.topRight.x;
-          const dist = outer.topRight.x - mouseX;
-          return -(1 - (dist / bufferSize)); // Negative = outward pressure
+        // Between visible and inner (green) - OUTWARD pressure
+        else if (mouseX <= visible.topRight.x && mouseX > inner.topRight.x) {
+          const zoneSize = visible.topRight.x - inner.topRight.x;
+          const distFromVisible = visible.topRight.x - mouseX;
+          return -(1 - distFromVisible / zoneSize);
         }
         return 0;
       }
