@@ -3,7 +3,7 @@ import { Meta, StoryObj } from "@storybook/react";
 import { useSpring } from 'use-spring';
 import Two from 'two.js';
 
-import { TwoProvider, TwoCircle, useTwo } from '../../two-js-react';
+import { TwoProvider, TwoCircle, TwoRect, TwoLine, useTwo } from '../../two-js-react';
 import { useMousePos, withMousePosition } from '../../../.storybook/decorators';
 
 // ============================================
@@ -28,6 +28,7 @@ interface ElasticRectBendProps {
   stiffness?: number;   // Spring tension - higher = snappier return
   damping?: number;     // How quickly wobble dies - lower = more bouncy
   mass?: number;        // Inertia - higher = more wobble/momentum
+  showDebug?: boolean;  // Show detection zones and quadrants
 }
 
 interface SpringConfig {
@@ -209,6 +210,7 @@ function ElasticRectBendDemo({
   stiffness = 180,
   damping = 12,
   mass = 2,
+  showDebug = false,
 }: ElasticRectBendProps) {
   const [mouseX, mouseY] = useMousePos();
 
@@ -227,12 +229,20 @@ function ElasticRectBendDemo({
     bottomLeft: { x: center.x - halfW, y: center.y + halfH },
   };
 
-  // Inner rectangle (tension release zone)
+  // Inner rectangle (tension release zone - smaller)
   const innerVertices = {
     topLeft: { x: center.x - halfW + innerMargin, y: center.y - halfH + innerMargin },
     topRight: { x: center.x + halfW - innerMargin, y: center.y - halfH + innerMargin },
     bottomRight: { x: center.x + halfW - innerMargin, y: center.y + halfH - innerMargin },
     bottomLeft: { x: center.x - halfW + innerMargin, y: center.y + halfH - innerMargin },
+  };
+
+  // Outer detection zone (larger than visible rect)
+  const outerVertices = {
+    topLeft: { x: center.x - halfW - margin, y: center.y - halfH - margin },
+    topRight: { x: center.x + halfW + margin, y: center.y - halfH - margin },
+    bottomRight: { x: center.x + halfW + margin, y: center.y + halfH + margin },
+    bottomLeft: { x: center.x - halfW - margin, y: center.y + halfH + margin },
   };
 
   // Edge midpoints (rest positions)
@@ -368,8 +378,64 @@ function ElasticRectBendDemo({
     left: useMembranePoint(edgeMidpoints.left, inwardPoints.left, outwardPoints.left, pressure.left, springConfig),
   };
 
+  // Calculate inner rectangle dimensions for TwoRect (which uses center + width/height)
+  const innerWidth = width - innerMargin * 2;
+  const innerHeight = height - innerMargin * 2;
+  const outerWidth = width + margin * 2;
+  const outerHeight = height + margin * 2;
+
   return (
     <TwoProvider width={500} height={500} type="canvas">
+      {/* Debug: Outer detection zone (where inward pressure starts) */}
+      {showDebug && (
+        <TwoRect
+          x={center.x}
+          y={center.y}
+          width={outerWidth}
+          height={outerHeight}
+          fill="transparent"
+          stroke="rgba(255, 100, 100, 0.5)"
+          linewidth={2}
+        />
+      )}
+
+      {/* Debug: Inner release zone (where tension releases) */}
+      {showDebug && innerWidth > 0 && innerHeight > 0 && (
+        <TwoRect
+          x={center.x}
+          y={center.y}
+          width={innerWidth}
+          height={innerHeight}
+          fill="rgba(100, 255, 100, 0.1)"
+          stroke="rgba(100, 255, 100, 0.5)"
+          linewidth={2}
+        />
+      )}
+
+      {/* Debug: Quadrant dividers */}
+      {showDebug && (
+        <>
+          {/* Vertical center line */}
+          <TwoLine
+            x1={center.x}
+            y1={outerVertices.topLeft.y}
+            x2={center.x}
+            y2={outerVertices.bottomLeft.y}
+            stroke="rgba(255, 255, 255, 0.2)"
+            linewidth={1}
+          />
+          {/* Horizontal center line */}
+          <TwoLine
+            x1={outerVertices.topLeft.x}
+            y1={center.y}
+            x2={outerVertices.topRight.x}
+            y2={center.y}
+            stroke="rgba(255, 255, 255, 0.2)"
+            linewidth={1}
+          />
+        </>
+      )}
+
       {/* Main elastic rect with quadratic bezier curves */}
       <QuadraticBezierRect
         vertices={vertices}
@@ -380,16 +446,24 @@ function ElasticRectBendDemo({
       />
 
       {/* Debug: show control points */}
-      <TwoCircle x={controlPoints.top.x} y={controlPoints.top.y} radius={4} fill="rgba(255, 100, 100, 0.6)" />
-      <TwoCircle x={controlPoints.right.x} y={controlPoints.right.y} radius={4} fill="rgba(100, 255, 100, 0.6)" />
-      <TwoCircle x={controlPoints.bottom.x} y={controlPoints.bottom.y} radius={4} fill="rgba(100, 100, 255, 0.6)" />
-      <TwoCircle x={controlPoints.left.x} y={controlPoints.left.y} radius={4} fill="rgba(255, 255, 100, 0.6)" />
+      {showDebug && (
+        <>
+          <TwoCircle x={controlPoints.top.x} y={controlPoints.top.y} radius={4} fill="rgba(255, 100, 100, 0.8)" />
+          <TwoCircle x={controlPoints.right.x} y={controlPoints.right.y} radius={4} fill="rgba(100, 255, 100, 0.8)" />
+          <TwoCircle x={controlPoints.bottom.x} y={controlPoints.bottom.y} radius={4} fill="rgba(100, 100, 255, 0.8)" />
+          <TwoCircle x={controlPoints.left.x} y={controlPoints.left.y} radius={4} fill="rgba(255, 255, 100, 0.8)" />
+        </>
+      )}
 
-      {/* Corner markers */}
-      <TwoCircle x={vertices.topLeft.x} y={vertices.topLeft.y} radius={3} fill="rgba(255, 255, 255, 0.5)" />
-      <TwoCircle x={vertices.topRight.x} y={vertices.topRight.y} radius={3} fill="rgba(255, 255, 255, 0.5)" />
-      <TwoCircle x={vertices.bottomRight.x} y={vertices.bottomRight.y} radius={3} fill="rgba(255, 255, 255, 0.5)" />
-      <TwoCircle x={vertices.bottomLeft.x} y={vertices.bottomLeft.y} radius={3} fill="rgba(255, 255, 255, 0.5)" />
+      {/* Debug: Corner markers */}
+      {showDebug && (
+        <>
+          <TwoCircle x={vertices.topLeft.x} y={vertices.topLeft.y} radius={3} fill="rgba(255, 255, 255, 0.5)" />
+          <TwoCircle x={vertices.topRight.x} y={vertices.topRight.y} radius={3} fill="rgba(255, 255, 255, 0.5)" />
+          <TwoCircle x={vertices.bottomRight.x} y={vertices.bottomRight.y} radius={3} fill="rgba(255, 255, 255, 0.5)" />
+          <TwoCircle x={vertices.bottomLeft.x} y={vertices.bottomLeft.y} radius={3} fill="rgba(255, 255, 255, 0.5)" />
+        </>
+      )}
     </TwoProvider>
   );
 }
@@ -441,6 +515,10 @@ const meta: Meta<ElasticRectBendProps> = {
       control: { type: 'range', min: 0.5, max: 10, step: 0.5 },
       description: 'Inertia/momentum - higher = more wobble and overshoot',
     },
+    showDebug: {
+      control: 'boolean',
+      description: 'Show detection zones: red = outer (inward pressure), green = inner (release zone)',
+    },
   },
 };
 
@@ -460,6 +538,7 @@ export const Default: ElasticRectBendStory = {
     stiffness: 180,
     damping: 12,
     mass: 2,
+    showDebug: false,
   },
 };
 
@@ -505,5 +584,21 @@ export const Sluggish: ElasticRectBendStory = {
     stiffness: 60,  // Low stiffness = slow return
     damping: 8,     // Medium damping
     mass: 5,        // High mass = heavy, lots of momentum
+  },
+};
+
+export const DebugView: ElasticRectBendStory = {
+  render: (args) => <ElasticRectBendDemo {...args} />,
+  args: {
+    center: { x: 250, y: 250 },
+    width: 200,
+    height: 200,
+    margin: 60,
+    innerMargin: 70,
+    resistance: 0.4,
+    stiffness: 180,
+    damping: 12,
+    mass: 2,
+    showDebug: true, // Debug visualization enabled
   },
 };
