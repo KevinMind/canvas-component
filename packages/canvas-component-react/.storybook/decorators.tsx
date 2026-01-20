@@ -280,7 +280,7 @@ export function withMousePosition(Story: StoryFn) {
   const [x, y] = position;
 
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} style={{ display: 'inline-block' }}>
       <MousePositionContext.Provider value={[x, y, {addMoveListener, removeMoveListener, addIdleListener, removeIdleListener}]}>
         <Story />
       </MousePositionContext.Provider>

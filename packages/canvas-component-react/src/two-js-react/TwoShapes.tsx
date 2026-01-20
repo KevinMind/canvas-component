@@ -342,6 +342,10 @@ export const TwoPath = memo(function TwoPath({
     const anchors = vertices.map((v) => new Two.Anchor(v.x, v.y));
     // Create path - Two.js types are incomplete, use any cast
     const path = two.makePath(anchors) as TwoJsPath;
+    // Reset position to (0, 0) so vertices are treated as world coordinates
+    // Two.js defaults to positioning path at centroid, which causes offset issues
+    // when vertices are later updated with world coordinates
+    path.position.set(0, 0);
     (path as any).closed = closed;
     if (curved) {
       (path as any).automatic = true;

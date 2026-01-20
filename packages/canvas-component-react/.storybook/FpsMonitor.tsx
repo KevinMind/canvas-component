@@ -142,7 +142,14 @@ export function FpsMonitor({ children }: { children: React.ReactNode }) {
   }, [drawMonitor]);
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+    <div style={{
+      position: 'relative',
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+    }}>
       {children}
       <canvas
         ref={canvasRef}
