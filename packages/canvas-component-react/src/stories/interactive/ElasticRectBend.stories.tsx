@@ -22,7 +22,7 @@ interface ElasticRectBendProps {
   center: Position;
   width: number;
   height: number;
-  margin?: number;      // Detection zone outside the rectangle
+  outerMargin?: number; // Detection zone outside the rectangle (where tension starts)
   innerMargin?: number; // Buffer zone inside - tension releases when mouse passes this
   resistance?: number;  // How far curve extends to boundaries (0-1, 1 = full extent)
   stiffness?: number;   // Spring tension - higher = snappier return
@@ -207,7 +207,7 @@ function ElasticRectBendDemo({
   center,
   width,
   height,
-  margin = 50,
+  outerMargin = 50,
   innerMargin = 70,
   resistance = 0.4,
   stiffness = 180,
@@ -245,10 +245,10 @@ function ElasticRectBendDemo({
 
   // Outer detection zone (larger than visible rect)
   const outerVertices = {
-    topLeft: { x: center.x - halfW - margin, y: center.y - halfH - margin },
-    topRight: { x: center.x + halfW + margin, y: center.y - halfH - margin },
-    bottomRight: { x: center.x + halfW + margin, y: center.y + halfH + margin },
-    bottomLeft: { x: center.x - halfW - margin, y: center.y + halfH + margin },
+    topLeft: { x: center.x - halfW - outerMargin, y: center.y - halfH - outerMargin },
+    topRight: { x: center.x + halfW + outerMargin, y: center.y - halfH - outerMargin },
+    bottomRight: { x: center.x + halfW + outerMargin, y: center.y + halfH + outerMargin },
+    bottomLeft: { x: center.x - halfW - outerMargin, y: center.y + halfH + outerMargin },
   };
 
   // Edge midpoints (rest positions)
@@ -275,10 +275,10 @@ function ElasticRectBendDemo({
 
   // Outward push points - curve should peak at outer rectangle boundary
   const outwardPoints = {
-    top: { x: center.x, y: center.y - halfH - margin * resistance * bezierCompensation },
-    right: { x: center.x + halfW + margin * resistance * bezierCompensation, y: center.y },
-    bottom: { x: center.x, y: center.y + halfH + margin * resistance * bezierCompensation },
-    left: { x: center.x - halfW - margin * resistance * bezierCompensation, y: center.y },
+    top: { x: center.x, y: center.y - halfH - outerMargin * resistance * bezierCompensation },
+    right: { x: center.x + halfW + outerMargin * resistance * bezierCompensation, y: center.y },
+    bottom: { x: center.x, y: center.y + halfH + outerMargin * resistance * bezierCompensation },
+    left: { x: center.x - halfW - outerMargin * resistance * bezierCompensation, y: center.y },
   };
 
   // Check position relative to the three rectangles
@@ -388,8 +388,8 @@ function ElasticRectBendDemo({
   // Calculate inner rectangle dimensions for TwoRect (which uses center + width/height)
   const innerWidth = width - innerMargin * 2;
   const innerHeight = height - innerMargin * 2;
-  const outerWidth = width + margin * 2;
-  const outerHeight = height + margin * 2;
+  const outerWidth = width + outerMargin * 2;
+  const outerHeight = height + outerMargin * 2;
 
   return (
     <TwoProvider width={500} height={500} type="canvas">
@@ -499,9 +499,9 @@ const meta: Meta<ElasticRectBendProps> = {
       control: { type: 'range', min: 50, max: 400, step: 10 },
       description: 'Height of the rectangle',
     },
-    margin: {
+    outerMargin: {
       control: { type: 'range', min: 10, max: 150, step: 5 },
-      description: 'Detection zone outside the rectangle',
+      description: 'Detection zone outside the rectangle (where tension starts)',
     },
     innerMargin: {
       control: { type: 'range', min: 10, max: 95, step: 5 },
@@ -540,7 +540,7 @@ export const Default: ElasticRectBendStory = {
     center: { x: 250, y: 250 },
     width: 200,
     height: 200,
-    margin: 60,
+    outerMargin: 60,
     innerMargin: 70,
     resistance: 1.0,  // Curve extends fully to inner/outer boundaries
     stiffness: 180,
@@ -556,7 +556,7 @@ export const Bouncy: ElasticRectBendStory = {
     center: { x: 250, y: 250 },
     width: 200,
     height: 200,
-    margin: 70,
+    outerMargin: 70,
     innerMargin: 80,
     resistance: 1.0,
     stiffness: 200,
@@ -571,7 +571,7 @@ export const Snappy: ElasticRectBendStory = {
     center: { x: 250, y: 250 },
     width: 200,
     height: 200,
-    margin: 50,
+    outerMargin: 50,
     innerMargin: 60,
     resistance: 1.0,
     stiffness: 400, // High stiffness = fast return
@@ -586,7 +586,7 @@ export const Sluggish: ElasticRectBendStory = {
     center: { x: 250, y: 250 },
     width: 200,
     height: 200,
-    margin: 80,
+    outerMargin: 80,
     innerMargin: 85,
     resistance: 1.0,
     stiffness: 60,  // Low stiffness = slow return
@@ -601,7 +601,7 @@ export const DebugView: ElasticRectBendStory = {
     center: { x: 250, y: 250 },
     width: 200,
     height: 200,
-    margin: 60,
+    outerMargin: 60,
     innerMargin: 70,
     resistance: 1.0,
     stiffness: 180,
