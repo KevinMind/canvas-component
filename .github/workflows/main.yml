@@ -30,6 +30,18 @@ jobs:
       - name: test
         run: yarn test
 
+      - name: Install Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Build Storybook
+        run: yarn workspace @canvas-component/react build-storybook
+
+      - name: Test Storybook
+        run: |
+          npx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
+            "npx http-server packages/canvas-component-react/storybook-static --port 6006 --silent" \
+            "npx wait-on tcp:127.0.0.1:6006 && yarn workspace @canvas-component/react test-storybook --url http://127.0.0.1:6006"
+
 
 
 

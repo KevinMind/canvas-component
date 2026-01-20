@@ -19,6 +19,8 @@ export interface AccessibleElement {
   checked?: boolean;
   tabIndex?: number;
   onClick?: (event: InteractionEvent) => void;
+  onFocus?: () => void;
+  onBlur?: () => void;
 }
 
 export interface AccessibilityContextValue {
@@ -124,6 +126,8 @@ export function AccessibilityLayer({
   );
 
   // Calculate position relative to canvas
+  // Note: Two.js coordinates are in CSS/logical pixels, not canvas buffer pixels.
+  // The bounds from calculateAABB are already in the correct coordinate space.
   const getElementStyle = useCallback(
     (element: AccessibleElement): CSSProperties => {
       if (!canvasRef) {
@@ -131,18 +135,14 @@ export function AccessibilityLayer({
       }
 
       const bounds = calculateAABB(element.points);
-      const canvasRect = canvasRef.getBoundingClientRect();
 
-      // Scale from canvas coordinates to viewport coordinates
-      const scaleX = canvasRect.width / canvasRef.width;
-      const scaleY = canvasRect.height / canvasRef.height;
-
+      // No scaling needed - points are in CSS pixels which match the container
       return {
         position: "absolute",
-        left: bounds.minX * scaleX,
-        top: bounds.minY * scaleY,
-        width: (bounds.maxX - bounds.minX) * scaleX,
-        height: (bounds.maxY - bounds.minY) * scaleY,
+        left: bounds.minX,
+        top: bounds.minY,
+        width: bounds.maxX - bounds.minX,
+        height: bounds.maxY - bounds.minY,
         // Visually hidden but accessible
         opacity: 0,
         pointerEvents: "none",
@@ -233,10 +233,14 @@ export function AccessibilityLayer({
                   e.currentTarget.style.outline = "2px solid #4A90D9";
                   e.currentTarget.style.outlineOffset = "2px";
                   e.currentTarget.style.opacity = "0.1";
+                  // Notify the shape component that it's focused
+                  element.onFocus?.();
                 }}
                 onBlur={(e) => {
                   e.currentTarget.style.outline = "none";
                   e.currentTarget.style.opacity = "0";
+                  // Notify the shape component that it's blurred
+                  element.onBlur?.();
                 }}
               />
             );

@@ -115,6 +115,8 @@ export function useInteractive(config: InteractiveConfig): InteractiveHandle {
     pressed: config.pressed,
     checked: config.checked,
     tabIndex: config.tabIndex,
+    onFocus: config.onFocus,
+    onBlur: config.onBlur,
   });
 
   accessibilityConfigRef.current = {
@@ -124,6 +126,8 @@ export function useInteractive(config: InteractiveConfig): InteractiveHandle {
     pressed: config.pressed,
     checked: config.checked,
     tabIndex: config.tabIndex,
+    onFocus: config.onFocus,
+    onBlur: config.onBlur,
   };
 
   // Register with accessibility layer
@@ -149,6 +153,8 @@ export function useInteractive(config: InteractiveConfig): InteractiveHandle {
       checked: cfg.checked,
       tabIndex: cfg.tabIndex ?? (hasInteraction ? 0 : undefined),
       onClick: (e: InteractionEvent) => callbacksRef.current.onClick?.(e),
+      onFocus: () => accessibilityConfigRef.current.onFocus?.(),
+      onBlur: () => accessibilityConfigRef.current.onBlur?.(),
     });
 
     return () => {

@@ -8,7 +8,9 @@ import { useMousePos, withMousePosition } from '../../../.storybook/decorators';
 
 // ============================================
 // ElasticRectBend - Rectangle with membrane-like edges
-// Edges resist entry (bulge inward), then release when mouse enters
+// Edges resist entry (bulge inward) when mouse approaches from outside
+// Edges expand outward when mouse approaches from inside
+// Tension releases and wobbles back when mouse crosses the edge
 // ============================================
 
 interface Position {
@@ -21,29 +23,56 @@ interface ElasticRectBendProps {
   width: number;
   height: number;
   margin?: number;
-  resistance?: number; // How much the membrane resists (0-1)
+  resistance?: number; // How much the membrane bends (0-1)
+  stiffness?: number;  // Spring tension - higher = snappier return
+  damping?: number;    // How quickly wobble dies - lower = more bouncy
+  mass?: number;       // Inertia - higher = more wobble/momentum
+}
+
+interface SpringConfig {
+  stiffness: number;
+  damping: number;
+  mass: number;
 }
 
 // Spring hook for membrane control point
-// When mouse is outside near edge: bulge INWARD (resist entry)
-// When mouse is inside or far away: return to rest
+// Pressure > 0: bulge INWARD (mouse outside, approaching edge)
+// Pressure < 0: bulge OUTWARD (mouse inside, approaching edge)
+// Pressure = 0: return to rest
 function useMembranePoint(
   restPoint: Position,
-  pushPoint: Position, // Where to push toward when resisting (toward center)
-  pressure: number,    // 0 = no pressure, 1 = max pressure
+  inwardPoint: Position,  // Where to push when resisting entry (toward center)
+  outwardPoint: Position, // Where to push when resisting exit (away from center)
+  pressure: number,       // -1 to 1: negative = outward, positive = inward
+  springConfig: SpringConfig,
 ): Position {
   const config = {
-    stiffness: 180,  // Stiffer for membrane feel
-    damping: 12,     // Less damping for more wobble on release
-    mass: 2,
+    stiffness: springConfig.stiffness,
+    damping: springConfig.damping,
+    mass: springConfig.mass,
     decimals: 2,
     teleport: false,
     initialSpeed: 0
   };
 
-  // Interpolate between rest and push based on pressure
-  const targetX = restPoint.x + (pushPoint.x - restPoint.x) * pressure;
-  const targetY = restPoint.y + (pushPoint.y - restPoint.y) * pressure;
+  // Interpolate based on signed pressure
+  let targetX: number;
+  let targetY: number;
+
+  if (pressure > 0) {
+    // Positive pressure = push inward
+    targetX = restPoint.x + (inwardPoint.x - restPoint.x) * pressure;
+    targetY = restPoint.y + (inwardPoint.y - restPoint.y) * pressure;
+  } else if (pressure < 0) {
+    // Negative pressure = push outward (use absolute value)
+    const absPressure = Math.abs(pressure);
+    targetX = restPoint.x + (outwardPoint.x - restPoint.x) * absPressure;
+    targetY = restPoint.y + (outwardPoint.y - restPoint.y) * absPressure;
+  } else {
+    // No pressure = rest position
+    targetX = restPoint.x;
+    targetY = restPoint.y;
+  }
 
   const [xSpring] = useSpring(targetX, config);
   const [ySpring] = useSpring(targetY, config);
@@ -169,8 +198,20 @@ function QuadraticBezierRect({
   return null;
 }
 
-function ElasticRectBendDemo({ center, width, height, margin = 50, resistance = 0.4 }: ElasticRectBendProps) {
+function ElasticRectBendDemo({
+  center,
+  width,
+  height,
+  margin = 50,
+  resistance = 0.4,
+  stiffness = 180,
+  damping = 12,
+  mass = 2,
+}: ElasticRectBendProps) {
   const [mouseX, mouseY] = useMousePos();
+
+  // Spring configuration for membrane behavior
+  const springConfig: SpringConfig = { stiffness, damping, mass };
 
   // Calculate corner positions
   const halfW = width / 2;
@@ -191,62 +232,106 @@ function ElasticRectBendDemo({ center, width, height, margin = 50, resistance = 
     left: { x: center.x - halfW, y: center.y },
   };
 
-  // Push points (where edges bend toward when resisting - toward center)
-  const pushPoints = {
+  // Inward push points (where edges bend toward when mouse is outside - toward center)
+  const inwardPoints = {
     top: { x: center.x, y: center.y - halfH + halfH * resistance },
     right: { x: center.x + halfW - halfW * resistance, y: center.y },
     bottom: { x: center.x, y: center.y + halfH - halfH * resistance },
     left: { x: center.x - halfW + halfW * resistance, y: center.y },
   };
 
-  // Check if mouse is inside the rectangle
-  const isInsideRect = mouseX > vertices.topLeft.x && mouseX < vertices.topRight.x &&
-                       mouseY > vertices.topLeft.y && mouseY < vertices.bottomLeft.y;
+  // Outward push points (where edges bend toward when mouse is inside - away from center)
+  const outwardPoints = {
+    top: { x: center.x, y: center.y - halfH - halfH * resistance },
+    right: { x: center.x + halfW + halfW * resistance, y: center.y },
+    bottom: { x: center.x, y: center.y + halfH + halfH * resistance },
+    left: { x: center.x - halfW - halfW * resistance, y: center.y },
+  };
 
-  // Calculate pressure for each edge (0 = no pressure, 1 = max pressure)
-  // Pressure only applies when mouse is OUTSIDE but within margin
+  // Calculate signed pressure for each edge
+  // Positive = mouse outside approaching (push inward)
+  // Negative = mouse inside approaching (push outward)
+  // Zero = no pressure (far from edge or just crossed)
   function getEdgePressure(edge: 'top' | 'right' | 'bottom' | 'left'): number {
-    if (isInsideRect) return 0; // Inside = no pressure, membrane released
+    const { topLeft, topRight, bottomLeft, bottomRight } = vertices;
 
-    const { topLeft, topRight, bottomLeft } = vertices;
+    // Check if mouse is within the horizontal/vertical bounds for this edge
+    const inHorizontalBounds = mouseX > topLeft.x && mouseX < topRight.x;
+    const inVerticalBounds = mouseY > topLeft.y && mouseY < bottomLeft.y;
 
     switch (edge) {
       case 'top': {
-        // Mouse is above the top edge
-        if (mouseY < topLeft.y && mouseX > topLeft.x - margin && mouseX < topRight.x + margin) {
+        if (!inHorizontalBounds) return 0;
+
+        // Mouse is above the top edge (outside)
+        if (mouseY < topLeft.y) {
           const dist = topLeft.y - mouseY;
           if (dist > 0 && dist < margin) {
-            return 1 - (dist / margin); // Closer = more pressure
+            return 1 - (dist / margin); // Positive = inward pressure
+          }
+        }
+        // Mouse is below the top edge (inside)
+        else if (mouseY >= topLeft.y && mouseY < topLeft.y + margin) {
+          const dist = mouseY - topLeft.y;
+          if (dist >= 0 && dist < margin) {
+            return -(1 - (dist / margin)); // Negative = outward pressure
           }
         }
         return 0;
       }
       case 'bottom': {
-        // Mouse is below the bottom edge
-        if (mouseY > bottomLeft.y && mouseX > topLeft.x - margin && mouseX < topRight.x + margin) {
+        if (!inHorizontalBounds) return 0;
+
+        // Mouse is below the bottom edge (outside)
+        if (mouseY > bottomLeft.y) {
           const dist = mouseY - bottomLeft.y;
           if (dist > 0 && dist < margin) {
-            return 1 - (dist / margin);
+            return 1 - (dist / margin); // Positive = inward pressure
+          }
+        }
+        // Mouse is above the bottom edge (inside)
+        else if (mouseY <= bottomLeft.y && mouseY > bottomLeft.y - margin) {
+          const dist = bottomLeft.y - mouseY;
+          if (dist >= 0 && dist < margin) {
+            return -(1 - (dist / margin)); // Negative = outward pressure
           }
         }
         return 0;
       }
       case 'left': {
-        // Mouse is to the left of the left edge
-        if (mouseX < topLeft.x && mouseY > topLeft.y - margin && mouseY < bottomLeft.y + margin) {
+        if (!inVerticalBounds) return 0;
+
+        // Mouse is to the left of the left edge (outside)
+        if (mouseX < topLeft.x) {
           const dist = topLeft.x - mouseX;
           if (dist > 0 && dist < margin) {
-            return 1 - (dist / margin);
+            return 1 - (dist / margin); // Positive = inward pressure
+          }
+        }
+        // Mouse is to the right of the left edge (inside)
+        else if (mouseX >= topLeft.x && mouseX < topLeft.x + margin) {
+          const dist = mouseX - topLeft.x;
+          if (dist >= 0 && dist < margin) {
+            return -(1 - (dist / margin)); // Negative = outward pressure
           }
         }
         return 0;
       }
       case 'right': {
-        // Mouse is to the right of the right edge
-        if (mouseX > topRight.x && mouseY > topLeft.y - margin && mouseY < bottomLeft.y + margin) {
+        if (!inVerticalBounds) return 0;
+
+        // Mouse is to the right of the right edge (outside)
+        if (mouseX > topRight.x) {
           const dist = mouseX - topRight.x;
           if (dist > 0 && dist < margin) {
-            return 1 - (dist / margin);
+            return 1 - (dist / margin); // Positive = inward pressure
+          }
+        }
+        // Mouse is to the left of the right edge (inside)
+        else if (mouseX <= topRight.x && mouseX > topRight.x - margin) {
+          const dist = topRight.x - mouseX;
+          if (dist >= 0 && dist < margin) {
+            return -(1 - (dist / margin)); // Negative = outward pressure
           }
         }
         return 0;
@@ -264,10 +349,10 @@ function ElasticRectBendDemo({ center, width, height, margin = 50, resistance = 
 
   // Animated control points with membrane behavior
   const controlPoints = {
-    top: useMembranePoint(edgeMidpoints.top, pushPoints.top, pressure.top),
-    right: useMembranePoint(edgeMidpoints.right, pushPoints.right, pressure.right),
-    bottom: useMembranePoint(edgeMidpoints.bottom, pushPoints.bottom, pressure.bottom),
-    left: useMembranePoint(edgeMidpoints.left, pushPoints.left, pressure.left),
+    top: useMembranePoint(edgeMidpoints.top, inwardPoints.top, outwardPoints.top, pressure.top, springConfig),
+    right: useMembranePoint(edgeMidpoints.right, inwardPoints.right, outwardPoints.right, pressure.right, springConfig),
+    bottom: useMembranePoint(edgeMidpoints.bottom, inwardPoints.bottom, outwardPoints.bottom, pressure.bottom, springConfig),
+    left: useMembranePoint(edgeMidpoints.left, inwardPoints.left, outwardPoints.left, pressure.left, springConfig),
   };
 
   return (
@@ -325,7 +410,19 @@ const meta: Meta<ElasticRectBendProps> = {
     },
     resistance: {
       control: { type: 'range', min: 0.1, max: 0.8, step: 0.05 },
-      description: 'How much the membrane resists entry (0-1)',
+      description: 'How much the membrane bends (0-1)',
+    },
+    stiffness: {
+      control: { type: 'range', min: 20, max: 500, step: 10 },
+      description: 'Spring tension - higher = snappier return to rest',
+    },
+    damping: {
+      control: { type: 'range', min: 1, max: 40, step: 1 },
+      description: 'Wobble decay - lower = more bouncy, higher = less oscillation',
+    },
+    mass: {
+      control: { type: 'range', min: 0.5, max: 10, step: 0.5 },
+      description: 'Inertia/momentum - higher = more wobble and overshoot',
     },
   },
 };
@@ -342,27 +439,50 @@ export const Default: ElasticRectBendStory = {
     height: 200,
     margin: 60,
     resistance: 0.4,
+    stiffness: 180,
+    damping: 12,
+    mass: 2,
   },
 };
 
-export const HighResistance: ElasticRectBendStory = {
+export const Bouncy: ElasticRectBendStory = {
+  render: (args) => <ElasticRectBendDemo {...args} />,
+  args: {
+    center: { x: 250, y: 250 },
+    width: 200,
+    height: 200,
+    margin: 70,
+    resistance: 0.5,
+    stiffness: 200,
+    damping: 6,   // Low damping = lots of bounce
+    mass: 3,      // Higher mass = more wobble
+  },
+};
+
+export const Snappy: ElasticRectBendStory = {
+  render: (args) => <ElasticRectBendDemo {...args} />,
+  args: {
+    center: { x: 250, y: 250 },
+    width: 200,
+    height: 200,
+    margin: 50,
+    resistance: 0.3,
+    stiffness: 400, // High stiffness = fast return
+    damping: 25,    // Higher damping = less wobble
+    mass: 1,        // Low mass = responsive
+  },
+};
+
+export const Sluggish: ElasticRectBendStory = {
   render: (args) => <ElasticRectBendDemo {...args} />,
   args: {
     center: { x: 250, y: 250 },
     width: 200,
     height: 200,
     margin: 80,
-    resistance: 0.7,
-  },
-};
-
-export const LowResistance: ElasticRectBendStory = {
-  render: (args) => <ElasticRectBendDemo {...args} />,
-  args: {
-    center: { x: 250, y: 250 },
-    width: 200,
-    height: 200,
-    margin: 40,
-    resistance: 0.2,
+    resistance: 0.6,
+    stiffness: 60,  // Low stiffness = slow return
+    damping: 8,     // Medium damping
+    mass: 5,        // High mass = heavy, lots of momentum
   },
 };

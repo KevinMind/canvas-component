@@ -24,6 +24,9 @@ interface BaseInteractiveProps {
   onClick?: (event: InteractionEvent) => void;
   onPointerEnter?: (event: InteractionEvent) => void;
   onPointerLeave?: (event: InteractionEvent) => void;
+  // Focus props (called when keyboard focus changes)
+  onFocus?: () => void;
+  onBlur?: () => void;
   // Accessibility
   ariaLabel?: string;
   role?: "button" | "link" | "checkbox" | "radio";
@@ -62,6 +65,8 @@ export const InteractiveTwoCircle = memo(function InteractiveTwoCircle({
   onClick,
   onPointerEnter,
   onPointerLeave,
+  onFocus,
+  onBlur,
   ariaLabel,
   role,
   disabled,
@@ -92,6 +97,8 @@ export const InteractiveTwoCircle = memo(function InteractiveTwoCircle({
     onClick: disabled ? undefined : onClick,
     onPointerEnter,
     onPointerLeave,
+    onFocus,
+    onBlur,
     ariaLabel,
     role: role ?? (onClick ? "button" : undefined),
     disabled,
@@ -156,6 +163,8 @@ export const InteractiveTwoRect = memo(function InteractiveTwoRect({
   onClick,
   onPointerEnter,
   onPointerLeave,
+  onFocus,
+  onBlur,
   ariaLabel,
   role,
   disabled,
@@ -185,6 +194,8 @@ export const InteractiveTwoRect = memo(function InteractiveTwoRect({
     onClick: disabled ? undefined : onClick,
     onPointerEnter,
     onPointerLeave,
+    onFocus,
+    onBlur,
     ariaLabel,
     role: role ?? (onClick ? "button" : undefined),
     disabled,
@@ -246,6 +257,8 @@ export const InteractiveTwoPolygon = memo(function InteractiveTwoPolygon({
   onClick,
   onPointerEnter,
   onPointerLeave,
+  onFocus,
+  onBlur,
   ariaLabel,
   role,
   disabled,
@@ -262,6 +275,8 @@ export const InteractiveTwoPolygon = memo(function InteractiveTwoPolygon({
     onClick: disabled ? undefined : onClick,
     onPointerEnter,
     onPointerLeave,
+    onFocus,
+    onBlur,
     ariaLabel,
     role: role ?? (onClick ? "button" : undefined),
     disabled,
@@ -328,6 +343,8 @@ export const InteractiveTwoRegularPolygon = memo(function InteractiveTwoRegularP
   onClick,
   onPointerEnter,
   onPointerLeave,
+  onFocus,
+  onBlur,
   ariaLabel,
   role,
   disabled,
@@ -356,6 +373,8 @@ export const InteractiveTwoRegularPolygon = memo(function InteractiveTwoRegularP
     onClick: disabled ? undefined : onClick,
     onPointerEnter,
     onPointerLeave,
+    onFocus,
+    onBlur,
     ariaLabel,
     role: role ?? (onClick ? "button" : undefined),
     disabled,

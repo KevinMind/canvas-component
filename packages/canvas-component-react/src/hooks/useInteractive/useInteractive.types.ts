@@ -72,6 +72,16 @@ export interface InteractiveConfig {
    * Tab index for keyboard navigation. Defaults to 0 for interactive elements.
    */
   tabIndex?: number;
+
+  /**
+   * Called when the shape gains keyboard focus.
+   */
+  onFocus?: () => void;
+
+  /**
+   * Called when the shape loses keyboard focus.
+   */
+  onBlur?: () => void;
 }
 
 export interface InteractiveHandle {
