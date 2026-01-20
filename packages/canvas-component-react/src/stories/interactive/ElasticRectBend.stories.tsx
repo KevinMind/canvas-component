@@ -305,46 +305,52 @@ function ElasticRectBendDemo({
   }, [mouseX, mouseY, insideOuter, insideInner, membraneState]);
 
   // Calculate pressure for each edge based on current state
-  // When "outside" (entering): INWARD pressure (constant) from outer to inner
-  // When "inside" (exiting): OUTWARD pressure (constant) from inner to outer
+  // Pressure is PROGRESSIVE - increases as mouse moves deeper into the membrane zone
+  // When "outside" (entering): pressure goes from 0 (at outer) to 1 (at inner)
+  // When "inside" (exiting): pressure goes from 0 (at inner) to -1 (at outer)
   function getEdgePressure(edge: 'top' | 'right' | 'bottom' | 'left'): number {
-    // Check bounds relative to outer detection zone for this edge
     const inHorizontalBounds = mouseX > outer.topLeft.x && mouseX < outer.topRight.x;
     const inVerticalBounds = mouseY > outer.topLeft.y && mouseY < outer.bottomLeft.y;
 
     if (membraneState === 'outside') {
-      // ENTERING: constant INWARD pressure from outer to inner
-      // No pressure outside outer or inside inner
-      if (!insideOuter) return 0;  // Outside outer = normal
-      if (insideInner) return 0;   // Inside inner = normal (will transition to "inside")
+      // ENTERING: progressive INWARD pressure from outer to inner
+      if (!insideOuter) return 0;
+      if (insideInner) return 0;
 
-      // In the membrane zone: constant inward pressure
+      // Calculate progress through membrane zone (0 at outer, 1 at inner)
       switch (edge) {
         case 'top':
-          return inHorizontalBounds && mouseY >= outer.topLeft.y && mouseY < inner.topLeft.y ? 1 : 0;
+          if (!inHorizontalBounds || mouseY < outer.topLeft.y || mouseY >= inner.topLeft.y) return 0;
+          return (mouseY - outer.topLeft.y) / (inner.topLeft.y - outer.topLeft.y);
         case 'bottom':
-          return inHorizontalBounds && mouseY <= outer.bottomLeft.y && mouseY > inner.bottomLeft.y ? 1 : 0;
+          if (!inHorizontalBounds || mouseY > outer.bottomLeft.y || mouseY <= inner.bottomLeft.y) return 0;
+          return (outer.bottomLeft.y - mouseY) / (outer.bottomLeft.y - inner.bottomLeft.y);
         case 'left':
-          return inVerticalBounds && mouseX >= outer.topLeft.x && mouseX < inner.topLeft.x ? 1 : 0;
+          if (!inVerticalBounds || mouseX < outer.topLeft.x || mouseX >= inner.topLeft.x) return 0;
+          return (mouseX - outer.topLeft.x) / (inner.topLeft.x - outer.topLeft.x);
         case 'right':
-          return inVerticalBounds && mouseX <= outer.topRight.x && mouseX > inner.topRight.x ? 1 : 0;
+          if (!inVerticalBounds || mouseX > outer.topRight.x || mouseX <= inner.topRight.x) return 0;
+          return (outer.topRight.x - mouseX) / (outer.topRight.x - inner.topRight.x);
       }
     } else {
-      // EXITING: constant OUTWARD pressure from inner to outer
-      // No pressure inside inner or outside outer
-      if (insideInner) return 0;   // Inside inner = normal (just left inner triggers this state)
-      if (!insideOuter) return 0;  // Outside outer = normal (will transition to "outside")
+      // EXITING: progressive OUTWARD pressure from inner to outer
+      if (insideInner) return 0;
+      if (!insideOuter) return 0;
 
-      // In the membrane zone: constant outward pressure
+      // Calculate progress through membrane zone (0 at inner, -1 at outer)
       switch (edge) {
         case 'top':
-          return inHorizontalBounds && mouseY >= outer.topLeft.y && mouseY < inner.topLeft.y ? -1 : 0;
+          if (!inHorizontalBounds || mouseY < outer.topLeft.y || mouseY >= inner.topLeft.y) return 0;
+          return -((inner.topLeft.y - mouseY) / (inner.topLeft.y - outer.topLeft.y));
         case 'bottom':
-          return inHorizontalBounds && mouseY <= outer.bottomLeft.y && mouseY > inner.bottomLeft.y ? -1 : 0;
+          if (!inHorizontalBounds || mouseY > outer.bottomLeft.y || mouseY <= inner.bottomLeft.y) return 0;
+          return -((mouseY - inner.bottomLeft.y) / (outer.bottomLeft.y - inner.bottomLeft.y));
         case 'left':
-          return inVerticalBounds && mouseX >= outer.topLeft.x && mouseX < inner.topLeft.x ? -1 : 0;
+          if (!inVerticalBounds || mouseX < outer.topLeft.x || mouseX >= inner.topLeft.x) return 0;
+          return -((inner.topLeft.x - mouseX) / (inner.topLeft.x - outer.topLeft.x));
         case 'right':
-          return inVerticalBounds && mouseX <= outer.topRight.x && mouseX > inner.topRight.x ? -1 : 0;
+          if (!inVerticalBounds || mouseX > outer.topRight.x || mouseX <= inner.topRight.x) return 0;
+          return -((mouseX - inner.topRight.x) / (outer.topRight.x - inner.topRight.x));
       }
     }
     return 0;
