@@ -184,33 +184,6 @@ export function AccessibilityLayer({
     []
   );
 
-  // Handle click (for when user clicks the accessible element directly)
-  const handleClick = useCallback(
-    (element: AccessibleElement) => (event: React.MouseEvent) => {
-      if (element.onClick && !element.disabled) {
-        const bounds = calculateAABB(element.points);
-        const center: Position = {
-          x: (bounds.minX + bounds.maxX) / 2,
-          y: (bounds.minY + bounds.maxY) / 2,
-        };
-
-        element.onClick({
-          type: "click",
-          position: center,
-          target: {
-            id: element.id,
-            points: element.points,
-            bounds,
-            containsPoint: () => true,
-            getCenter: () => center,
-          },
-          originalEvent: event.nativeEvent,
-        });
-      }
-    },
-    []
-  );
-
   return (
     <AccessibilityContext.Provider value={contextValue}>
       {children}
@@ -240,12 +213,13 @@ export function AccessibilityLayer({
                 }}
                 style={{
                   ...getElementStyle(element),
-                  pointerEvents: "auto",
+                  // pointerEvents: "none" lets mouse clicks pass through to canvas
+                  // InteractionManager handles canvas hit detection
+                  // These elements are for keyboard/screen reader access only
+                  pointerEvents: "none",
                   background: "transparent",
                   border: "none",
-                  cursor: element.disabled ? "default" : "pointer",
-                  // Show focus ring when focused
-                  ...(element.disabled ? { cursor: "default" } : {}),
+                  cursor: "default",
                 }}
                 role={element.role || "button"}
                 aria-label={element.ariaLabel}
@@ -254,7 +228,6 @@ export function AccessibilityLayer({
                 aria-checked={element.checked}
                 tabIndex={element.disabled ? -1 : (element.tabIndex ?? 0)}
                 onKeyDown={handleKeyDown(element)}
-                onClick={handleClick(element)}
                 onFocus={(e) => {
                   // Make visible when focused for keyboard users
                   e.currentTarget.style.outline = "2px solid #4A90D9";
