@@ -145,12 +145,11 @@ export class InteractionManager {
 
   private getCanvasPosition(event: MouseEvent | PointerEvent): Position {
     const rect = this.canvas.getBoundingClientRect();
-    const scaleX = this.canvas.width / rect.width;
-    const scaleY = this.canvas.height / rect.height;
-
+    // Don't scale by DPI - hit regions are in logical coordinates (CSS pixels)
+    // not in the canvas's internal resolution
     return {
-      x: (event.clientX - rect.left) * scaleX,
-      y: (event.clientY - rect.top) * scaleY,
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
     };
   }
 
