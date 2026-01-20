@@ -259,22 +259,26 @@ function ElasticRectBendDemo({
     left: { x: center.x - halfW, y: center.y },
   };
 
-  // Inward push points = inner rectangle edge midpoints
-  // When entering (inward tension), the curve peaks at the inner rectangle boundary
+  // Bezier curves don't reach their control points - they bend toward them.
+  // To make the curve peak actually touch the boundary, we overshoot the control point.
+  // The 0.66 factor in bezier handles + curve math means we reach ~50% of target distance.
+  // So we multiply by ~2 to compensate.
+  const bezierCompensation = 2.0;
+
+  // Inward push points - curve should peak at inner rectangle boundary
   const inwardPoints = {
-    top: { x: center.x, y: center.y - halfH + innerMargin * resistance },
-    right: { x: center.x + halfW - innerMargin * resistance, y: center.y },
-    bottom: { x: center.x, y: center.y + halfH - innerMargin * resistance },
-    left: { x: center.x - halfW + innerMargin * resistance, y: center.y },
+    top: { x: center.x, y: center.y - halfH + innerMargin * resistance * bezierCompensation },
+    right: { x: center.x + halfW - innerMargin * resistance * bezierCompensation, y: center.y },
+    bottom: { x: center.x, y: center.y + halfH - innerMargin * resistance * bezierCompensation },
+    left: { x: center.x - halfW + innerMargin * resistance * bezierCompensation, y: center.y },
   };
 
-  // Outward push points = outer rectangle edge midpoints
-  // When exiting (outward tension), the curve peaks at the outer rectangle boundary
+  // Outward push points - curve should peak at outer rectangle boundary
   const outwardPoints = {
-    top: { x: center.x, y: center.y - halfH - margin * resistance },
-    right: { x: center.x + halfW + margin * resistance, y: center.y },
-    bottom: { x: center.x, y: center.y + halfH + margin * resistance },
-    left: { x: center.x - halfW - margin * resistance, y: center.y },
+    top: { x: center.x, y: center.y - halfH - margin * resistance * bezierCompensation },
+    right: { x: center.x + halfW + margin * resistance * bezierCompensation, y: center.y },
+    bottom: { x: center.x, y: center.y + halfH + margin * resistance * bezierCompensation },
+    left: { x: center.x - halfW - margin * resistance * bezierCompensation, y: center.y },
   };
 
   // Check position relative to the three rectangles
