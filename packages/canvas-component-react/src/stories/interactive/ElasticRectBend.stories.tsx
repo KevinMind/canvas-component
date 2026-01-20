@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Meta, StoryObj } from "@storybook/react";
 import { useSpring } from 'use-spring';
 import Two from 'two.js';
@@ -200,6 +200,9 @@ function QuadraticBezierRect({
   return null;
 }
 
+// Membrane state: tracks whether we're "inside" or "outside" the membrane
+type MembraneState = 'outside' | 'inside';
+
 function ElasticRectBendDemo({
   center,
   width,
@@ -213,6 +216,9 @@ function ElasticRectBendDemo({
   showDebug = false,
 }: ElasticRectBendProps) {
   const [mouseX, mouseY] = useMousePos();
+
+  // Track membrane state: are we "inside" (entered through inner) or "outside" (exited through outer)
+  const [membraneState, setMembraneState] = useState<MembraneState>('outside');
 
   // Spring configuration for membrane behavior
   const springConfig: SpringConfig = { stiffness, damping, mass };
@@ -269,80 +275,113 @@ function ElasticRectBendDemo({
     left: { x: center.x - halfW - halfW * resistance, y: center.y },
   };
 
-  // Calculate signed pressure for each edge
-  // Pressure is based on proximity to the VISIBLE boundary:
-  // - Between outer (red) and visible: inward pressure, max at visible edge
-  // - Between visible and inner (green): outward pressure, max at visible edge
-  // - Outside outer (red): no pressure (too far)
-  // - Inside inner (green): no pressure (tension released)
+  // Check position relative to the three rectangles
+  const outer = outerVertices;
+  const visible = vertices;
+  const inner = innerVertices;
+
+  const insideOuter = mouseX > outer.topLeft.x && mouseX < outer.topRight.x &&
+                      mouseY > outer.topLeft.y && mouseY < outer.bottomLeft.y;
+  const insideVisible = mouseX > visible.topLeft.x && mouseX < visible.topRight.x &&
+                        mouseY > visible.topLeft.y && mouseY < visible.bottomLeft.y;
+  const insideInner = mouseX > inner.topLeft.x && mouseX < inner.topRight.x &&
+                      mouseY > inner.topLeft.y && mouseY < inner.bottomLeft.y;
+
+  // State transitions
+  useEffect(() => {
+    if (membraneState === 'outside' && insideInner) {
+      // Entered through inner boundary - now "inside"
+      setMembraneState('inside');
+    } else if (membraneState === 'inside' && !insideOuter) {
+      // Exited through outer boundary - now "outside"
+      setMembraneState('outside');
+    }
+  }, [mouseX, mouseY, insideOuter, insideInner, membraneState]);
+
+  // Calculate pressure for each edge based on current state
+  // When "outside" (entering): pressure in outer→inner direction
+  // When "inside" (exiting): pressure in inner→outer direction
   function getEdgePressure(edge: 'top' | 'right' | 'bottom' | 'left'): number {
-    const outer = outerVertices;   // Red - tension starts here when coming IN
-    const visible = vertices;       // The visible rectangle boundary
-    const inner = innerVertices;    // Green - tension releases here when going IN
-
-    // Check if mouse is fully inside the inner rectangle (tension released)
-    const insideInner = mouseX > inner.topLeft.x && mouseX < inner.topRight.x &&
-                        mouseY > inner.topLeft.y && mouseY < inner.bottomLeft.y;
-    if (insideInner) return 0;
-
-    // Check bounds relative to outer detection zone
+    // Check bounds relative to outer detection zone for this edge
     const inHorizontalBounds = mouseX > outer.topLeft.x && mouseX < outer.topRight.x;
     const inVerticalBounds = mouseY > outer.topLeft.y && mouseY < outer.bottomLeft.y;
 
-    switch (edge) {
-      case 'top': {
-        if (!inHorizontalBounds) return 0;
+    if (membraneState === 'outside') {
+      // ENTERING: pressure applies from outer to inner
+      // No pressure once inside inner (released)
+      if (insideInner) return 0;
 
-        // Between outer (red) and visible - INWARD pressure (constant)
-        if (mouseY >= outer.topLeft.y && mouseY < visible.topLeft.y) {
-          return 1; // Full inward pressure throughout zone
+      switch (edge) {
+        case 'top': {
+          if (!inHorizontalBounds) return 0;
+          // In the membrane zone (between outer and inner)
+          if (mouseY >= outer.topLeft.y && mouseY < inner.topLeft.y) {
+            // Inward when outside visible, outward when inside visible
+            return mouseY < visible.topLeft.y ? 1 : -1;
+          }
+          return 0;
         }
-        // Between visible and inner (green) - OUTWARD pressure (constant)
-        else if (mouseY >= visible.topLeft.y && mouseY < inner.topLeft.y) {
-          return -1; // Full outward pressure throughout zone
+        case 'bottom': {
+          if (!inHorizontalBounds) return 0;
+          if (mouseY <= outer.bottomLeft.y && mouseY > inner.bottomLeft.y) {
+            return mouseY > visible.bottomLeft.y ? 1 : -1;
+          }
+          return 0;
         }
-        return 0;
+        case 'left': {
+          if (!inVerticalBounds) return 0;
+          if (mouseX >= outer.topLeft.x && mouseX < inner.topLeft.x) {
+            return mouseX < visible.topLeft.x ? 1 : -1;
+          }
+          return 0;
+        }
+        case 'right': {
+          if (!inVerticalBounds) return 0;
+          if (mouseX <= outer.topRight.x && mouseX > inner.topRight.x) {
+            return mouseX > visible.topRight.x ? 1 : -1;
+          }
+          return 0;
+        }
       }
-      case 'bottom': {
-        if (!inHorizontalBounds) return 0;
+    } else {
+      // EXITING: pressure applies from inner to outer
+      // No pressure once outside outer (released)
+      if (!insideOuter) return 0;
 
-        // Between outer (red) and visible - INWARD pressure (constant)
-        if (mouseY <= outer.bottomLeft.y && mouseY > visible.bottomLeft.y) {
-          return 1;
+      switch (edge) {
+        case 'top': {
+          if (!inHorizontalBounds) return 0;
+          // In the membrane zone (between inner and outer)
+          if (mouseY >= outer.topLeft.y && mouseY < inner.topLeft.y) {
+            // Outward when inside visible, inward when outside visible
+            return mouseY >= visible.topLeft.y ? -1 : 1;
+          }
+          return 0;
         }
-        // Between visible and inner (green) - OUTWARD pressure (constant)
-        else if (mouseY <= visible.bottomLeft.y && mouseY > inner.bottomLeft.y) {
-          return -1;
+        case 'bottom': {
+          if (!inHorizontalBounds) return 0;
+          if (mouseY <= outer.bottomLeft.y && mouseY > inner.bottomLeft.y) {
+            return mouseY <= visible.bottomLeft.y ? -1 : 1;
+          }
+          return 0;
         }
-        return 0;
-      }
-      case 'left': {
-        if (!inVerticalBounds) return 0;
-
-        // Between outer (red) and visible - INWARD pressure (constant)
-        if (mouseX >= outer.topLeft.x && mouseX < visible.topLeft.x) {
-          return 1;
+        case 'left': {
+          if (!inVerticalBounds) return 0;
+          if (mouseX >= outer.topLeft.x && mouseX < inner.topLeft.x) {
+            return mouseX >= visible.topLeft.x ? -1 : 1;
+          }
+          return 0;
         }
-        // Between visible and inner (green) - OUTWARD pressure (constant)
-        else if (mouseX >= visible.topLeft.x && mouseX < inner.topLeft.x) {
-          return -1;
+        case 'right': {
+          if (!inVerticalBounds) return 0;
+          if (mouseX <= outer.topRight.x && mouseX > inner.topRight.x) {
+            return mouseX <= visible.topRight.x ? -1 : 1;
+          }
+          return 0;
         }
-        return 0;
-      }
-      case 'right': {
-        if (!inVerticalBounds) return 0;
-
-        // Between outer (red) and visible - INWARD pressure (constant)
-        if (mouseX <= outer.topRight.x && mouseX > visible.topRight.x) {
-          return 1;
-        }
-        // Between visible and inner (green) - OUTWARD pressure (constant)
-        else if (mouseX <= visible.topRight.x && mouseX > inner.topRight.x) {
-          return -1;
-        }
-        return 0;
       }
     }
+    return 0;
   }
 
   // Get pressure for each edge
@@ -382,15 +421,16 @@ function ElasticRectBendDemo({
         />
       )}
 
-      {/* Debug: Inner release zone (where tension releases) */}
+      {/* Debug: Inner release zone - color changes based on state */}
+      {/* Green = "inside" (entered), Blue = "outside" (not yet entered or exited) */}
       {showDebug && innerWidth > 0 && innerHeight > 0 && (
         <TwoRect
           x={center.x}
           y={center.y}
           width={innerWidth}
           height={innerHeight}
-          fill="rgba(100, 255, 100, 0.1)"
-          stroke="rgba(100, 255, 100, 0.5)"
+          fill={membraneState === 'inside' ? "rgba(100, 255, 100, 0.3)" : "rgba(100, 100, 255, 0.1)"}
+          stroke={membraneState === 'inside' ? "rgba(100, 255, 100, 0.8)" : "rgba(100, 100, 255, 0.5)"}
           linewidth={2}
         />
       )}
