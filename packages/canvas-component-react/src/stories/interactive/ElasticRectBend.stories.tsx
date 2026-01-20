@@ -356,12 +356,25 @@ function ElasticRectBendDemo({
     return 0;
   }
 
-  // Get pressure for each edge
-  const pressure = {
+  // Get raw pressure for each edge
+  const rawPressure = {
     top: getEdgePressure('top'),
     right: getEdgePressure('right'),
     bottom: getEdgePressure('bottom'),
     left: getEdgePressure('left'),
+  };
+
+  // When applying pressure, only bend ONE edge (the one with highest pressure)
+  // Springs will handle multiple edges releasing simultaneously
+  const maxEdge = (['top', 'right', 'bottom', 'left'] as const).reduce((max, edge) => {
+    return Math.abs(rawPressure[edge]) > Math.abs(rawPressure[max]) ? edge : max;
+  }, 'top' as const);
+
+  const pressure = {
+    top: maxEdge === 'top' ? rawPressure.top : 0,
+    right: maxEdge === 'right' ? rawPressure.right : 0,
+    bottom: maxEdge === 'bottom' ? rawPressure.bottom : 0,
+    left: maxEdge === 'left' ? rawPressure.left : 0,
   };
 
   // Animated control points with membrane behavior
