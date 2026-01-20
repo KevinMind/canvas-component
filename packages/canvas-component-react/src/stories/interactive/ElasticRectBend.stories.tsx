@@ -22,8 +22,7 @@ interface ElasticRectBendProps {
   center: Position;
   width: number;
   height: number;
-  outerMargin?: number; // Detection zone outside the rectangle (where tension starts)
-  innerMargin?: number; // Buffer zone inside - tension releases when mouse passes this
+  buffer?: number;      // Thickness of membrane zone (extends both outside and inside the edge)
   resistance?: number;  // How far curve extends to boundaries (0-1, 1 = full extent)
   stiffness?: number;   // Spring tension - higher = snappier return
   damping?: number;     // How quickly wobble dies - lower = more bouncy
@@ -207,8 +206,7 @@ function ElasticRectBendDemo({
   center,
   width,
   height,
-  outerMargin = 50,
-  innerMargin = 70,
+  buffer = 60,
   resistance = 0.4,
   stiffness = 180,
   damping = 12,
@@ -237,18 +235,18 @@ function ElasticRectBendDemo({
 
   // Inner rectangle (tension release zone - smaller)
   const innerVertices = {
-    topLeft: { x: center.x - halfW + innerMargin, y: center.y - halfH + innerMargin },
-    topRight: { x: center.x + halfW - innerMargin, y: center.y - halfH + innerMargin },
-    bottomRight: { x: center.x + halfW - innerMargin, y: center.y + halfH - innerMargin },
-    bottomLeft: { x: center.x - halfW + innerMargin, y: center.y + halfH - innerMargin },
+    topLeft: { x: center.x - halfW + buffer, y: center.y - halfH + buffer },
+    topRight: { x: center.x + halfW - buffer, y: center.y - halfH + buffer },
+    bottomRight: { x: center.x + halfW - buffer, y: center.y + halfH - buffer },
+    bottomLeft: { x: center.x - halfW + buffer, y: center.y + halfH - buffer },
   };
 
   // Outer detection zone (larger than visible rect)
   const outerVertices = {
-    topLeft: { x: center.x - halfW - outerMargin, y: center.y - halfH - outerMargin },
-    topRight: { x: center.x + halfW + outerMargin, y: center.y - halfH - outerMargin },
-    bottomRight: { x: center.x + halfW + outerMargin, y: center.y + halfH + outerMargin },
-    bottomLeft: { x: center.x - halfW - outerMargin, y: center.y + halfH + outerMargin },
+    topLeft: { x: center.x - halfW - buffer, y: center.y - halfH - buffer },
+    topRight: { x: center.x + halfW + buffer, y: center.y - halfH - buffer },
+    bottomRight: { x: center.x + halfW + buffer, y: center.y + halfH + buffer },
+    bottomLeft: { x: center.x - halfW - buffer, y: center.y + halfH + buffer },
   };
 
   // Edge midpoints (rest positions)
@@ -267,18 +265,18 @@ function ElasticRectBendDemo({
 
   // Inward push points - curve should peak at inner rectangle boundary
   const inwardPoints = {
-    top: { x: center.x, y: center.y - halfH + innerMargin * resistance * bezierCompensation },
-    right: { x: center.x + halfW - innerMargin * resistance * bezierCompensation, y: center.y },
-    bottom: { x: center.x, y: center.y + halfH - innerMargin * resistance * bezierCompensation },
-    left: { x: center.x - halfW + innerMargin * resistance * bezierCompensation, y: center.y },
+    top: { x: center.x, y: center.y - halfH + buffer * resistance * bezierCompensation },
+    right: { x: center.x + halfW - buffer * resistance * bezierCompensation, y: center.y },
+    bottom: { x: center.x, y: center.y + halfH - buffer * resistance * bezierCompensation },
+    left: { x: center.x - halfW + buffer * resistance * bezierCompensation, y: center.y },
   };
 
   // Outward push points - curve should peak at outer rectangle boundary
   const outwardPoints = {
-    top: { x: center.x, y: center.y - halfH - outerMargin * resistance * bezierCompensation },
-    right: { x: center.x + halfW + outerMargin * resistance * bezierCompensation, y: center.y },
-    bottom: { x: center.x, y: center.y + halfH + outerMargin * resistance * bezierCompensation },
-    left: { x: center.x - halfW - outerMargin * resistance * bezierCompensation, y: center.y },
+    top: { x: center.x, y: center.y - halfH - buffer * resistance * bezierCompensation },
+    right: { x: center.x + halfW + buffer * resistance * bezierCompensation, y: center.y },
+    bottom: { x: center.x, y: center.y + halfH + buffer * resistance * bezierCompensation },
+    left: { x: center.x - halfW - buffer * resistance * bezierCompensation, y: center.y },
   };
 
   // Check position relative to the three rectangles
@@ -386,10 +384,10 @@ function ElasticRectBendDemo({
   };
 
   // Calculate inner rectangle dimensions for TwoRect (which uses center + width/height)
-  const innerWidth = width - innerMargin * 2;
-  const innerHeight = height - innerMargin * 2;
-  const outerWidth = width + outerMargin * 2;
-  const outerHeight = height + outerMargin * 2;
+  const innerWidth = width - buffer * 2;
+  const innerHeight = height - buffer * 2;
+  const outerWidth = width + buffer * 2;
+  const outerHeight = height + buffer * 2;
 
   return (
     <TwoProvider width={500} height={500} type="canvas">
@@ -499,13 +497,9 @@ const meta: Meta<ElasticRectBendProps> = {
       control: { type: 'range', min: 50, max: 400, step: 10 },
       description: 'Height of the rectangle',
     },
-    outerMargin: {
-      control: { type: 'range', min: 10, max: 150, step: 5 },
-      description: 'Detection zone outside the rectangle (where tension starts)',
-    },
-    innerMargin: {
-      control: { type: 'range', min: 10, max: 95, step: 5 },
-      description: 'Buffer zone inside - larger = smaller inner release zone',
+    buffer: {
+      control: { type: 'range', min: 20, max: 100, step: 5 },
+      description: 'Thickness of membrane zone (extends both outside and inside the edge)',
     },
     resistance: {
       control: { type: 'range', min: 0.1, max: 1.0, step: 0.05 },
@@ -540,9 +534,8 @@ export const Default: ElasticRectBendStory = {
     center: { x: 250, y: 250 },
     width: 200,
     height: 200,
-    outerMargin: 60,
-    innerMargin: 70,
-    resistance: 1.0,  // Curve extends fully to inner/outer boundaries
+    buffer: 60,
+    resistance: 1.0,
     stiffness: 180,
     damping: 12,
     mass: 2,
@@ -556,8 +549,7 @@ export const Bouncy: ElasticRectBendStory = {
     center: { x: 250, y: 250 },
     width: 200,
     height: 200,
-    outerMargin: 70,
-    innerMargin: 80,
+    buffer: 70,
     resistance: 1.0,
     stiffness: 200,
     damping: 6,   // Low damping = lots of bounce
@@ -571,8 +563,7 @@ export const Snappy: ElasticRectBendStory = {
     center: { x: 250, y: 250 },
     width: 200,
     height: 200,
-    outerMargin: 50,
-    innerMargin: 60,
+    buffer: 50,
     resistance: 1.0,
     stiffness: 400, // High stiffness = fast return
     damping: 25,    // Higher damping = less wobble
@@ -586,8 +577,7 @@ export const Sluggish: ElasticRectBendStory = {
     center: { x: 250, y: 250 },
     width: 200,
     height: 200,
-    outerMargin: 80,
-    innerMargin: 85,
+    buffer: 80,
     resistance: 1.0,
     stiffness: 60,  // Low stiffness = slow return
     damping: 8,     // Medium damping
@@ -601,8 +591,7 @@ export const DebugView: ElasticRectBendStory = {
     center: { x: 250, y: 250 },
     width: 200,
     height: 200,
-    outerMargin: 60,
-    innerMargin: 70,
+    buffer: 60,
     resistance: 1.0,
     stiffness: 180,
     damping: 12,
