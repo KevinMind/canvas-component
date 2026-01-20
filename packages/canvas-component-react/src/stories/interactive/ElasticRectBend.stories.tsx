@@ -22,11 +22,12 @@ interface ElasticRectBendProps {
   center: Position;
   width: number;
   height: number;
-  margin?: number;
-  resistance?: number; // How much the membrane bends (0-1)
-  stiffness?: number;  // Spring tension - higher = snappier return
-  damping?: number;    // How quickly wobble dies - lower = more bouncy
-  mass?: number;       // Inertia - higher = more wobble/momentum
+  margin?: number;      // Detection zone outside the rectangle
+  innerMargin?: number; // Buffer zone inside - tension releases when mouse passes this
+  resistance?: number;  // How much the membrane bends (0-1)
+  stiffness?: number;   // Spring tension - higher = snappier return
+  damping?: number;     // How quickly wobble dies - lower = more bouncy
+  mass?: number;        // Inertia - higher = more wobble/momentum
 }
 
 interface SpringConfig {
@@ -203,6 +204,7 @@ function ElasticRectBendDemo({
   width,
   height,
   margin = 50,
+  innerMargin = 40,
   resistance = 0.4,
   stiffness = 180,
   damping = 12,
@@ -217,11 +219,20 @@ function ElasticRectBendDemo({
   const halfW = width / 2;
   const halfH = height / 2;
 
+  // Outer rectangle (visible boundary)
   const vertices = {
     topLeft: { x: center.x - halfW, y: center.y - halfH },
     topRight: { x: center.x + halfW, y: center.y - halfH },
     bottomRight: { x: center.x + halfW, y: center.y + halfH },
     bottomLeft: { x: center.x - halfW, y: center.y + halfH },
+  };
+
+  // Inner rectangle (tension release zone)
+  const innerVertices = {
+    topLeft: { x: center.x - halfW + innerMargin, y: center.y - halfH + innerMargin },
+    topRight: { x: center.x + halfW - innerMargin, y: center.y - halfH + innerMargin },
+    bottomRight: { x: center.x + halfW - innerMargin, y: center.y + halfH - innerMargin },
+    bottomLeft: { x: center.x - halfW + innerMargin, y: center.y + halfH - innerMargin },
   };
 
   // Edge midpoints (rest positions)
@@ -249,90 +260,92 @@ function ElasticRectBendDemo({
   };
 
   // Calculate signed pressure for each edge
-  // Positive = mouse outside approaching (push inward)
-  // Negative = mouse inside approaching (push outward)
-  // Zero = no pressure (far from edge or just crossed)
+  // Positive = mouse outside outer edge, approaching (push inward)
+  // Negative = mouse between outer and inner edge (push outward)
+  // Zero = mouse inside inner rectangle (tension released) or far away
   function getEdgePressure(edge: 'top' | 'right' | 'bottom' | 'left'): number {
-    const { topLeft, topRight, bottomLeft, bottomRight } = vertices;
+    const outer = vertices;
+    const inner = innerVertices;
+
+    // Check if mouse is fully inside the inner rectangle (tension released)
+    const insideInner = mouseX > inner.topLeft.x && mouseX < inner.topRight.x &&
+                        mouseY > inner.topLeft.y && mouseY < inner.bottomLeft.y;
+    if (insideInner) return 0;
 
     // Check if mouse is within the horizontal/vertical bounds for this edge
-    const inHorizontalBounds = mouseX > topLeft.x && mouseX < topRight.x;
-    const inVerticalBounds = mouseY > topLeft.y && mouseY < bottomLeft.y;
+    const inHorizontalBounds = mouseX > outer.topLeft.x && mouseX < outer.topRight.x;
+    const inVerticalBounds = mouseY > outer.topLeft.y && mouseY < outer.bottomLeft.y;
 
     switch (edge) {
       case 'top': {
         if (!inHorizontalBounds) return 0;
 
-        // Mouse is above the top edge (outside)
-        if (mouseY < topLeft.y) {
-          const dist = topLeft.y - mouseY;
+        // Mouse is above the outer top edge (outside) - push inward
+        if (mouseY < outer.topLeft.y) {
+          const dist = outer.topLeft.y - mouseY;
           if (dist > 0 && dist < margin) {
             return 1 - (dist / margin); // Positive = inward pressure
           }
         }
-        // Mouse is below the top edge (inside)
-        else if (mouseY >= topLeft.y && mouseY < topLeft.y + margin) {
-          const dist = mouseY - topLeft.y;
-          if (dist >= 0 && dist < margin) {
-            return -(1 - (dist / margin)); // Negative = outward pressure
-          }
+        // Mouse is between outer and inner top edge (buffer zone) - push outward
+        else if (mouseY >= outer.topLeft.y && mouseY < inner.topLeft.y) {
+          const bufferSize = inner.topLeft.y - outer.topLeft.y;
+          const dist = mouseY - outer.topLeft.y;
+          return -(1 - (dist / bufferSize)); // Negative = outward pressure
         }
         return 0;
       }
       case 'bottom': {
         if (!inHorizontalBounds) return 0;
 
-        // Mouse is below the bottom edge (outside)
-        if (mouseY > bottomLeft.y) {
-          const dist = mouseY - bottomLeft.y;
+        // Mouse is below the outer bottom edge (outside) - push inward
+        if (mouseY > outer.bottomLeft.y) {
+          const dist = mouseY - outer.bottomLeft.y;
           if (dist > 0 && dist < margin) {
             return 1 - (dist / margin); // Positive = inward pressure
           }
         }
-        // Mouse is above the bottom edge (inside)
-        else if (mouseY <= bottomLeft.y && mouseY > bottomLeft.y - margin) {
-          const dist = bottomLeft.y - mouseY;
-          if (dist >= 0 && dist < margin) {
-            return -(1 - (dist / margin)); // Negative = outward pressure
-          }
+        // Mouse is between outer and inner bottom edge (buffer zone) - push outward
+        else if (mouseY <= outer.bottomLeft.y && mouseY > inner.bottomLeft.y) {
+          const bufferSize = outer.bottomLeft.y - inner.bottomLeft.y;
+          const dist = outer.bottomLeft.y - mouseY;
+          return -(1 - (dist / bufferSize)); // Negative = outward pressure
         }
         return 0;
       }
       case 'left': {
         if (!inVerticalBounds) return 0;
 
-        // Mouse is to the left of the left edge (outside)
-        if (mouseX < topLeft.x) {
-          const dist = topLeft.x - mouseX;
+        // Mouse is to the left of outer left edge (outside) - push inward
+        if (mouseX < outer.topLeft.x) {
+          const dist = outer.topLeft.x - mouseX;
           if (dist > 0 && dist < margin) {
             return 1 - (dist / margin); // Positive = inward pressure
           }
         }
-        // Mouse is to the right of the left edge (inside)
-        else if (mouseX >= topLeft.x && mouseX < topLeft.x + margin) {
-          const dist = mouseX - topLeft.x;
-          if (dist >= 0 && dist < margin) {
-            return -(1 - (dist / margin)); // Negative = outward pressure
-          }
+        // Mouse is between outer and inner left edge (buffer zone) - push outward
+        else if (mouseX >= outer.topLeft.x && mouseX < inner.topLeft.x) {
+          const bufferSize = inner.topLeft.x - outer.topLeft.x;
+          const dist = mouseX - outer.topLeft.x;
+          return -(1 - (dist / bufferSize)); // Negative = outward pressure
         }
         return 0;
       }
       case 'right': {
         if (!inVerticalBounds) return 0;
 
-        // Mouse is to the right of the right edge (outside)
-        if (mouseX > topRight.x) {
-          const dist = mouseX - topRight.x;
+        // Mouse is to the right of outer right edge (outside) - push inward
+        if (mouseX > outer.topRight.x) {
+          const dist = mouseX - outer.topRight.x;
           if (dist > 0 && dist < margin) {
             return 1 - (dist / margin); // Positive = inward pressure
           }
         }
-        // Mouse is to the left of the right edge (inside)
-        else if (mouseX <= topRight.x && mouseX > topRight.x - margin) {
-          const dist = topRight.x - mouseX;
-          if (dist >= 0 && dist < margin) {
-            return -(1 - (dist / margin)); // Negative = outward pressure
-          }
+        // Mouse is between outer and inner right edge (buffer zone) - push outward
+        else if (mouseX <= outer.topRight.x && mouseX > inner.topRight.x) {
+          const bufferSize = outer.topRight.x - inner.topRight.x;
+          const dist = outer.topRight.x - mouseX;
+          return -(1 - (dist / bufferSize)); // Negative = outward pressure
         }
         return 0;
       }
@@ -406,7 +419,11 @@ const meta: Meta<ElasticRectBendProps> = {
     },
     margin: {
       control: { type: 'range', min: 10, max: 150, step: 5 },
-      description: 'Detection margin around edges',
+      description: 'Detection zone outside the rectangle',
+    },
+    innerMargin: {
+      control: { type: 'range', min: 5, max: 100, step: 5 },
+      description: 'Buffer zone inside - tension releases when mouse passes this',
     },
     resistance: {
       control: { type: 'range', min: 0.1, max: 0.8, step: 0.05 },
@@ -438,6 +455,7 @@ export const Default: ElasticRectBendStory = {
     width: 200,
     height: 200,
     margin: 60,
+    innerMargin: 40,
     resistance: 0.4,
     stiffness: 180,
     damping: 12,
@@ -452,6 +470,7 @@ export const Bouncy: ElasticRectBendStory = {
     width: 200,
     height: 200,
     margin: 70,
+    innerMargin: 50,
     resistance: 0.5,
     stiffness: 200,
     damping: 6,   // Low damping = lots of bounce
@@ -466,6 +485,7 @@ export const Snappy: ElasticRectBendStory = {
     width: 200,
     height: 200,
     margin: 50,
+    innerMargin: 30,
     resistance: 0.3,
     stiffness: 400, // High stiffness = fast return
     damping: 25,    // Higher damping = less wobble
@@ -480,6 +500,7 @@ export const Sluggish: ElasticRectBendStory = {
     width: 200,
     height: 200,
     margin: 80,
+    innerMargin: 60,
     resistance: 0.6,
     stiffness: 60,  // Low stiffness = slow return
     damping: 8,     // Medium damping
