@@ -204,7 +204,7 @@ function ElasticRectBendDemo({
   width,
   height,
   margin = 50,
-  innerMargin = 40,
+  innerMargin = 70,
   resistance = 0.4,
   stiffness = 180,
   damping = 12,
@@ -422,8 +422,8 @@ const meta: Meta<ElasticRectBendProps> = {
       description: 'Detection zone outside the rectangle',
     },
     innerMargin: {
-      control: { type: 'range', min: 5, max: 100, step: 5 },
-      description: 'Buffer zone inside - tension releases when mouse passes this',
+      control: { type: 'range', min: 10, max: 95, step: 5 },
+      description: 'Buffer zone inside - larger = smaller inner release zone',
     },
     resistance: {
       control: { type: 'range', min: 0.1, max: 0.8, step: 0.05 },
@@ -455,7 +455,7 @@ export const Default: ElasticRectBendStory = {
     width: 200,
     height: 200,
     margin: 60,
-    innerMargin: 40,
+    innerMargin: 70,
     resistance: 0.4,
     stiffness: 180,
     damping: 12,
@@ -470,7 +470,7 @@ export const Bouncy: ElasticRectBendStory = {
     width: 200,
     height: 200,
     margin: 70,
-    innerMargin: 50,
+    innerMargin: 80,
     resistance: 0.5,
     stiffness: 200,
     damping: 6,   // Low damping = lots of bounce
@@ -485,7 +485,7 @@ export const Snappy: ElasticRectBendStory = {
     width: 200,
     height: 200,
     margin: 50,
-    innerMargin: 30,
+    innerMargin: 60,
     resistance: 0.3,
     stiffness: 400, // High stiffness = fast return
     damping: 25,    // Higher damping = less wobble
@@ -500,7 +500,7 @@ export const Sluggish: ElasticRectBendStory = {
     width: 200,
     height: 200,
     margin: 80,
-    innerMargin: 60,
+    innerMargin: 85,
     resistance: 0.6,
     stiffness: 60,  // Low stiffness = slow return
     damping: 8,     // Medium damping
