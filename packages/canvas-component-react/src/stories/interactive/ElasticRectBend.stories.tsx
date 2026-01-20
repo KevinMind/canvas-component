@@ -293,70 +293,52 @@ function ElasticRectBendDemo({
       case 'top': {
         if (!inHorizontalBounds) return 0;
 
-        // Between outer (red) and visible - INWARD pressure
-        // Pressure increases as mouse approaches visible edge
+        // Between outer (red) and visible - INWARD pressure (constant)
         if (mouseY >= outer.topLeft.y && mouseY < visible.topLeft.y) {
-          const zoneSize = visible.topLeft.y - outer.topLeft.y;
-          const distFromVisible = visible.topLeft.y - mouseY;
-          return distFromVisible / zoneSize; // 0 at outer, 1 at visible
+          return 1; // Full inward pressure throughout zone
         }
-        // Between visible and inner (green) - OUTWARD pressure
-        // Pressure decreases as mouse moves toward inner
+        // Between visible and inner (green) - OUTWARD pressure (constant)
         else if (mouseY >= visible.topLeft.y && mouseY < inner.topLeft.y) {
-          const zoneSize = inner.topLeft.y - visible.topLeft.y;
-          const distFromVisible = mouseY - visible.topLeft.y;
-          return -(1 - distFromVisible / zoneSize); // -1 at visible, 0 at inner
+          return -1; // Full outward pressure throughout zone
         }
         return 0;
       }
       case 'bottom': {
         if (!inHorizontalBounds) return 0;
 
-        // Between outer (red) and visible - INWARD pressure
+        // Between outer (red) and visible - INWARD pressure (constant)
         if (mouseY <= outer.bottomLeft.y && mouseY > visible.bottomLeft.y) {
-          const zoneSize = outer.bottomLeft.y - visible.bottomLeft.y;
-          const distFromVisible = mouseY - visible.bottomLeft.y;
-          return distFromVisible / zoneSize;
+          return 1;
         }
-        // Between visible and inner (green) - OUTWARD pressure
+        // Between visible and inner (green) - OUTWARD pressure (constant)
         else if (mouseY <= visible.bottomLeft.y && mouseY > inner.bottomLeft.y) {
-          const zoneSize = visible.bottomLeft.y - inner.bottomLeft.y;
-          const distFromVisible = visible.bottomLeft.y - mouseY;
-          return -(1 - distFromVisible / zoneSize);
+          return -1;
         }
         return 0;
       }
       case 'left': {
         if (!inVerticalBounds) return 0;
 
-        // Between outer (red) and visible - INWARD pressure
+        // Between outer (red) and visible - INWARD pressure (constant)
         if (mouseX >= outer.topLeft.x && mouseX < visible.topLeft.x) {
-          const zoneSize = visible.topLeft.x - outer.topLeft.x;
-          const distFromVisible = visible.topLeft.x - mouseX;
-          return distFromVisible / zoneSize;
+          return 1;
         }
-        // Between visible and inner (green) - OUTWARD pressure
+        // Between visible and inner (green) - OUTWARD pressure (constant)
         else if (mouseX >= visible.topLeft.x && mouseX < inner.topLeft.x) {
-          const zoneSize = inner.topLeft.x - visible.topLeft.x;
-          const distFromVisible = mouseX - visible.topLeft.x;
-          return -(1 - distFromVisible / zoneSize);
+          return -1;
         }
         return 0;
       }
       case 'right': {
         if (!inVerticalBounds) return 0;
 
-        // Between outer (red) and visible - INWARD pressure
+        // Between outer (red) and visible - INWARD pressure (constant)
         if (mouseX <= outer.topRight.x && mouseX > visible.topRight.x) {
-          const zoneSize = outer.topRight.x - visible.topRight.x;
-          const distFromVisible = mouseX - visible.topRight.x;
-          return distFromVisible / zoneSize;
+          return 1;
         }
-        // Between visible and inner (green) - OUTWARD pressure
+        // Between visible and inner (green) - OUTWARD pressure (constant)
         else if (mouseX <= visible.topRight.x && mouseX > inner.topRight.x) {
-          const zoneSize = visible.topRight.x - inner.topRight.x;
-          const distFromVisible = visible.topRight.x - mouseX;
-          return -(1 - distFromVisible / zoneSize);
+          return -1;
         }
         return 0;
       }
