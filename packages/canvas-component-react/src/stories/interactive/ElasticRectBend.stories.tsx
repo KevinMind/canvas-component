@@ -24,7 +24,7 @@ interface ElasticRectBendProps {
   height: number;
   margin?: number;      // Detection zone outside the rectangle
   innerMargin?: number; // Buffer zone inside - tension releases when mouse passes this
-  resistance?: number;  // How much the membrane bends (0-1)
+  resistance?: number;  // How far curve extends to boundaries (0-1, 1 = full extent)
   stiffness?: number;   // Spring tension - higher = snappier return
   damping?: number;     // How quickly wobble dies - lower = more bouncy
   mass?: number;        // Inertia - higher = more wobble/momentum
@@ -259,20 +259,22 @@ function ElasticRectBendDemo({
     left: { x: center.x - halfW, y: center.y },
   };
 
-  // Inward push points (where edges bend toward when mouse is outside - toward center)
+  // Inward push points = inner rectangle edge midpoints
+  // When entering (inward tension), the curve peaks at the inner rectangle boundary
   const inwardPoints = {
-    top: { x: center.x, y: center.y - halfH + halfH * resistance },
-    right: { x: center.x + halfW - halfW * resistance, y: center.y },
-    bottom: { x: center.x, y: center.y + halfH - halfH * resistance },
-    left: { x: center.x - halfW + halfW * resistance, y: center.y },
+    top: { x: center.x, y: center.y - halfH + innerMargin * resistance },
+    right: { x: center.x + halfW - innerMargin * resistance, y: center.y },
+    bottom: { x: center.x, y: center.y + halfH - innerMargin * resistance },
+    left: { x: center.x - halfW + innerMargin * resistance, y: center.y },
   };
 
-  // Outward push points (where edges bend toward when mouse is inside - away from center)
+  // Outward push points = outer rectangle edge midpoints
+  // When exiting (outward tension), the curve peaks at the outer rectangle boundary
   const outwardPoints = {
-    top: { x: center.x, y: center.y - halfH - halfH * resistance },
-    right: { x: center.x + halfW + halfW * resistance, y: center.y },
-    bottom: { x: center.x, y: center.y + halfH + halfH * resistance },
-    left: { x: center.x - halfW - halfW * resistance, y: center.y },
+    top: { x: center.x, y: center.y - halfH - margin * resistance },
+    right: { x: center.x + halfW + margin * resistance, y: center.y },
+    bottom: { x: center.x, y: center.y + halfH + margin * resistance },
+    left: { x: center.x - halfW - margin * resistance, y: center.y },
   };
 
   // Check position relative to the three rectangles
@@ -483,8 +485,8 @@ const meta: Meta<ElasticRectBendProps> = {
       description: 'Buffer zone inside - larger = smaller inner release zone',
     },
     resistance: {
-      control: { type: 'range', min: 0.1, max: 0.8, step: 0.05 },
-      description: 'How much the membrane bends (0-1)',
+      control: { type: 'range', min: 0.1, max: 1.0, step: 0.05 },
+      description: 'Curve peak depth - 1.0 = extends to inner/outer rect boundaries',
     },
     stiffness: {
       control: { type: 'range', min: 20, max: 500, step: 10 },
@@ -517,7 +519,7 @@ export const Default: ElasticRectBendStory = {
     height: 200,
     margin: 60,
     innerMargin: 70,
-    resistance: 0.4,
+    resistance: 1.0,  // Curve extends fully to inner/outer boundaries
     stiffness: 180,
     damping: 12,
     mass: 2,
@@ -533,7 +535,7 @@ export const Bouncy: ElasticRectBendStory = {
     height: 200,
     margin: 70,
     innerMargin: 80,
-    resistance: 0.5,
+    resistance: 1.0,
     stiffness: 200,
     damping: 6,   // Low damping = lots of bounce
     mass: 3,      // Higher mass = more wobble
@@ -548,7 +550,7 @@ export const Snappy: ElasticRectBendStory = {
     height: 200,
     margin: 50,
     innerMargin: 60,
-    resistance: 0.3,
+    resistance: 1.0,
     stiffness: 400, // High stiffness = fast return
     damping: 25,    // Higher damping = less wobble
     mass: 1,        // Low mass = responsive
@@ -563,7 +565,7 @@ export const Sluggish: ElasticRectBendStory = {
     height: 200,
     margin: 80,
     innerMargin: 85,
-    resistance: 0.6,
+    resistance: 1.0,
     stiffness: 60,  // Low stiffness = slow return
     damping: 8,     // Medium damping
     mass: 5,        // High mass = heavy, lots of momentum
@@ -578,7 +580,7 @@ export const DebugView: ElasticRectBendStory = {
     height: 200,
     margin: 60,
     innerMargin: 70,
-    resistance: 0.4,
+    resistance: 1.0,
     stiffness: 180,
     damping: 12,
     mass: 2,
