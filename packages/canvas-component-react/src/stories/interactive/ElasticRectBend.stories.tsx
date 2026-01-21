@@ -22,12 +22,13 @@ interface ElasticRectBendProps {
   center: Position;
   width: number;
   height: number;
-  buffer?: number;      // Thickness of membrane zone (extends both outside and inside the edge)
-  resistance?: number;  // How far curve extends to boundaries (0-1, 1 = full extent)
-  stiffness?: number;   // Spring tension - higher = snappier return
-  damping?: number;     // How quickly wobble dies - lower = more bouncy
-  mass?: number;        // Inertia - higher = more wobble/momentum
-  showDebug?: boolean;  // Show detection zones and quadrants
+  buffer?: number;           // Thickness of membrane zone (extends both outside and inside the edge)
+  resistance?: number;       // How far curve extends to boundaries (0-1, 1 = full extent)
+  stretchMultiplier?: number; // How much further it stretches when grabbed (clicked inside)
+  stiffness?: number;        // Spring tension - higher = snappier return
+  damping?: number;          // How quickly wobble dies - lower = more bouncy
+  mass?: number;             // Inertia - higher = more wobble/momentum
+  showDebug?: boolean;       // Show detection zones and quadrants
 }
 
 interface SpringConfig {
@@ -208,6 +209,7 @@ function ElasticRectBendDemo({
   height,
   buffer = 60,
   resistance = 0.4,
+  stretchMultiplier = 3,
   stiffness = 180,
   damping = 12,
   mass = 2,
@@ -218,12 +220,42 @@ function ElasticRectBendDemo({
   // Track membrane state: are we "inside" (entered through inner) or "outside" (exited through outer)
   const [membraneState, setMembraneState] = useState<MembraneState>('outside');
 
+  // Track grab state: true when mouse is pressed inside the visible rectangle
+  const [isGrabbed, setIsGrabbed] = useState(false);
+  const mouseDownInsideRef = useRef(false);
+
   // Spring configuration for membrane behavior
   const springConfig: SpringConfig = { stiffness, damping, mass };
 
-  // Calculate corner positions
+  // Calculate corner positions (needed early for grab detection)
   const halfW = width / 2;
   const halfH = height / 2;
+
+  // Track grab state via mouse events
+  useEffect(() => {
+    const handleMouseDown = () => {
+      // Check if mouse is inside visible rectangle
+      const insideX = mouseX > center.x - halfW && mouseX < center.x + halfW;
+      const insideY = mouseY > center.y - halfH && mouseY < center.y + halfH;
+      if (insideX && insideY) {
+        mouseDownInsideRef.current = true;
+        setIsGrabbed(true);
+      }
+    };
+
+    const handleMouseUp = () => {
+      mouseDownInsideRef.current = false;
+      setIsGrabbed(false);
+    };
+
+    window.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      window.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [mouseX, mouseY, center.x, center.y, halfW, halfH]);
 
   // Outer rectangle (visible boundary)
   const vertices = {
@@ -272,11 +304,13 @@ function ElasticRectBendDemo({
   };
 
   // Outward push points - curve should peak at outer rectangle boundary
+  // When grabbed (mouse pressed inside), stretch further by stretchMultiplier
+  const stretchFactor = isGrabbed ? stretchMultiplier : 1;
   const outwardPoints = {
-    top: { x: center.x, y: center.y - halfH - buffer * resistance * bezierCompensation },
-    right: { x: center.x + halfW + buffer * resistance * bezierCompensation, y: center.y },
-    bottom: { x: center.x, y: center.y + halfH + buffer * resistance * bezierCompensation },
-    left: { x: center.x - halfW - buffer * resistance * bezierCompensation, y: center.y },
+    top: { x: center.x, y: center.y - halfH - buffer * resistance * bezierCompensation * stretchFactor },
+    right: { x: center.x + halfW + buffer * resistance * bezierCompensation * stretchFactor, y: center.y },
+    bottom: { x: center.x, y: center.y + halfH + buffer * resistance * bezierCompensation * stretchFactor },
+    left: { x: center.x - halfW - buffer * resistance * bezierCompensation * stretchFactor, y: center.y },
   };
 
   // Check position relative to the three rectangles
@@ -505,6 +539,10 @@ const meta: Meta<ElasticRectBendProps> = {
       control: { type: 'range', min: 0.1, max: 1.0, step: 0.05 },
       description: 'Curve peak depth - 1.0 = extends to inner/outer rect boundaries',
     },
+    stretchMultiplier: {
+      control: { type: 'range', min: 1, max: 10, step: 0.5 },
+      description: 'How much further it stretches when grabbed (clicked inside)',
+    },
     stiffness: {
       control: { type: 'range', min: 20, max: 500, step: 10 },
       description: 'Spring tension - higher = snappier return to rest',
@@ -597,5 +635,21 @@ export const DebugView: ElasticRectBendStory = {
     damping: 12,
     mass: 2,
     showDebug: true, // Debug visualization enabled
+  },
+};
+
+export const SmallGrabbable: ElasticRectBendStory = {
+  render: (args) => <ElasticRectBendDemo {...args} />,
+  args: {
+    center: { x: 250, y: 250 },
+    width: 50,
+    height: 50,
+    buffer: 20,
+    resistance: 0.1,
+    stretchMultiplier: 5, // Stretches 5x when grabbed
+    stiffness: 20,
+    damping: 1,
+    mass: 0.5,
+    showDebug: true,
   },
 };
