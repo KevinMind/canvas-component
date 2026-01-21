@@ -225,7 +225,10 @@ function ElasticRectBendDemo({
   const mouseDownInsideRef = useRef(false);
 
   // Spring configuration for membrane behavior
-  const springConfig: SpringConfig = { stiffness, damping, mass };
+  // When grabbed, use very stiff spring with high damping (taut, no wobble)
+  const springConfig: SpringConfig = isGrabbed
+    ? { stiffness: 800, damping: 80, mass: 0.1 }  // Taut when grabbed
+    : { stiffness, damping, mass };               // Normal spring behavior
 
   // Calculate corner positions (needed early for grab detection)
   const halfW = width / 2;
