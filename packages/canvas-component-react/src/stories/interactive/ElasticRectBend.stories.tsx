@@ -285,44 +285,15 @@ function ElasticRectBendDemo({
   };
 
   // Mouse position along each edge (clamped to edge bounds)
-  // This makes the curve "sway" to follow where the mouse actually is
   const clampedMouseX = Math.max(center.x - halfW, Math.min(center.x + halfW, mouseX));
   const clampedMouseY = Math.max(center.y - halfH, Math.min(center.y + halfH, mouseY));
-
-  // Edge midpoints (rest positions) - track mouse position along the edge
-  // This makes the curve "point" toward the mouse even at rest
-  const edgeMidpoints = {
-    top: { x: clampedMouseX, y: center.y - halfH },
-    right: { x: center.x + halfW, y: clampedMouseY },
-    bottom: { x: clampedMouseX, y: center.y + halfH },
-    left: { x: center.x - halfW, y: clampedMouseY },
-  };
 
   // Bezier curves don't reach their control points - they bend toward them.
   // To make the curve peak actually touch the boundary, we overshoot the control point.
   // The 0.66 factor in bezier handles + curve math means we reach ~50% of target distance.
   // So we multiply by ~2 to compensate.
   const bezierCompensation = 2.0;
-
-  // Inward push points - curve should peak at inner rectangle boundary
-  // X/Y follows mouse position along the edge for natural "sway"
-  const inwardPoints = {
-    top: { x: clampedMouseX, y: center.y - halfH + buffer * resistance * bezierCompensation },
-    right: { x: center.x + halfW - buffer * resistance * bezierCompensation, y: clampedMouseY },
-    bottom: { x: clampedMouseX, y: center.y + halfH - buffer * resistance * bezierCompensation },
-    left: { x: center.x - halfW + buffer * resistance * bezierCompensation, y: clampedMouseY },
-  };
-
-  // Outward push points - curve should peak at outer rectangle boundary
-  // When grabbed (mouse pressed inside), stretch further by stretchMultiplier
-  // X/Y follows mouse position along the edge for natural "sway"
   const stretchFactor = isGrabbed ? stretchMultiplier : 1;
-  const outwardPoints = {
-    top: { x: clampedMouseX, y: center.y - halfH - buffer * resistance * bezierCompensation * stretchFactor },
-    right: { x: center.x + halfW + buffer * resistance * bezierCompensation * stretchFactor, y: clampedMouseY },
-    bottom: { x: clampedMouseX, y: center.y + halfH + buffer * resistance * bezierCompensation * stretchFactor },
-    left: { x: center.x - halfW - buffer * resistance * bezierCompensation * stretchFactor, y: clampedMouseY },
-  };
 
   // Check position relative to the three rectangles
   const outer = outerVertices;
@@ -461,6 +432,29 @@ function ElasticRectBendDemo({
     right: maxEdge === 'right' ? rawPressure.right : 0,
     bottom: maxEdge === 'bottom' ? rawPressure.bottom : 0,
     left: maxEdge === 'left' ? rawPressure.left : 0,
+  };
+
+  // Edge control points - only engaged edge follows mouse, others stay at center
+  // This prevents all edges from swaying when only one is being pushed
+  const edgeMidpoints = {
+    top: { x: pressure.top !== 0 ? clampedMouseX : center.x, y: center.y - halfH },
+    right: { x: center.x + halfW, y: pressure.right !== 0 ? clampedMouseY : center.y },
+    bottom: { x: pressure.bottom !== 0 ? clampedMouseX : center.x, y: center.y + halfH },
+    left: { x: center.x - halfW, y: pressure.left !== 0 ? clampedMouseY : center.y },
+  };
+
+  const inwardPoints = {
+    top: { x: pressure.top !== 0 ? clampedMouseX : center.x, y: center.y - halfH + buffer * resistance * bezierCompensation },
+    right: { x: center.x + halfW - buffer * resistance * bezierCompensation, y: pressure.right !== 0 ? clampedMouseY : center.y },
+    bottom: { x: pressure.bottom !== 0 ? clampedMouseX : center.x, y: center.y + halfH - buffer * resistance * bezierCompensation },
+    left: { x: center.x - halfW + buffer * resistance * bezierCompensation, y: pressure.left !== 0 ? clampedMouseY : center.y },
+  };
+
+  const outwardPoints = {
+    top: { x: pressure.top !== 0 ? clampedMouseX : center.x, y: center.y - halfH - buffer * resistance * bezierCompensation * stretchFactor },
+    right: { x: center.x + halfW + buffer * resistance * bezierCompensation * stretchFactor, y: pressure.right !== 0 ? clampedMouseY : center.y },
+    bottom: { x: pressure.bottom !== 0 ? clampedMouseX : center.x, y: center.y + halfH + buffer * resistance * bezierCompensation * stretchFactor },
+    left: { x: center.x - halfW - buffer * resistance * bezierCompensation * stretchFactor, y: pressure.left !== 0 ? clampedMouseY : center.y },
   };
 
   // Animated control points with membrane behavior
