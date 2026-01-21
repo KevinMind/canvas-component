@@ -435,26 +435,36 @@ function ElasticRectBendDemo({
   };
 
   // Edge control points - only engaged edge follows mouse, others stay at center
-  // This prevents all edges from swaying when only one is being pushed
+  // Use absolute pressure as interpolation factor (0 = center, 1 = mouse position)
+  // This creates subtle sway that increases with pressure
+  const getSwayX = (edgePressure: number) => {
+    const t = Math.abs(edgePressure); // 0 to 1
+    return center.x + (clampedMouseX - center.x) * t;
+  };
+  const getSwayY = (edgePressure: number) => {
+    const t = Math.abs(edgePressure);
+    return center.y + (clampedMouseY - center.y) * t;
+  };
+
   const edgeMidpoints = {
-    top: { x: pressure.top !== 0 ? clampedMouseX : center.x, y: center.y - halfH },
-    right: { x: center.x + halfW, y: pressure.right !== 0 ? clampedMouseY : center.y },
-    bottom: { x: pressure.bottom !== 0 ? clampedMouseX : center.x, y: center.y + halfH },
-    left: { x: center.x - halfW, y: pressure.left !== 0 ? clampedMouseY : center.y },
+    top: { x: getSwayX(pressure.top), y: center.y - halfH },
+    right: { x: center.x + halfW, y: getSwayY(pressure.right) },
+    bottom: { x: getSwayX(pressure.bottom), y: center.y + halfH },
+    left: { x: center.x - halfW, y: getSwayY(pressure.left) },
   };
 
   const inwardPoints = {
-    top: { x: pressure.top !== 0 ? clampedMouseX : center.x, y: center.y - halfH + buffer * resistance * bezierCompensation },
-    right: { x: center.x + halfW - buffer * resistance * bezierCompensation, y: pressure.right !== 0 ? clampedMouseY : center.y },
-    bottom: { x: pressure.bottom !== 0 ? clampedMouseX : center.x, y: center.y + halfH - buffer * resistance * bezierCompensation },
-    left: { x: center.x - halfW + buffer * resistance * bezierCompensation, y: pressure.left !== 0 ? clampedMouseY : center.y },
+    top: { x: getSwayX(pressure.top), y: center.y - halfH + buffer * resistance * bezierCompensation },
+    right: { x: center.x + halfW - buffer * resistance * bezierCompensation, y: getSwayY(pressure.right) },
+    bottom: { x: getSwayX(pressure.bottom), y: center.y + halfH - buffer * resistance * bezierCompensation },
+    left: { x: center.x - halfW + buffer * resistance * bezierCompensation, y: getSwayY(pressure.left) },
   };
 
   const outwardPoints = {
-    top: { x: pressure.top !== 0 ? clampedMouseX : center.x, y: center.y - halfH - buffer * resistance * bezierCompensation * stretchFactor },
-    right: { x: center.x + halfW + buffer * resistance * bezierCompensation * stretchFactor, y: pressure.right !== 0 ? clampedMouseY : center.y },
-    bottom: { x: pressure.bottom !== 0 ? clampedMouseX : center.x, y: center.y + halfH + buffer * resistance * bezierCompensation * stretchFactor },
-    left: { x: center.x - halfW - buffer * resistance * bezierCompensation * stretchFactor, y: pressure.left !== 0 ? clampedMouseY : center.y },
+    top: { x: getSwayX(pressure.top), y: center.y - halfH - buffer * resistance * bezierCompensation * stretchFactor },
+    right: { x: center.x + halfW + buffer * resistance * bezierCompensation * stretchFactor, y: getSwayY(pressure.right) },
+    bottom: { x: getSwayX(pressure.bottom), y: center.y + halfH + buffer * resistance * bezierCompensation * stretchFactor },
+    left: { x: center.x - halfW - buffer * resistance * bezierCompensation * stretchFactor, y: getSwayY(pressure.left) },
   };
 
   // Animated control points with membrane behavior
