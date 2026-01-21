@@ -336,11 +336,54 @@ function ElasticRectBendDemo({
     }
   }, [mouseX, mouseY, insideOuter, insideInner, membraneState]);
 
+  // Calculate pressure for grabbed state - stretches toward mouse position
+  // Returns pressure from 0 (at visible edge) to -1 (at stretch zone edge)
+  function getGrabbedPressure(edge: 'top' | 'right' | 'bottom' | 'left'): number {
+    const stretchDistance = buffer * stretchMultiplier;
+
+    switch (edge) {
+      case 'top': {
+        const edgeY = visible.topLeft.y;
+        const maxStretchY = edgeY - stretchDistance;
+        if (mouseY >= edgeY) return 0;
+        const distance = edgeY - mouseY;
+        return -Math.min(1, distance / stretchDistance);
+      }
+      case 'bottom': {
+        const edgeY = visible.bottomLeft.y;
+        const maxStretchY = edgeY + stretchDistance;
+        if (mouseY <= edgeY) return 0;
+        const distance = mouseY - edgeY;
+        return -Math.min(1, distance / stretchDistance);
+      }
+      case 'left': {
+        const edgeX = visible.topLeft.x;
+        const maxStretchX = edgeX - stretchDistance;
+        if (mouseX >= edgeX) return 0;
+        const distance = edgeX - mouseX;
+        return -Math.min(1, distance / stretchDistance);
+      }
+      case 'right': {
+        const edgeX = visible.topRight.x;
+        const maxStretchX = edgeX + stretchDistance;
+        if (mouseX <= edgeX) return 0;
+        const distance = mouseX - edgeX;
+        return -Math.min(1, distance / stretchDistance);
+      }
+    }
+    return 0;
+  }
+
   // Calculate pressure for each edge based on current state
   // Pressure is PROGRESSIVE - increases as mouse moves deeper into the membrane zone
   // When "outside" (entering): pressure goes from 0 (at outer) to 1 (at inner)
   // When "inside" (exiting): pressure goes from 0 (at inner) to -1 (at outer)
   function getEdgePressure(edge: 'top' | 'right' | 'bottom' | 'left'): number {
+    // When grabbed, use special stretch logic that ignores normal zone limits
+    if (isGrabbed) {
+      return getGrabbedPressure(edge);
+    }
+
     const inHorizontalBounds = mouseX > outer.topLeft.x && mouseX < outer.topRight.x;
     const inVerticalBounds = mouseY > outer.topLeft.y && mouseY < outer.bottomLeft.y;
 
