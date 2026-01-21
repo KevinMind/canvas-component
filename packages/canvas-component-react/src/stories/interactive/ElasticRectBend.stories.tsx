@@ -423,8 +423,38 @@ function ElasticRectBendDemo({
   const outerWidth = width + buffer * 2;
   const outerHeight = height + buffer * 2;
 
+  // Stretch zone dimensions (how far it can stretch when grabbed)
+  const stretchZoneWidth = width + buffer * 2 * stretchMultiplier;
+  const stretchZoneHeight = height + buffer * 2 * stretchMultiplier;
+
+  // Determine fill color based on hover/pressed state
+  const getFillColor = () => {
+    if (isGrabbed) return "rgba(100, 180, 255, 0.9)"; // Blue when pressed/grabbed
+    if (insideVisible) return "rgba(80, 80, 80, 0.9)"; // Lighter when hovered
+    return "rgba(60, 60, 60, 0.8)"; // Default
+  };
+
+  const getStrokeColor = () => {
+    if (isGrabbed) return "rgba(60, 140, 220, 1)"; // Blue stroke when grabbed
+    if (insideVisible) return "rgba(100, 100, 100, 1)"; // Lighter stroke when hovered
+    return "rgba(40, 40, 40, 1)"; // Default
+  };
+
   return (
     <TwoProvider width={500} height={500} type="canvas">
+      {/* Debug: Stretch zone (how far it can stretch when grabbed) */}
+      {showDebug && (
+        <TwoRect
+          x={center.x}
+          y={center.y}
+          width={stretchZoneWidth}
+          height={stretchZoneHeight}
+          fill="transparent"
+          stroke={isGrabbed ? "rgba(255, 200, 100, 0.8)" : "rgba(255, 200, 100, 0.3)"}
+          linewidth={isGrabbed ? 3 : 1}
+        />
+      )}
+
       {/* Debug: Outer detection zone (where inward pressure starts) */}
       {showDebug && (
         <TwoRect
@@ -477,11 +507,12 @@ function ElasticRectBendDemo({
       )}
 
       {/* Main elastic rect with quadratic bezier curves */}
+      {/* Color changes on hover (lighter) and grab (blue) */}
       <QuadraticBezierRect
         vertices={vertices}
         controlPoints={controlPoints}
-        fill="rgba(60, 60, 60, 0.8)"
-        stroke="rgba(40, 40, 40, 1)"
+        fill={getFillColor()}
+        stroke={getStrokeColor()}
         linewidth={2}
       />
 
