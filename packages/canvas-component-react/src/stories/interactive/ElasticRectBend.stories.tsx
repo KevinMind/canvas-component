@@ -22,13 +22,15 @@ interface ElasticRectBendProps {
   center: Position;
   width: number;
   height: number;
-  buffer?: number;           // Thickness of membrane zone (extends both outside and inside the edge)
-  resistance?: number;       // How far curve extends to boundaries (0-1, 1 = full extent)
-  stretchMultiplier?: number; // How much further it stretches when grabbed (clicked inside)
-  stiffness?: number;        // Spring tension - higher = snappier return
-  damping?: number;          // How quickly wobble dies - lower = more bouncy
-  mass?: number;             // Inertia - higher = more wobble/momentum
+  reach?: number;            // Interaction aura - how far the membrane senses your cursor
+  squish?: number;           // Give - how much it yields to pressure (0-1)
+  stretch?: number;          // Pull factor when grabbed
+  tension?: number;          // Snap factor - higher = crisper return
+  settle?: number;           // Chill factor - higher = less bounce
+  weight?: number;           // Heft - higher = more momentum
   showDebug?: boolean;       // Show detection zones and quadrants
+  label?: string;            // Text to display on the button (warps with surface)
+  fontSize?: number;         // Font size for the label
 }
 
 interface SpringConfig {
@@ -200,20 +202,326 @@ function QuadraticBezierRect({
   return null;
 }
 
+// ============================================
+// WarpedText - Text that warps along bezier surface
+// ============================================
+
+interface WarpedTextProps {
+  text: string;
+  fontSize: number;
+  vertices: { topLeft: Position; topRight: Position; bottomRight: Position; bottomLeft: Position };
+  controlPoints: { top: Position; right: Position; bottom: Position; left: Position };
+  color?: string;
+  gridSize?: number; // Number of subdivisions for the mesh
+}
+
+// Sample a point on a quadratic bezier curve
+function sampleBezier(p0: Position, control: Position, p1: Position, t: number): Position {
+  const mt = 1 - t;
+  return {
+    x: mt * mt * p0.x + 2 * mt * t * control.x + t * t * p1.x,
+    y: mt * mt * p0.y + 2 * mt * t * control.y + t * t * p1.y,
+  };
+}
+
+// Linear interpolation between two points
+function lerp(a: Position, b: Position, t: number): Position {
+  return {
+    x: a.x + (b.x - a.x) * t,
+    y: a.y + (b.y - a.y) * t,
+  };
+}
+
+// Calculate warped position on the bezier surface
+// u: horizontal position (0 = left, 1 = right)
+// v: vertical position (0 = top, 1 = bottom)
+function getWarpedPoint(
+  u: number,
+  v: number,
+  vertices: { topLeft: Position; topRight: Position; bottomRight: Position; bottomLeft: Position },
+  controlPoints: { top: Position; right: Position; bottom: Position; left: Position }
+): Position {
+  const { topLeft, topRight, bottomRight, bottomLeft } = vertices;
+  const { top: cpTop, right: cpRight, bottom: cpBottom, left: cpLeft } = controlPoints;
+
+  // Sample top edge (bezier from topLeft through cpTop to topRight)
+  const topPoint = sampleBezier(topLeft, cpTop, topRight, u);
+
+  // Sample bottom edge (bezier from bottomLeft through cpBottom to bottomRight)
+  const bottomPoint = sampleBezier(bottomLeft, cpBottom, bottomRight, u);
+
+  // Sample left edge (bezier from topLeft through cpLeft to bottomLeft)
+  const leftPoint = sampleBezier(topLeft, cpLeft, bottomLeft, v);
+
+  // Sample right edge (bezier from topRight through cpRight to bottomRight)
+  const rightPoint = sampleBezier(topRight, cpRight, bottomRight, v);
+
+  // Bilinear interpolation with bezier influence
+  // Blend horizontal edges (top/bottom) vertically
+  const horizontalBlend = lerp(topPoint, bottomPoint, v);
+
+  // Blend vertical edges (left/right) horizontally
+  const verticalBlend = lerp(leftPoint, rightPoint, u);
+
+  // Combine both blends and subtract the bilinear corner interpolation
+  // to avoid double-counting corners
+  const cornerInterp = {
+    x: (1-u)*(1-v)*topLeft.x + u*(1-v)*topRight.x + u*v*bottomRight.x + (1-u)*v*bottomLeft.x,
+    y: (1-u)*(1-v)*topLeft.y + u*(1-v)*topRight.y + u*v*bottomRight.y + (1-u)*v*bottomLeft.y,
+  };
+
+  return {
+    x: horizontalBlend.x + verticalBlend.x - cornerInterp.x,
+    y: horizontalBlend.y + verticalBlend.y - cornerInterp.y,
+  };
+}
+
+// Component that renders text warped along the bezier surface
+// Uses Two.js paths with colors sampled from high-res text texture
+function WarpedText({
+  text,
+  fontSize,
+  vertices,
+  controlPoints,
+  color = 'white',
+  gridSize = 80, // Higher = smoother but more objects
+}: WarpedTextProps) {
+  const two = useTwo();
+  const textCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const imageDataRef = useRef<ImageData | null>(null);
+  const meshRef = useRef<any[]>([]);
+
+  // Create offscreen canvas and render text once
+  useEffect(() => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Render text at 4x resolution for quality
+    const scale = 4;
+    const scaledFontSize = fontSize * scale;
+
+    ctx.font = `bold ${scaledFontSize}px sans-serif`;
+    const metrics = ctx.measureText(text);
+    const textWidth = metrics.width;
+    const textHeight = scaledFontSize * 1.2;
+
+    canvas.width = Math.ceil(textWidth) + 16 * scale;
+    canvas.height = Math.ceil(textHeight) + 16 * scale;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.font = `bold ${scaledFontSize}px sans-serif`;
+    ctx.fillStyle = color;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+
+    // Store the image data for fast pixel sampling
+    imageDataRef.current = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    textCanvasRef.current = canvas;
+
+    return () => {
+      textCanvasRef.current = null;
+      imageDataRef.current = null;
+    };
+  }, [text, fontSize, color]);
+
+  // Create mesh cells
+  useEffect(() => {
+    meshRef.current.forEach(cell => cell.remove());
+    meshRef.current = [];
+
+    for (let row = 0; row < gridSize; row++) {
+      for (let col = 0; col < gridSize; col++) {
+        const path = two.makePath([
+          new Two.Anchor(0, 0),
+          new Two.Anchor(0, 0),
+          new Two.Anchor(0, 0),
+          new Two.Anchor(0, 0),
+        ]);
+        path.position.set(0, 0);
+        (path as any).closed = true;
+        path.noStroke();
+        meshRef.current.push(path);
+      }
+    }
+
+    return () => {
+      meshRef.current.forEach(cell => cell.remove());
+      meshRef.current = [];
+    };
+  }, [two, gridSize]);
+
+  // Update mesh positions directly (not in useEffect to ensure every frame updates)
+  const imageData = imageDataRef.current;
+  if (imageData && meshRef.current.length > 0) {
+    const { width: texW, height: texH, data } = imageData;
+
+    // Helper to sample pixel with bilinear filtering
+    const samplePixel = (u: number, v: number): [number, number, number, number] => {
+      const x = u * (texW - 1);
+      const y = v * (texH - 1);
+      const x0 = Math.floor(x);
+      const y0 = Math.floor(y);
+      const x1 = Math.min(x0 + 1, texW - 1);
+      const y1 = Math.min(y0 + 1, texH - 1);
+      const fx = x - x0;
+      const fy = y - y0;
+
+      const getPixel = (px: number, py: number) => {
+        const i = (py * texW + px) * 4;
+        return [data[i], data[i + 1], data[i + 2], data[i + 3]];
+      };
+
+      const p00 = getPixel(x0, y0);
+      const p10 = getPixel(x1, y0);
+      const p01 = getPixel(x0, y1);
+      const p11 = getPixel(x1, y1);
+
+      // Bilinear interpolation
+      const r = p00[0] * (1-fx) * (1-fy) + p10[0] * fx * (1-fy) + p01[0] * (1-fx) * fy + p11[0] * fx * fy;
+      const g = p00[1] * (1-fx) * (1-fy) + p10[1] * fx * (1-fy) + p01[1] * (1-fx) * fy + p11[1] * fx * fy;
+      const b = p00[2] * (1-fx) * (1-fy) + p10[2] * fx * (1-fy) + p01[2] * (1-fx) * fy + p11[2] * fx * fy;
+      const a = p00[3] * (1-fx) * (1-fy) + p10[3] * fx * (1-fy) + p01[3] * (1-fx) * fy + p11[3] * fx * fy;
+
+      return [Math.round(r), Math.round(g), Math.round(b), Math.round(a)];
+    };
+
+    for (let row = 0; row < gridSize; row++) {
+      for (let col = 0; col < gridSize; col++) {
+        const cellIndex = row * gridSize + col;
+        const path = meshRef.current[cellIndex];
+        if (!path) continue;
+
+        const u0 = col / gridSize;
+        const u1 = (col + 1) / gridSize;
+        const v0 = row / gridSize;
+        const v1 = (row + 1) / gridSize;
+
+        // Get warped corner positions
+        const p00 = getWarpedPoint(u0, v0, vertices, controlPoints);
+        const p10 = getWarpedPoint(u1, v0, vertices, controlPoints);
+        const p11 = getWarpedPoint(u1, v1, vertices, controlPoints);
+        const p01 = getWarpedPoint(u0, v1, vertices, controlPoints);
+
+        path.vertices[0].set(p00.x, p00.y);
+        path.vertices[1].set(p10.x, p10.y);
+        path.vertices[2].set(p11.x, p11.y);
+        path.vertices[3].set(p01.x, p01.y);
+      }
+    }
+  }
+
+  // Set colors once when texture is ready (doesn't need to update every frame)
+  const colorsSetRef = useRef(false);
+  useEffect(() => {
+    const imageData = imageDataRef.current;
+    if (!imageData || colorsSetRef.current || meshRef.current.length === 0) return;
+
+    const { width: texW, height: texH, data } = imageData;
+
+    const samplePixel = (u: number, v: number): [number, number, number, number] => {
+      const x = Math.floor(u * (texW - 1));
+      const y = Math.floor(v * (texH - 1));
+      const i = (y * texW + x) * 4;
+      return [data[i], data[i + 1], data[i + 2], data[i + 3]];
+    };
+
+    for (let row = 0; row < gridSize; row++) {
+      for (let col = 0; col < gridSize; col++) {
+        const cellIndex = row * gridSize + col;
+        const path = meshRef.current[cellIndex];
+        if (!path) continue;
+
+        const u = (col + 0.5) / gridSize;
+        const v = (row + 0.5) / gridSize;
+        const [r, g, b, a] = samplePixel(u, v);
+
+        if (a > 5) {
+          path.fill = `rgba(${r}, ${g}, ${b}, ${a / 255})`;
+          path.visible = true;
+        } else {
+          path.visible = false;
+        }
+      }
+    }
+    colorsSetRef.current = true;
+  }, [gridSize]);
+
+  return null;
+}
+
+// Wrapper that spring-animates the text sway back to center when released
+function WarpedTextWithSpring({
+  text,
+  fontSize,
+  vertices,
+  controlPoints,
+  center,
+  hasActivePressure,
+  springConfig,
+}: {
+  text: string;
+  fontSize: number;
+  vertices: { topLeft: Position; topRight: Position; bottomRight: Position; bottomLeft: Position };
+  controlPoints: { top: Position; right: Position; bottom: Position; left: Position };
+  center: Position;
+  hasActivePressure: boolean;
+  springConfig: SpringConfig;
+}) {
+  // Spring-animate the sway position (X for top/bottom, Y for left/right)
+  // When active: follow mouse. When inactive: return to center.
+  const targetSwayX = hasActivePressure ? controlPoints.top.x : center.x;
+  const targetSwayY = hasActivePressure ? controlPoints.right.y : center.y;
+
+  const springOpts = {
+    stiffness: springConfig.stiffness,
+    damping: springConfig.damping,
+    mass: springConfig.mass,
+    decimals: 2,
+  };
+
+  const [swayX] = useSpring(targetSwayX, springOpts);
+  const [swayY] = useSpring(targetSwayY, springOpts);
+
+  const textControlPoints = {
+    top: { x: swayX, y: controlPoints.top.y },
+    right: { x: controlPoints.right.x, y: swayY },
+    bottom: { x: swayX, y: controlPoints.bottom.y },
+    left: { x: controlPoints.left.x, y: swayY },
+  };
+
+  return (
+    <WarpedText
+      text={text}
+      fontSize={fontSize}
+      vertices={vertices}
+      controlPoints={textControlPoints}
+      color="white"
+      gridSize={100}
+    />
+  );
+}
+
 // Membrane state: tracks whether we're "inside" or "outside" the membrane
 type MembraneState = 'outside' | 'inside';
+
+// Easing function for natural pressure curve
+const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 
 function ElasticRectBendDemo({
   center,
   width,
   height,
-  buffer = 60,
-  resistance = 0.4,
-  stretchMultiplier = 3,
-  stiffness = 180,
-  damping = 12,
-  mass = 2,
+  reach = 40,
+  squish = 0.8,
+  stretch = 2.5,
+  tension = 280,
+  settle = 18,
+  weight = 1.2,
   showDebug = false,
+  label,
+  fontSize = 24,
 }: ElasticRectBendProps) {
   const [mouseX, mouseY] = useMousePos();
 
@@ -225,10 +533,9 @@ function ElasticRectBendDemo({
   const mouseDownInsideRef = useRef(false);
 
   // Spring configuration for membrane behavior
-  // When grabbed, use very stiff spring with high damping (taut, no wobble)
-  const springConfig: SpringConfig = isGrabbed
-    ? { stiffness: 800, damping: 80, mass: 0.1 }  // Taut when grabbed
-    : { stiffness, damping, mass };               // Normal spring behavior
+  const normalSpringConfig: SpringConfig = { stiffness: tension, damping: settle, mass: weight };
+  // Taut config only for engaged edge when grabbed (no wobble on the stretched edge)
+  const tautSpringConfig: SpringConfig = { stiffness: 800, damping: 80, mass: 0.1 };
 
   // Calculate corner positions (needed early for grab detection)
   const halfW = width / 2;
@@ -270,18 +577,18 @@ function ElasticRectBendDemo({
 
   // Inner rectangle (tension release zone - smaller)
   const innerVertices = {
-    topLeft: { x: center.x - halfW + buffer, y: center.y - halfH + buffer },
-    topRight: { x: center.x + halfW - buffer, y: center.y - halfH + buffer },
-    bottomRight: { x: center.x + halfW - buffer, y: center.y + halfH - buffer },
-    bottomLeft: { x: center.x - halfW + buffer, y: center.y + halfH - buffer },
+    topLeft: { x: center.x - halfW + reach, y: center.y - halfH + reach },
+    topRight: { x: center.x + halfW - reach, y: center.y - halfH + reach },
+    bottomRight: { x: center.x + halfW - reach, y: center.y + halfH - reach },
+    bottomLeft: { x: center.x - halfW + reach, y: center.y + halfH - reach },
   };
 
   // Outer detection zone (larger than visible rect)
   const outerVertices = {
-    topLeft: { x: center.x - halfW - buffer, y: center.y - halfH - buffer },
-    topRight: { x: center.x + halfW + buffer, y: center.y - halfH - buffer },
-    bottomRight: { x: center.x + halfW + buffer, y: center.y + halfH + buffer },
-    bottomLeft: { x: center.x - halfW - buffer, y: center.y + halfH + buffer },
+    topLeft: { x: center.x - halfW - reach, y: center.y - halfH - reach },
+    topRight: { x: center.x + halfW + reach, y: center.y - halfH - reach },
+    bottomRight: { x: center.x + halfW + reach, y: center.y + halfH + reach },
+    bottomLeft: { x: center.x - halfW - reach, y: center.y + halfH + reach },
   };
 
   // Mouse position along each edge (clamped to edge bounds)
@@ -293,7 +600,7 @@ function ElasticRectBendDemo({
   // The 0.66 factor in bezier handles + curve math means we reach ~50% of target distance.
   // So we multiply by ~2 to compensate.
   const bezierCompensation = 2.0;
-  const stretchFactor = isGrabbed ? stretchMultiplier : 1;
+  const stretchFactor = isGrabbed ? stretch : 1;
 
   // Check position relative to the three rectangles
   const outer = outerVertices;
@@ -321,7 +628,7 @@ function ElasticRectBendDemo({
   // Calculate pressure for grabbed state - stretches toward mouse position
   // Returns pressure from 0 (at visible edge) to -1 (at stretch zone edge)
   function getGrabbedPressure(edge: 'top' | 'right' | 'bottom' | 'left'): number {
-    const stretchDistance = buffer * stretchMultiplier;
+    const stretchDistance = reach * stretch;
 
     switch (edge) {
       case 'top': {
@@ -413,12 +720,18 @@ function ElasticRectBendDemo({
     return 0;
   }
 
-  // Get raw pressure for each edge
+  // Apply easing to pressure while preserving sign
+  const applyEasing = (p: number) => {
+    const sign = p < 0 ? -1 : 1;
+    return sign * easeOutCubic(Math.abs(p));
+  };
+
+  // Get raw pressure for each edge (with easing applied for natural feel)
   const rawPressure = {
-    top: getEdgePressure('top'),
-    right: getEdgePressure('right'),
-    bottom: getEdgePressure('bottom'),
-    left: getEdgePressure('left'),
+    top: applyEasing(getEdgePressure('top')),
+    right: applyEasing(getEdgePressure('right')),
+    bottom: applyEasing(getEdgePressure('bottom')),
+    left: applyEasing(getEdgePressure('left')),
   };
 
   // When applying pressure, only bend ONE edge (the one with highest pressure)
@@ -434,56 +747,74 @@ function ElasticRectBendDemo({
     left: maxEdge === 'left' ? rawPressure.left : 0,
   };
 
-  // Edge control points - only engaged edge follows mouse, others stay at center
-  // Use absolute pressure as interpolation factor (0 = center, 1 = mouse position)
-  // This creates subtle sway that increases with pressure
-  const getSwayX = (edgePressure: number) => {
-    const t = Math.abs(edgePressure); // 0 to 1
-    return center.x + (clampedMouseX - center.x) * t;
-  };
-  const getSwayY = (edgePressure: number) => {
-    const t = Math.abs(edgePressure);
-    return center.y + (clampedMouseY - center.y) * t;
-  };
-
+  // Edge control points - all edges follow mouse position for natural sway
+  // Each control point tracks mouse along its edge axis
   const edgeMidpoints = {
-    top: { x: getSwayX(pressure.top), y: center.y - halfH },
-    right: { x: center.x + halfW, y: getSwayY(pressure.right) },
-    bottom: { x: getSwayX(pressure.bottom), y: center.y + halfH },
-    left: { x: center.x - halfW, y: getSwayY(pressure.left) },
+    top: { x: clampedMouseX, y: center.y - halfH },
+    right: { x: center.x + halfW, y: clampedMouseY },
+    bottom: { x: clampedMouseX, y: center.y + halfH },
+    left: { x: center.x - halfW, y: clampedMouseY },
   };
 
   const inwardPoints = {
-    top: { x: getSwayX(pressure.top), y: center.y - halfH + buffer * resistance * bezierCompensation },
-    right: { x: center.x + halfW - buffer * resistance * bezierCompensation, y: getSwayY(pressure.right) },
-    bottom: { x: getSwayX(pressure.bottom), y: center.y + halfH - buffer * resistance * bezierCompensation },
-    left: { x: center.x - halfW + buffer * resistance * bezierCompensation, y: getSwayY(pressure.left) },
+    top: { x: clampedMouseX, y: center.y - halfH + reach * squish * bezierCompensation },
+    right: { x: center.x + halfW - reach * squish * bezierCompensation, y: clampedMouseY },
+    bottom: { x: clampedMouseX, y: center.y + halfH - reach * squish * bezierCompensation },
+    left: { x: center.x - halfW + reach * squish * bezierCompensation, y: clampedMouseY },
   };
 
   const outwardPoints = {
-    top: { x: getSwayX(pressure.top), y: center.y - halfH - buffer * resistance * bezierCompensation * stretchFactor },
-    right: { x: center.x + halfW + buffer * resistance * bezierCompensation * stretchFactor, y: getSwayY(pressure.right) },
-    bottom: { x: getSwayX(pressure.bottom), y: center.y + halfH + buffer * resistance * bezierCompensation * stretchFactor },
-    left: { x: center.x - halfW - buffer * resistance * bezierCompensation * stretchFactor, y: getSwayY(pressure.left) },
+    top: { x: clampedMouseX, y: center.y - halfH - reach * squish * bezierCompensation * stretchFactor },
+    right: { x: center.x + halfW + reach * squish * bezierCompensation * stretchFactor, y: clampedMouseY },
+    bottom: { x: clampedMouseX, y: center.y + halfH + reach * squish * bezierCompensation * stretchFactor },
+    left: { x: center.x - halfW - reach * squish * bezierCompensation * stretchFactor, y: clampedMouseY },
   };
 
-  // Animated control points with membrane behavior
+  // Animated control points with membrane behavior (raw spring output)
+  // Only the engaged edge uses taut config when grabbed; others use normal config
+  const getSpringConfig = (edge: 'top' | 'right' | 'bottom' | 'left') => {
+    if (isGrabbed && maxEdge === edge) return tautSpringConfig;
+    return normalSpringConfig;
+  };
+
+  const rawControlPoints = {
+    top: useMembranePoint(edgeMidpoints.top, inwardPoints.top, outwardPoints.top, pressure.top, getSpringConfig('top')),
+    right: useMembranePoint(edgeMidpoints.right, inwardPoints.right, outwardPoints.right, pressure.right, getSpringConfig('right')),
+    bottom: useMembranePoint(edgeMidpoints.bottom, inwardPoints.bottom, outwardPoints.bottom, pressure.bottom, getSpringConfig('bottom')),
+    left: useMembranePoint(edgeMidpoints.left, inwardPoints.left, outwardPoints.left, pressure.left, getSpringConfig('left')),
+  };
+
+  // Clamp control points to rectangle bounds to prevent "narrow band" artifacts
+  // Top/bottom: clamp X to [left edge, right edge]
+  // Left/right: clamp Y to [top edge, bottom edge]
   const controlPoints = {
-    top: useMembranePoint(edgeMidpoints.top, inwardPoints.top, outwardPoints.top, pressure.top, springConfig),
-    right: useMembranePoint(edgeMidpoints.right, inwardPoints.right, outwardPoints.right, pressure.right, springConfig),
-    bottom: useMembranePoint(edgeMidpoints.bottom, inwardPoints.bottom, outwardPoints.bottom, pressure.bottom, springConfig),
-    left: useMembranePoint(edgeMidpoints.left, inwardPoints.left, outwardPoints.left, pressure.left, springConfig),
+    top: {
+      x: Math.max(center.x - halfW, Math.min(center.x + halfW, rawControlPoints.top.x)),
+      y: rawControlPoints.top.y, // Y is the membrane deformation - don't clamp
+    },
+    right: {
+      x: rawControlPoints.right.x, // X is the membrane deformation - don't clamp
+      y: Math.max(center.y - halfH, Math.min(center.y + halfH, rawControlPoints.right.y)),
+    },
+    bottom: {
+      x: Math.max(center.x - halfW, Math.min(center.x + halfW, rawControlPoints.bottom.x)),
+      y: rawControlPoints.bottom.y, // Y is the membrane deformation - don't clamp
+    },
+    left: {
+      x: rawControlPoints.left.x, // X is the membrane deformation - don't clamp
+      y: Math.max(center.y - halfH, Math.min(center.y + halfH, rawControlPoints.left.y)),
+    },
   };
 
   // Calculate inner rectangle dimensions for TwoRect (which uses center + width/height)
-  const innerWidth = width - buffer * 2;
-  const innerHeight = height - buffer * 2;
-  const outerWidth = width + buffer * 2;
-  const outerHeight = height + buffer * 2;
+  const innerWidth = width - reach * 2;
+  const innerHeight = height - reach * 2;
+  const outerWidth = width + reach * 2;
+  const outerHeight = height + reach * 2;
 
   // Stretch zone dimensions (how far it can stretch when grabbed)
-  const stretchZoneWidth = width + buffer * 2 * stretchMultiplier;
-  const stretchZoneHeight = height + buffer * 2 * stretchMultiplier;
+  const stretchZoneWidth = width + reach * 2 * stretch;
+  const stretchZoneHeight = height + reach * 2 * stretch;
 
   // Determine fill color based on hover/pressed state
   const getFillColor = () => {
@@ -574,6 +905,23 @@ function ElasticRectBendDemo({
         linewidth={2}
       />
 
+      {/* Warped text label that follows the bezier surface */}
+      {label && (
+        <WarpedTextWithSpring
+          text={label}
+          fontSize={fontSize}
+          vertices={vertices}
+          controlPoints={controlPoints}
+          center={center}
+          hasActivePressure={isGrabbed ||
+            Math.abs(rawPressure.top) > 0.01 ||
+            Math.abs(rawPressure.right) > 0.01 ||
+            Math.abs(rawPressure.bottom) > 0.01 ||
+            Math.abs(rawPressure.left) > 0.01}
+          springConfig={normalSpringConfig}
+        />
+      )}
+
       {/* Debug: show control points */}
       {showDebug && (
         <>
@@ -620,33 +968,41 @@ const meta: Meta<ElasticRectBendProps> = {
       control: { type: 'range', min: 50, max: 400, step: 10 },
       description: 'Height of the rectangle',
     },
-    buffer: {
-      control: { type: 'range', min: 20, max: 100, step: 5 },
-      description: 'Thickness of membrane zone (extends both outside and inside the edge)',
+    reach: {
+      control: { type: 'range', min: 15, max: 80, step: 5 },
+      description: 'Interaction aura - how far the membrane senses your cursor',
     },
-    resistance: {
-      control: { type: 'range', min: 0.1, max: 1.0, step: 0.05 },
-      description: 'Curve peak depth - 1.0 = extends to inner/outer rect boundaries',
+    squish: {
+      control: { type: 'range', min: 0.2, max: 1.0, step: 0.05 },
+      description: 'Give - how much it yields to pressure',
     },
-    stretchMultiplier: {
-      control: { type: 'range', min: 1, max: 10, step: 0.5 },
-      description: 'How much further it stretches when grabbed (clicked inside)',
+    stretch: {
+      control: { type: 'range', min: 1, max: 6, step: 0.5 },
+      description: 'Pull factor when grabbed',
     },
-    stiffness: {
-      control: { type: 'range', min: 20, max: 500, step: 10 },
-      description: 'Spring tension - higher = snappier return to rest',
+    tension: {
+      control: { type: 'range', min: 50, max: 500, step: 10 },
+      description: 'Snap factor - higher = crisper return',
     },
-    damping: {
-      control: { type: 'range', min: 1, max: 40, step: 1 },
-      description: 'Wobble decay - lower = more bouncy, higher = less oscillation',
+    settle: {
+      control: { type: 'range', min: 5, max: 40, step: 1 },
+      description: 'Chill factor - higher = less bounce',
     },
-    mass: {
-      control: { type: 'range', min: 0.5, max: 10, step: 0.5 },
-      description: 'Inertia/momentum - higher = more wobble and overshoot',
+    weight: {
+      control: { type: 'range', min: 0.5, max: 5, step: 0.1 },
+      description: 'Heft - higher = more momentum',
     },
     showDebug: {
       control: 'boolean',
       description: 'Show detection zones: red = outer (inward pressure), green = inner (release zone)',
+    },
+    label: {
+      control: 'text',
+      description: 'Text to display on the button (warps with surface)',
+    },
+    fontSize: {
+      control: { type: 'range', min: 12, max: 48, step: 2 },
+      description: 'Font size for the label',
     },
   },
 };
@@ -655,60 +1011,85 @@ export default meta;
 
 type ElasticRectBendStory = StoryObj<ElasticRectBendProps>;
 
-export const Default: ElasticRectBendStory = {
+// Soft - Gentle, approachable
+export const Soft: ElasticRectBendStory = {
   render: (args) => <ElasticRectBendDemo {...args} />,
   args: {
     center: { x: 250, y: 250 },
     width: 200,
     height: 200,
-    buffer: 60,
-    resistance: 1.0,
-    stiffness: 180,
-    damping: 12,
-    mass: 2,
+    tension: 200,
+    settle: 14,
+    weight: 1.5,
+    reach: 45,
+    squish: 0.9,
     showDebug: false,
+    label: 'SOFT',
+    fontSize: 24,
   },
 };
 
-export const Bouncy: ElasticRectBendStory = {
+// Taut - Crisp, responsive
+export const Taut: ElasticRectBendStory = {
   render: (args) => <ElasticRectBendDemo {...args} />,
   args: {
     center: { x: 250, y: 250 },
     width: 200,
     height: 200,
-    buffer: 70,
-    resistance: 1.0,
-    stiffness: 200,
-    damping: 6,   // Low damping = lots of bounce
-    mass: 3,      // Higher mass = more wobble
+    tension: 400,
+    settle: 28,
+    weight: 0.8,
+    reach: 30,
+    squish: 0.5,
+    label: 'TAUT',
   },
 };
 
-export const Snappy: ElasticRectBendStory = {
+// Jelly - Playful, bouncy
+export const Jelly: ElasticRectBendStory = {
   render: (args) => <ElasticRectBendDemo {...args} />,
   args: {
     center: { x: 250, y: 250 },
     width: 200,
     height: 200,
-    buffer: 50,
-    resistance: 1.0,
-    stiffness: 400, // High stiffness = fast return
-    damping: 25,    // Higher damping = less wobble
-    mass: 1,        // Low mass = responsive
+    tension: 150,
+    settle: 6,
+    weight: 2.5,
+    reach: 55,
+    squish: 1.0,
+    label: 'JELLY',
   },
 };
 
-export const Sluggish: ElasticRectBendStory = {
+// Gooey - Thick, viscous
+export const Gooey: ElasticRectBendStory = {
   render: (args) => <ElasticRectBendDemo {...args} />,
   args: {
     center: { x: 250, y: 250 },
     width: 200,
     height: 200,
-    buffer: 80,
-    resistance: 1.0,
-    stiffness: 60,  // Low stiffness = slow return
-    damping: 8,     // Medium damping
-    mass: 5,        // High mass = heavy, lots of momentum
+    tension: 80,
+    settle: 10,
+    weight: 4,
+    reach: 70,
+    squish: 1.0,
+    label: 'GOOEY',
+  },
+};
+
+// Glass - Minimal deformation, subtle
+export const Glass: ElasticRectBendStory = {
+  render: (args) => <ElasticRectBendDemo {...args} />,
+  args: {
+    center: { x: 250, y: 250 },
+    width: 200,
+    height: 200,
+    tension: 500,
+    settle: 35,
+    weight: 0.5,
+    reach: 25,
+    squish: 0.3,
+    label: 'GLASS',
   },
 };
 
@@ -718,27 +1099,47 @@ export const DebugView: ElasticRectBendStory = {
     center: { x: 250, y: 250 },
     width: 200,
     height: 200,
-    buffer: 60,
-    resistance: 1.0,
-    stiffness: 180,
-    damping: 12,
-    mass: 2,
-    showDebug: true, // Debug visualization enabled
+    reach: 40,
+    squish: 0.8,
+    tension: 280,
+    settle: 18,
+    weight: 1.2,
+    showDebug: true,
   },
 };
 
-export const SmallGrabbable: ElasticRectBendStory = {
+export const WarpedTextDemo: ElasticRectBendStory = {
   render: (args) => <ElasticRectBendDemo {...args} />,
   args: {
     center: { x: 250, y: 250 },
-    width: 50,
-    height: 50,
-    buffer: 20,
-    resistance: 0.1,
-    stretchMultiplier: 5, // Stretches 5x when grabbed
-    stiffness: 20,
-    damping: 1,
-    mass: 0.5,
-    showDebug: true,
+    width: 280,
+    height: 120,
+    reach: 50,
+    squish: 1.0,
+    stretch: 3,
+    tension: 150,
+    settle: 10,
+    weight: 2,
+    showDebug: false,
+    label: 'ELASTIC',
+    fontSize: 36,
+  },
+};
+
+export const ButtonWithLabel: ElasticRectBendStory = {
+  render: (args) => <ElasticRectBendDemo {...args} />,
+  args: {
+    center: { x: 250, y: 250 },
+    width: 160,
+    height: 60,
+    reach: 30,
+    squish: 0.8,
+    stretch: 2,
+    tension: 200,
+    settle: 15,
+    weight: 1.5,
+    showDebug: false,
+    label: 'Submit',
+    fontSize: 20,
   },
 };

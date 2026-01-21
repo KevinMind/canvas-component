@@ -1,44 +1,98 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { Meta, StoryObj } from "@storybook/react";
+import bezierEasing from "bezier-easing";
 
-import { useMousePos, withMousePosition } from '../../../.storybook/decorators';
+import { TwoProvider, TwoLine } from '../../two-js-react';
+import { useAnimationFrameState, useMousePos, withMousePosition } from '../../../.storybook/decorators';
 
 // ============================================
-// MagnetDust - Iron filing-like lines following mouse
-// Randomly angled lines with varying colors and thickness
-// Faster movement = larger pieces
+// GridDust - DrawGrid with MagnetDust overlay
+// ============================================
+
+// Original bezier easing curve for grid
+const drawEasing = bezierEasing(0.64, 0.13, 0.64, 0.98);
+
+function randomNumber(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+// ============================================
+// Grid Row/Col Components
+// ============================================
+
+interface RowProps {
+  width: number;
+  y: number;
+  reverse?: boolean;
+  maxDuration: number;
+}
+
+function Row({ width, y, reverse = false, maxDuration }: RowProps) {
+  const duration = useMemo(() => randomNumber(maxDuration / Math.E, maxDuration), [maxDuration]);
+
+  const [percentage] = useAnimationFrameState({
+    from: 0,
+    to: 100,
+    duration,
+    auto: true,
+    easing: drawEasing,
+  });
+
+  const x = (width * percentage) / 100;
+
+  if (reverse) {
+    const reverseX = width - x;
+    return <TwoLine x1={reverseX} y1={y} x2={width} y2={y} stroke="black" linewidth={1} />;
+  }
+
+  return <TwoLine x1={0} y1={y} x2={x} y2={y} stroke="black" linewidth={1} />;
+}
+
+interface ColProps {
+  height: number;
+  x: number;
+  reverse?: boolean;
+  maxDuration: number;
+}
+
+function Col({ height, x, reverse = false, maxDuration }: ColProps) {
+  const duration = useMemo(() => randomNumber(maxDuration / 2, maxDuration), [maxDuration]);
+
+  const [percentage] = useAnimationFrameState({
+    from: 0,
+    to: 100,
+    duration,
+    auto: true,
+    easing: drawEasing,
+  });
+
+  const y = (height * percentage) / 100;
+
+  if (reverse) {
+    const reverseY = height - y;
+    return <TwoLine x1={x} y1={reverseY} x2={x} y2={height} stroke="black" linewidth={1} />;
+  }
+
+  return <TwoLine x1={x} y1={0} x2={x} y2={y} stroke="black" linewidth={1} />;
+}
+
+// ============================================
+// MagnetDust Particle System (direct canvas)
 // ============================================
 
 interface DustParticle {
   x: number;
   y: number;
-  id: number;
   spawnTime: number;
-  decayStartTime: number | null; // null = not decaying yet (mouse still near)
-  angle: number;         // Random angle in radians
-  length: number;        // Line length (based on velocity)
-  thickness: number;     // Line boldness
-  color: number[];       // RGB values [r, g, b]
-  // Drift for organic dispersal
+  decayStartTime: number | null;
+  angle: number;
+  length: number;
+  thickness: number;
+  color: number[];
   driftX: number;
   driftY: number;
 }
 
-interface MagnetDustProps {
-  maxLength: number;       // Maximum line length
-  minLength: number;       // Minimum line length
-  duration: number;        // How long particles take to fully fade (ms)
-  decay: number;           // Decay curve exponent
-  sampleRate: number;      // Minimum ms between creating new particles
-  density: number;         // Multiplier for how many lines spawn (scaled by velocity)
-  thicknessRange: [number, number]; // Min/max line thickness
-  velocityScale: number;   // How much velocity affects size (0-1)
-  sizeVariance: number;    // Randomness in sizes (0 = uniform, 1 = full range)
-  spread: number;          // How much lines spread from cursor position
-  drift: number;           // How much particles drift as they fade
-}
-
-// Color palette for the dust particles (RGB values for direct canvas use)
 const DUST_COLORS = [
   [60, 60, 60],
   [80, 80, 80],
@@ -50,7 +104,21 @@ const DUST_COLORS = [
   [75, 70, 65],
 ];
 
-function MagnetDustDemo({
+interface MagnetDustOverlayProps {
+  maxLength: number;
+  minLength: number;
+  duration: number;
+  decay: number;
+  sampleRate: number;
+  density: number;
+  thicknessRange: [number, number];
+  velocityScale: number;
+  sizeVariance: number;
+  spread: number;
+  drift: number;
+}
+
+function MagnetDustOverlay({
   maxLength,
   minLength,
   duration,
@@ -62,7 +130,7 @@ function MagnetDustDemo({
   sizeVariance,
   spread,
   drift,
-}: MagnetDustProps) {
+}: MagnetDustOverlayProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<DustParticle[]>([]);
   const lastPosRef = useRef<{ x: number; y: number } | null>(null);
@@ -73,7 +141,6 @@ function MagnetDustDemo({
 
   const [x, y] = useMousePos();
 
-  // Track mouse position and calculate velocity
   useEffect(() => {
     if (x === 0 && y === 0) return;
 
@@ -87,7 +154,6 @@ function MagnetDustDemo({
     lastPosRef.current = { x, y };
   }, [x, y]);
 
-  // Animation loop - direct canvas rendering
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -100,14 +166,12 @@ function MagnetDustDemo({
     const animate = () => {
       const now = performance.now();
 
-      // Decay velocity
       velocityRef.current *= 0.95;
 
       const mouseX = lastPosRef.current?.x ?? 0;
       const mouseY = lastPosRef.current?.y ?? 0;
       const decayRadius = spread * 2;
 
-      // Spawn particles
       if (lastPosRef.current && now - lastSampleTimeRef.current >= sampleRate) {
         lastSampleTimeRef.current = now;
 
@@ -142,7 +206,6 @@ function MagnetDustDemo({
             particlesRef.current.push({
               x: interpX + spreadX,
               y: interpY + spreadY,
-              id: nextIdRef.current++,
               spawnTime: now,
               decayStartTime: null,
               angle: Math.random() * Math.PI * 2,
@@ -158,7 +221,6 @@ function MagnetDustDemo({
         prevSpawnPosRef.current = { x: lastPosRef.current.x, y: lastPosRef.current.y };
       }
 
-      // Update particles and render
       ctx.clearRect(0, 0, 500, 500);
 
       const particles = particlesRef.current;
@@ -167,7 +229,6 @@ function MagnetDustDemo({
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
 
-        // Check if should start decaying
         const dx = p.x - mouseX;
         const dy = p.y - mouseY;
         const dist = Math.sqrt(dx * dx + dy * dy);
@@ -176,14 +237,13 @@ function MagnetDustDemo({
           p.decayStartTime = now;
         }
 
-        // Calculate opacity and check if dead
         let opacity = 0.8;
         let driftX = 0;
         let driftY = 0;
 
         if (p.decayStartTime !== null) {
           const decayAge = now - p.decayStartTime;
-          if (decayAge >= duration) continue; // Dead, skip
+          if (decayAge >= duration) continue;
 
           const agePerc = decayAge / duration;
           const linearPerc = 1 - agePerc;
@@ -196,10 +256,8 @@ function MagnetDustDemo({
 
         if (opacity < 0.01) continue;
 
-        // Keep particle (compact array)
         particles[writeIndex++] = p;
 
-        // Draw line
         const halfLen = p.length / 2;
         const cos = Math.cos(p.angle);
         const sin = Math.sin(p.angle);
@@ -221,7 +279,6 @@ function MagnetDustDemo({
         ctx.stroke();
       }
 
-      // Trim dead particles (no hard cap - canvas can handle it)
       particles.length = writeIndex;
 
       animationId = requestAnimationFrame(animate);
@@ -236,8 +293,113 @@ function MagnetDustDemo({
       ref={canvasRef}
       width={500}
       height={500}
-      style={{ background: 'white' }}
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        pointerEvents: 'none',
+      }}
     />
+  );
+}
+
+// ============================================
+// Combined GridDust Component
+// ============================================
+
+interface GridDustProps {
+  rows: number;
+  cols: number;
+  // Dust settings
+  maxLength: number;
+  minLength: number;
+  duration: number;
+  decay: number;
+  sampleRate: number;
+  density: number;
+  thicknessRange: [number, number];
+  velocityScale: number;
+  sizeVariance: number;
+  spread: number;
+  drift: number;
+}
+
+function GridDustDemo({
+  rows,
+  cols,
+  maxLength,
+  minLength,
+  duration,
+  decay,
+  sampleRate,
+  density,
+  thicknessRange,
+  velocityScale,
+  sizeVariance,
+  spread,
+  drift,
+}: GridDustProps) {
+  const width = 500;
+  const height = 500;
+
+  const rowSpacing = useMemo(() => {
+    if (!rows) return height / cols;
+    return height / rows;
+  }, [rows, cols, height]);
+
+  const colSpacing = useMemo(() => {
+    if (!cols) return width / rows;
+    return width / cols;
+  }, [rows, cols, width]);
+
+  const numRows = useMemo(() => {
+    if (!rows) return Math.round(height / colSpacing);
+    return rows;
+  }, [rows, height, colSpacing]);
+
+  const numCols = useMemo(() => {
+    if (!cols) return Math.round(width / rowSpacing);
+    return cols;
+  }, [cols, width, rowSpacing]);
+
+  const maxDuration = 6000;
+
+  return (
+    <div style={{ position: 'relative', width, height }}>
+      <TwoProvider width={width} height={height} type="canvas">
+        {Array.from({ length: numRows }, (_, idx) => (
+          <Row
+            key={`row-${idx}`}
+            y={idx * rowSpacing}
+            width={width}
+            maxDuration={maxDuration}
+            reverse={idx % 2 === 0}
+          />
+        ))}
+        {Array.from({ length: numCols }, (_, idx) => (
+          <Col
+            key={`col-${idx}`}
+            x={idx * colSpacing}
+            height={height}
+            maxDuration={maxDuration}
+            reverse={idx % 2 !== 0}
+          />
+        ))}
+      </TwoProvider>
+      <MagnetDustOverlay
+        maxLength={maxLength}
+        minLength={minLength}
+        duration={duration}
+        decay={decay}
+        sampleRate={sampleRate}
+        density={density}
+        thicknessRange={thicknessRange}
+        velocityScale={velocityScale}
+        sizeVariance={sizeVariance}
+        spread={spread}
+        drift={drift}
+      />
+    </div>
   );
 }
 
@@ -245,8 +407,8 @@ function MagnetDustDemo({
 // Stories
 // ============================================
 
-const meta: Meta<MagnetDustProps> = {
-  title: 'Interactive/Magnet Dust',
+const meta: Meta<GridDustProps> = {
+  title: 'Interactive/Grid Dust',
   decorators: [withMousePosition],
   parameters: {
     layout: 'centered',
@@ -256,60 +418,31 @@ const meta: Meta<MagnetDustProps> = {
     },
   },
   argTypes: {
-    maxLength: {
-      control: { type: 'range', min: 10, max: 100, step: 5 },
-      description: 'Maximum line length',
-    },
-    minLength: {
-      control: { type: 'range', min: 2, max: 30, step: 1 },
-      description: 'Minimum line length',
-    },
-    duration: {
-      control: { type: 'range', min: 500, max: 5000, step: 100 },
-      description: 'How long particles take to fully fade (ms)',
-    },
-    decay: {
-      control: { type: 'range', min: 0.1, max: 3, step: 0.1 },
-      description: 'Decay curve (1 = linear, <1 = slow then fast, >1 = fast then slow)',
-    },
-    sampleRate: {
-      control: { type: 'range', min: 0, max: 100, step: 5 },
-      description: 'Minimum ms between spawning batches (0 = every frame)',
-    },
-    density: {
-      control: { type: 'range', min: 0.1, max: 5, step: 0.1 },
-      description: 'Particle density multiplier (scales with movement speed)',
-    },
-    thicknessRange: {
-      control: { type: 'object' },
-      description: 'Min/max line thickness [min, max]',
-    },
-    velocityScale: {
-      control: { type: 'range', min: 0, max: 1, step: 0.1 },
-      description: 'How much velocity affects line size (0 = ignore velocity, 1 = velocity driven)',
-    },
-    sizeVariance: {
-      control: { type: 'range', min: 0, max: 1, step: 0.1 },
-      description: 'Randomness in sizes (0 = uniform based on velocity, 1 = fully random)',
-    },
-    spread: {
-      control: { type: 'range', min: 0, max: 100, step: 5 },
-      description: 'How much lines spread from cursor position',
-    },
-    drift: {
-      control: { type: 'range', min: 0, max: 100, step: 5 },
-      description: 'How much particles drift as they fade',
-    },
+    rows: { control: { type: 'range', min: 5, max: 30, step: 1 } },
+    cols: { control: { type: 'range', min: 0, max: 30, step: 1 } },
+    maxLength: { control: { type: 'range', min: 10, max: 100, step: 5 } },
+    minLength: { control: { type: 'range', min: 2, max: 30, step: 1 } },
+    duration: { control: { type: 'range', min: 500, max: 5000, step: 100 } },
+    decay: { control: { type: 'range', min: 0.1, max: 3, step: 0.1 } },
+    sampleRate: { control: { type: 'range', min: 0, max: 100, step: 5 } },
+    density: { control: { type: 'range', min: 0.1, max: 5, step: 0.1 } },
+    thicknessRange: { control: { type: 'object' } },
+    velocityScale: { control: { type: 'range', min: 0, max: 1, step: 0.1 } },
+    sizeVariance: { control: { type: 'range', min: 0, max: 1, step: 0.1 } },
+    spread: { control: { type: 'range', min: 0, max: 100, step: 5 } },
+    drift: { control: { type: 'range', min: 0, max: 100, step: 5 } },
   },
 };
 
 export default meta;
 
-type MagnetDustStory = StoryObj<MagnetDustProps>;
+type GridDustStory = StoryObj<GridDustProps>;
 
-export const Default: MagnetDustStory = {
-  render: (args) => <MagnetDustDemo {...args} />,
+export const Default: GridDustStory = {
+  render: (args) => <GridDustDemo {...args} />,
   args: {
+    rows: 12,
+    cols: 0,
     maxLength: 20,
     minLength: 4,
     duration: 3500,
@@ -324,9 +457,11 @@ export const Default: MagnetDustStory = {
   },
 };
 
-export const Fine: MagnetDustStory = {
-  render: (args) => <MagnetDustDemo {...args} />,
+export const Dense: GridDustStory = {
+  render: (args) => <GridDustDemo {...args} />,
   args: {
+    rows: 20,
+    cols: 0,
     maxLength: 12,
     minLength: 3,
     duration: 3000,
@@ -341,9 +476,11 @@ export const Fine: MagnetDustStory = {
   },
 };
 
-export const Bold: MagnetDustStory = {
-  render: (args) => <MagnetDustDemo {...args} />,
+export const Sparse: GridDustStory = {
+  render: (args) => <GridDustDemo {...args} />,
   args: {
+    rows: 8,
+    cols: 0,
     maxLength: 30,
     minLength: 8,
     duration: 4000,
@@ -355,22 +492,5 @@ export const Bold: MagnetDustStory = {
     sizeVariance: 0.5,
     spread: 20,
     drift: 15,
-  },
-};
-
-export const Wispy: MagnetDustStory = {
-  render: (args) => <MagnetDustDemo {...args} />,
-  args: {
-    maxLength: 25,
-    minLength: 5,
-    duration: 5000,
-    decay: 2.5,
-    sampleRate: 20,
-    density: 0.6,
-    thicknessRange: [0.2, 1.5],
-    velocityScale: 0.9,
-    sizeVariance: 0.8,
-    spread: 25,
-    drift: 30,
   },
 };
